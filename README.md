@@ -1,4 +1,4 @@
 glibc-i18n
 ==========
 
-Scripts for updating glibc to latest Unicode ctype
+Scripts useful while updating glibc localedata to latest Unicode ctype and i18n
