@@ -18,11 +18,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys
+import os
+import sys
 
 class ctype:
     def __init__(self):
-        self.upper, self.lower, self.alpha, self.digit, self.space, self.cntrl, self.punct, self.graph, self.printc, self.xdigit, self.blank = [], [], [], [], [], [], [], [], [], [], []
+        self.upper, self.lower, self.alpha, self.digit, self.space, self.cntrl, self.punct, \
+            self.graph, self.printc, self.xdigit, self.blank, self.combining, self.combining3  \
+            = [], [], [], [], [], [], [], [], [], [], [], [], []
 
 def extract_class_and_unichars(filename, struct_ctype):
     ipfile = open(filename)
@@ -55,10 +58,15 @@ def extract_class_and_unichars(filename, struct_ctype):
 		process_chars(i+1, struct_ctype.xdigit, flines)
 	    if l.split()[0] == "blank":
 		process_chars(i+1, struct_ctype.blank, flines)
-	 
+            if l.split()[1] == "\"combining\"":
+                print "combining"
+		process_chars(i+1, struct_ctype.combining, flines)
+            if l.split()[1] == "\"combining_level3\"":
+                print "combining_level3"
+		process_chars(i+1, struct_ctype.combining3, flines)
 
         i = i+1
-    print "alpha chars group", struct_ctype.alpha
+#    print "alpha chars group", struct_ctype.alpha
 
 def process_chars(line_no, list_name, flines):
 	for x in range(line_no, len(flines)):
@@ -111,6 +119,75 @@ def process_chars(line_no, list_name, flines):
 		if l[len(l)-1] != "/":
 			break
 		    
+#self.upper, self.lower, self.alpha, self.digit, self.space, self.cntrl, self.punct, self.graph, self.printc, self.xdigit, self.blank, self.combining, selft.combining3
+def compare_list(old_list, new_list):
+    for property, value in vars(old_list).iteritems():
+        exec("prop = %s %s" % ("new_list.",property))
+        print "%s: %d chars in old ctype and %d chars in new ctype" % (property, len(value), len(prop))
+	report(value, prop)
+
+#   print "GRAPH CLASS: %d chars in old ctype and %d chars in new ctype" % (len(old_list.graph), len(new_list.graph))
+#   report(old_list.graph, new_list.graph )
+
+
+def report(old_list, new_list):
+   count = 0
+   mcount = 0
+   for i in range(0,len(old_list)):
+	if old_list[i] in new_list:
+	    count = count +1
+#	    print count
+	else:
+	    print "Missing char from old list", old_list[i]
+            mcount = mcount + 1
+   print "Missing %d number characters of old ctype in new" % (mcount)
+   print "\n******************************************************\n"
+
+def check_pairs(file_old, file_new):
+    ipfile = open(file_old)
+    flines = ipfile.readlines()
+    linecount = len(flines)
+    i = 0
+    for l in flines:
+	w = l.split()
+	if len(w) > 1:
+	    if l.split()[0] == "toupper":
+                pair_name = "toupper"
+		print "Processing for TOUPPER pair group"
+		process_pairs(i+1, flines, file_new, pair_name)
+	    if l.split()[0] == "tolower":
+                pair_name = "tolower"
+		print "Processing for TOLOWER pair group"
+		process_pairs(i+1, flines, file_new, pair_name)
+	    if l.split()[1] == "\"totitle\";":
+                pair_name = "totitle"
+		print "Processing for TOTITLE pair group"
+		process_pairs(i+1, flines, file_new, pair_name)
+        i = i + 1
+
+
+def process_pairs(line_no, flines, file_new, pair_name):
+        f = open(file_new).read()
+	for x in range(line_no, len(flines)):
+		if len(flines[x].split()) < 1:
+			break
+		if flines[x].split()[0] == "%":
+		    continue
+		
+		else:
+# Break line into pairs, separated by ;
+		    l = flines[x].strip().split(";")
+		    if l[len(l)-1] != "/":
+			list_lenght = len(l)+1
+		    else:
+			list_lenght = len(l)
+		    for i in range (0, list_lenght-1):
+                        if l[i] not in f:
+			   print "%s not present in %s pair new ctype" % (l[i], pair_name)
+# Groups are not separated by line in unicode file
+		l = flines[x].strip().split(";")
+		if l[len(l)-1] != "/":
+			break
 
 
 if __name__ == "__main__":
@@ -122,4 +199,5 @@ if __name__ == "__main__":
     new_ctype = ctype()
     extract_class_and_unichars(file_i18n, ext_ctype)
     extract_class_and_unichars(file_unicode, new_ctype)
-# remaining stuff compare chars group for backward compatibility
+    compare_list(ext_ctype, new_ctype)
+    check_pairs(file_i18n, file_unicode)
