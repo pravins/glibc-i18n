@@ -14,6 +14,7 @@ File Information
 
 
 Checking backward compatibility of new generate LC_CTYPE
+
 a) First generate "unicode" file for latest Unicode UCD using gen-unicode.ctype.c
 
 b) $python check-backcompatibility.py i18n unicode > Report
