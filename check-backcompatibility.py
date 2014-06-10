@@ -126,22 +126,11 @@ def compare_list(old_list, new_list):
         print "%s: %d chars in old ctype and %d chars in new ctype" % (property, len(value), len(prop))
 	report(value, prop)
 
-#   print "GRAPH CLASS: %d chars in old ctype and %d chars in new ctype" % (len(old_list.graph), len(new_list.graph))
-#   report(old_list.graph, new_list.graph )
-
-
 def report(old_list, new_list):
-   count = 0
-   mcount = 0
-   for i in range(0,len(old_list)):
-	if old_list[i] in new_list:
-	    count = count +1
-#	    print count
-	else:
-	    print "Missing char from old list", old_list[i]
-            mcount = mcount + 1
-   print "Missing %d number characters of old ctype in new ctype" % (mcount)
-   print "\n******************************************************\n"
+   missing_chars = list(set(old_list)-set(old_list).intersection(set(new_list)))
+   print "Missing %d characters of old ctype in new ctype \n " % len(missing_chars), sorted(missing_chars)
+   print "\n****************************************************"
+
 
 def check_pairs(file_old, file_new):
     ipfile = open(file_old)
