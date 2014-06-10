@@ -58,11 +58,11 @@ def extract_class_and_unichars(filename, struct_ctype):
 		process_chars(i+1, struct_ctype.xdigit, flines)
 	    if l.split()[0] == "blank":
 		process_chars(i+1, struct_ctype.blank, flines)
-            if l.split()[1] == "\"combining\"":
-                print "combining"
+            if l.split()[1] == "\"combining\";":
+#                print "combining"
 		process_chars(i+1, struct_ctype.combining, flines)
-            if l.split()[1] == "\"combining_level3\"":
-                print "combining_level3"
+            if l.split()[1] == "\"combining_level3\";":
+#                print "combining_level3"
 		process_chars(i+1, struct_ctype.combining3, flines)
 
         i = i+1
@@ -140,7 +140,7 @@ def report(old_list, new_list):
 	else:
 	    print "Missing char from old list", old_list[i]
             mcount = mcount + 1
-   print "Missing %d number characters of old ctype in new" % (mcount)
+   print "Missing %d number characters of old ctype in new ctype" % (mcount)
    print "\n******************************************************\n"
 
 def check_pairs(file_old, file_new):
