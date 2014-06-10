@@ -20,3 +20,9 @@ a) First generate "unicode" file for latest Unicode UCD using gen-unicode.ctype.
 b) $python check-backcompatibility.py i18n unicode > Report
 
 
+Useful Documents for UnicodeData.txt:
+
+Unicode ch04:- General category http://www.unicode.org/reports/tr44/#General_Category_Values
+
+ftp://ftp.unicode.org/Public/3.0-Update/UnicodeData-3.0.0.html
+
