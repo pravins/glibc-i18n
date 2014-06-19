@@ -23,6 +23,7 @@ b) $python check-backcompatibility.py i18n unicode > Report
 Useful Documents for UnicodeData.txt:
 
 Unicode ch04:- General category http://www.unicode.org/reports/tr44/#General_Category_Values
+"Implementations should simply use the derived properties, and should not try to rederive them from lists of simple properties and collections of rules, because of the chances for error and divergence when doing so."
 
 ftp://ftp.unicode.org/Public/3.0-Update/UnicodeData-3.0.0.html
 
