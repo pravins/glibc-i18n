@@ -182,11 +182,12 @@ def process_pairs(line_no, flines, file_new, pair_name):
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print  " USAGE: python check_backcompatibility existing_ctype_file new_ctype_file "
-    file_i18n = sys.argv[1]
-    file_unicode = sys.argv[2]
-    ext_ctype = ctype()
-    new_ctype = ctype()
-    extract_class_and_unichars(file_i18n, ext_ctype)
-    extract_class_and_unichars(file_unicode, new_ctype)
-    compare_list(ext_ctype, new_ctype)
-    check_pairs(file_i18n, file_unicode)
+    else:
+        file_i18n = sys.argv[1]
+        file_unicode = sys.argv[2]
+        ext_ctype = ctype()
+        new_ctype = ctype()
+        extract_class_and_unichars(file_i18n, ext_ctype)
+        extract_class_and_unichars(file_unicode, new_ctype)
+        compare_list(ext_ctype, new_ctype)
+        check_pairs(file_i18n, file_unicode)
