@@ -56,12 +56,12 @@ def write_class(line_no, outfile, flines):
 #         print x
 	    break
 	if len(flines[x].split()[0].split(".."))==1:
-            print flines[x].split()[0].split("..")
+#            print flines[x].split()[0].split("..")
 	    outfile.write( "<U"  + flines[x].split()[0].split("..")[0] + ">;")
             nline_count = nline_count + 1
 	else:
 #         print flines[x].split()[0].split("..")
-	    outfile.write( "<U"  + flines[x].split()[0].split("..")[0] + ">..<U" + flines[x].split()[0].split("..")[0] + ">;")
+	    outfile.write( "<U"  + flines[x].split()[0].split("..")[0] + ">..<U" + flines[x].split()[0].split("..")[1] + ">;")
             if len(flines[x].split()[0].split("..")[0]) > 4:
                 nline_count = nline_count + 3
             else:
