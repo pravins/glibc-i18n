@@ -1,10 +1,13 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -i*-
 # Copyright (C) 2013-14, Pravin Satpute <psatpute@redhat.com>
+#
+# This script is useful for checking backward compatibility of newly 
+# generated ctype file from gen-unicode-ctype.c and gen-unicode-ctype-dcp.py
 
-#Input file for this is /usr/share/i18n/locale/i18n, It parses file and
-#gather Unicode characters under different Lc_CTYPE
-
+# USAGE: python check-backcompatibility.py existing_ctype_file new_ctype_file 
+# Existing CTYPE file /usr/share/i18n/locale/i18n and new generated 'unicode'
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -27,6 +30,9 @@ class ctype:
             self.graph, self.printc, self.xdigit, self.blank, self.combining, self.combining3  \
             = [], [], [], [], [], [], [], [], [], [], [], [], []
 
+"""Captures Unicode values from character class and add 
+to ctype struct
+"""
 def extract_class_and_unichars(filename, struct_ctype):
     ipfile = open(filename)
     flines = ipfile.readlines()
@@ -68,6 +74,10 @@ def extract_class_and_unichars(filename, struct_ctype):
         i = i+1
 #    print "alpha chars group", struct_ctype.alpha
 
+
+"""Breaks each line of i18n and unicode file into Unicode blocks
+Separated by ";" and extract Unicode values and add into Struct
+"""
 def process_chars(line_no, list_name, flines):
 	for x in range(line_no, len(flines)):
 #		print x
@@ -119,19 +129,21 @@ def process_chars(line_no, list_name, flines):
 		if l[len(l)-1] != "/":
 			break
 		    
-#self.upper, self.lower, self.alpha, self.digit, self.space, self.cntrl, self.punct, self.graph, self.printc, self.xdigit, self.blank, self.combining, selft.combining3
+# Compared values added in stuct
 def compare_list(old_list, new_list):
     for property, value in vars(old_list).iteritems():
         exec("prop = %s %s" % ("new_list.",property))
         print "%s: %d chars in old ctype and %d chars in new ctype" % (property, len(value), len(prop))
 	report(value, prop)
 
+# Report values to stdout
 def report(old_list, new_list):
    missing_chars = list(set(old_list)-set(old_list).intersection(set(new_list)))
    print "Missing %d characters of old ctype in new ctype \n " % len(missing_chars), sorted(missing_chars)
    print "\n****************************************************"
 
 
+# This function compares TOLOWER, TOUPPER and TOTITLE pairs of i18n and unicode file
 def check_pairs(file_old, file_new):
     ipfile = open(file_old)
     flines = ipfile.readlines()
@@ -158,6 +170,9 @@ def check_pairs(file_old, file_new):
         i = i + 1
 
 
+""" Split the i18n file line into Unicode pairs and check into 
+unicode files
+"""
 def process_pairs(line_no, flines, file_new, pair_name):
         f = open(file_new).read()
 	for x in range(line_no, len(flines)):
@@ -184,7 +199,7 @@ def process_pairs(line_no, flines, file_new, pair_name):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print  " USAGE: python check_backcompatibility existing_ctype_file new_ctype_file "
+        print  "USAGE: python check_backcompatibility existing_ctype_file new_ctype_file "
     else:
         file_i18n = sys.argv[1]
         file_unicode = sys.argv[2]
