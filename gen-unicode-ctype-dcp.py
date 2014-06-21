@@ -24,23 +24,25 @@ import sys
 def process_dcp(dcp_file, outfile):
     ipfile = open(dcp_file)
     flines = ipfile.readlines()
+    outfile.write("% Generated automatically by gen-unicode-ctype-dcp.py for " + flines[0])
+    outfile.write("LC_CTYPE\n")
     linecount = len(flines)
     i = 0
     for l in flines:
 	w = l.split()
 	if len(w) > 3:
 	    if (l.split()[3] == "Uppercase") and (l.split()[2] == "Property:"):
-               print "uppercase @ ", i
+#               print "uppercase @ ", i
 	       outfile.write("upper \\\n")
 	       write_class(i+3, outfile, flines)
 
 	    if (l.split()[3] == "Lowercase") and (l.split()[2] == "Property:"):
-               print "lowercase @ ", i
+#               print "lowercase @ ", i
 	       outfile.write("lower \\\n")
 	       write_class(i+3, outfile, flines)
 
 	    if (l.split()[3] == "Alphabetic") and (l.split()[2] == "Property:"):
-               print "alphabetic @ ", i
+#               print "alphabetic @ ", i
 	       outfile.write("alpha \\\n")
 	       write_class(i+3, outfile, flines)
         i = i+1
@@ -76,11 +78,9 @@ def write_class(line_no, outfile, flines):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print  " USAGE: python gen-unicode-ctype-dcp.py DerivedCoreProperties.txt VERSION "
+    if len(sys.argv) < 2:
+        print  " USAGE: python gen-unicode-ctype-dcp.py DerivedCoreProperties.txt"
     else:
         dcp_file = sys.argv[1]
         outfile=open("unicode-ctype.txt","w")
-        outfile.write("% Generated automatically by gen-unicode-ctype-dcp for Unicode " + sys.argv[2] + "\n")
-        outfile.write("LC_CTYPE\n")
 	process_dcp(dcp_file, outfile)
