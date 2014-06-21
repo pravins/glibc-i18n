@@ -1,0 +1,23 @@
+Process to generate new CTYPE:
+1. Download  UnicodeData.txt and DerivedCoreProperties.txt from latest Unicode release. 
+2. Compile gen-unicode-ctype.c
+3. $./a.out UnicodeData.txt VERSION   --> (Unicode VERSION)
+4. It will create "unicode" file
+5. $./gen-unicode-ctype-dcp.py DerivedCoreProperties.txt VERSION
+6. It will create unicode-ctype.txt
+7. Replace alpha, lower and upper group of "unicode" file with unicode-ctype.txt
+8. New CTYPE is ready in "unicode" file
+
+Chek backward compatibility:
+It is important to see how many characters has been changed in new CTYPE.
+1. $./check-backcompatibility.py i18n unicode > Report  --(Here i18n is existing Unicode ctype file in glibc and "unicode" is generated as above)
+2. vi Report
+
+Report file will show give stats of how many characters was present in each group and how many are missing in new CTYPE. Do analysis if required.
+
+Note:
+Following characters added manually to "unicode"  during 5.1 to 7.0 update
+- combining3: '0x103f', '0x108d', '0x375', '0xbd0' Since there is no change in new UnicodeData.txt
+- Combining:   ['0x103f', '0xbd0'] Since there is no change in new UnicodeData.txt
+See backward-compatibility5_1-to-7_0 for more information
+

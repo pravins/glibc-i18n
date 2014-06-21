@@ -144,14 +144,17 @@ def check_pairs(file_old, file_new):
                 pair_name = "toupper"
 		print "Processing for TOUPPER pair group"
 		process_pairs(i+1, flines, file_new, pair_name)
+		print "Completed processing for TOUPPER pair group"
 	    if l.split()[0] == "tolower":
                 pair_name = "tolower"
 		print "Processing for TOLOWER pair group"
 		process_pairs(i+1, flines, file_new, pair_name)
+		print "Completed processing for TOLOWER pair group"
 	    if l.split()[1] == "\"totitle\";":
                 pair_name = "totitle"
 		print "Processing for TOTITLE pair group"
 		process_pairs(i+1, flines, file_new, pair_name)
+		print "Completed processing for TOTITLE pair group"
         i = i + 1
 
 
