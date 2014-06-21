@@ -15,6 +15,10 @@ It is important to see how many characters has been changed in new CTYPE.
 
 Report file will show give stats of how many characters was present in each group and how many are missing in new CTYPE. Do analysis if required.
 
+Final Patch:
+1. Add classes of 'unicode' file into the glibc/localedata/locales/i18n file
+2. Update Unicode version and do manual edit if anything
+
 Note:
 Following characters added manually to "unicode"  during 5.1 to 7.0 update
 - combining3: '0x103f', '0x108d', '0x375', '0xbd0' Since there is no change in new UnicodeData.txt
