@@ -27,8 +27,6 @@ import sys
 def process_dcp(dcp_file, outfile):
     ipfile = open(dcp_file)
     flines = ipfile.readlines()
-    outfile.write("% Generated automatically by gen-unicode-ctype-dcp.py for " + flines[0])
-    outfile.write("LC_CTYPE\n")
     linecount = len(flines)
     i = 0
     for l in flines:
@@ -49,6 +47,7 @@ def process_dcp(dcp_file, outfile):
 	       outfile.write("alpha \\\n")
 	       write_class(i+3, outfile, flines)
         i = i+1
+    ipfile.close()
 
 def write_class(line_no, outfile, flines):
     nline_count = 0
@@ -88,8 +87,14 @@ if __name__ == "__main__":
         outfile=open("unicode-ctype.txt","w")
         unicode_file=open("unicode")
 	flines = unicode_file.readlines()
+	i = 0
 	for l in flines:
 		outfile.write(l)
-		if l == "LC_CTYPE\n"
-		break
+		i = i+1
+		if l == "LC_CTYPE\n":
+		   break
 	process_dcp(dcp_file, outfile)
+       	for x in range(i,len(flines)):
+		outfile.write(flines[x])
+        outfile.close()
+        unicode_file.close()
