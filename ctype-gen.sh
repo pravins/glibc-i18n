@@ -19,6 +19,10 @@
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
 
+if [ $# -eq 0 ]; then
+    echo "USAGE: ./ctype-gen.sh UnicodeData.txt DerivedCoreProperties.txt VERSION"
+    exit 1
+fi
 gcc -o gen-unicode-ctype.out gen-unicode-ctype.c
 ./gen-unicode-ctype.out $1 $3
 python gen-unicode-ctype-dcp.py $2

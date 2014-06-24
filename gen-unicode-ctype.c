@@ -741,7 +741,7 @@ output_tables (const char *filename, const char *version)
 
   fprintf (stream, "LC_CTYPE\n");
       /* upper, lower and alpha classes are no more required. DerivedCoreProperties.txt 
-         file providing ready to classification for above classed. We are generating these classes
+         file providing ready to use classification for above classed. We are generating these classes
          using gen-unicode-ctype-dcp.py script from DerivedCoreProperties.txt.
          */
 //  output_charclass (stream, "upper", is_upper);
