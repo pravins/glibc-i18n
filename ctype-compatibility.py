@@ -1,25 +1,27 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -i*-
-# Copyright (C) 2013-14, Pravin Satpute <psatpute@redhat.com>
+# Copyright (C) 2014 Free Software Foundation, Inc.
+# This file is part of the GNU C Library.
+# Contributed by Pravin Satpute <psatpute@redhat.com>, 2014.
 #
-# This script is useful for checking backward compatibility of newly 
-# generated ctype file from gen-unicode-ctype.c and gen-unicode-ctype-dcp.py
-
-# USAGE: python check-backcompatibility.py existing_ctype_file new_ctype_file 
-# Existing CTYPE file /usr/share/i18n/locale/i18n and new generated 'unicode'
+# The GNU C Library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
+# The GNU C Library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with the GNU C Library; if not, see
+# <http://www.gnu.org/licenses/>.
 
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# This script is useful for checking backward compatibility of newly 
+# generated LC_CTYPE file from gen-unicode-ctype.c and gen-unicode-ctype-dcp.py
+# USAGE: python check-backcompatibility.py existing_ctype_file new_ctype_file 
+# Existing LC_CTYPE file /usr/share/i18n/locale/i18n and new generated 'unicode-ctype'
 
 import os
 import sys
