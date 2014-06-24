@@ -25,7 +25,6 @@ Restore '0x103f', '0x108d', '0x375', '0xbd0'
 
 
 
-
 ****************************************************
 Space: 22 chars in old ctype and 21 chars in new ctype
 Missing 1 characters of old ctype in new ctype 
