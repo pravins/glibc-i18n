@@ -634,7 +634,7 @@ output_tables (const char *filename, const char *version)
 
   fprintf (stream, "LC_IDENTIFICATION\n");
   fprintf (stream, "title     \"Unicode %s FDCC-set\"\n", version);
-  fprintf (stream, "source    \"UnicodeData.txt, PropList.txt\"\n");
+  fprintf (stream, "source    \"UnicodeData.txt, PropList.txt, DerivedCoreProperties.txt\"\n");
   fprintf (stream, "address   \"\"\n");
   fprintf (stream, "contact   \"\"\n");
   fprintf (stream, "email     \"bug-glibc-locales@gnu.org\"\n");
