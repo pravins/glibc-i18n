@@ -86,4 +86,10 @@ if __name__ == "__main__":
     else:
         dcp_file = sys.argv[1]
         outfile=open("unicode-ctype.txt","w")
+        unicode_file=open("unicode")
+	flines = unicode_file.readlines()
+	for l in flines:
+		outfile.write(l)
+		if l == "LC_CTYPE\n"
+		break
 	process_dcp(dcp_file, outfile)
