@@ -748,7 +748,10 @@ output_tables (const char *filename, const char *version)
 //  output_charclass (stream, "lower", is_lower);
 //  output_charclass (stream, "alpha", is_alpha);
   output_charclass (stream, "digit", is_digit);
-  output_charclass (stream, "outdigit", is_outdigit);
+      /* The "outdigit" information is by default "0" to "9".  We don't have to
+         provide it here since localedef will fill in the bits and it would
+         prevent locales copy-ing this file define their own values. */
+//  output_charclass (stream, "outdigit", is_outdigit);
   output_charclass (stream, "blank", is_blank);
   output_charclass (stream, "space", is_space);
   output_charclass (stream, "cntrl", is_cntrl);
