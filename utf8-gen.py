@@ -25,19 +25,24 @@ def process_range(start, end, outfile, name):
 #	print "start:", start
 #	print "\nend:", end
 	for i in range(int(start, 16), int(end, 16), 64 ):
-		if i > (int(end, 16)-64):
-			break
+		unihex = unichr(i).encode("UTF-8")
+         	length_hex = len(unihex)
+         	hexword = ""
+         	for x in range(0, length_hex):
+         		hexword =hexword + "/x" + ('%x' % ord(unihex[x]))
+		if len(start) == 4:
+			outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 		else:
-#		        print "Value of i",  i
-                        unihex = unichr(i).encode("UTF-8")
-         	        length_hex = len(unihex)
-         	        hexword = ""
-         	        for x in range(0, length_hex):
-         	           hexword =hexword + "/x" + ('%x' % ord(unihex[x]))
+			outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+		
+		if i > (int(end, 16)-64):
 			if len(start) == 4:
-				outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+				outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 			else:
-				outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+				outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+
+			break
+
 #	print start
 #	print end
 
