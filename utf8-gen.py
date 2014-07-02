@@ -118,12 +118,12 @@ if __name__ == "__main__":
         outfile=open("UTF-8","w")
 	flines = unidata_file.readlines()
 	# Writing lines from existing UTF-8 to new UTF-8
-	outfile.write("% CHARMAP generated using utf8-gen.py\n")
         outfile.write("<code_set_name> UTF-8\n")
 	outfile.write("<comment_char> %\n")
 	outfile.write("<escape_char> /\n")
 	outfile.write("<mb_cur_min> 1\n")
 	outfile.write("<mb_cur_max> 6\n\n")
+	outfile.write("% CHARMAP generated using utf8-gen.py\n")
 	outfile.write("% alias ISO-10646/UTF-8\n")
 	outfile.write("CHARMAP\n")
 	# Processing UnicodeData.txt and write to UTF-8 file
