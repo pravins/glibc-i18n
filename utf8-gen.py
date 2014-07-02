@@ -110,6 +110,7 @@ if __name__ == "__main__":
 	outfile.write("CHARMAP\n")
 	# Processing UnicodeData.txt and write to UTF-8 file
 	process_unidata(flines, outfile)
+	outfile.write("END CHARMAP\n")
 
         outfile.close()
 	unidata_file.close()
