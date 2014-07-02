@@ -17,14 +17,28 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
+# Usage: python utf8-gen.py UnicodeData.txt
+# It will output UTF-8 file
 
 import os
 import sys		
 
-''' Where UnicodeData.txt file has given characters in range i.e. First> and Last>
-   UTf-8 file write its by adding 0x3F inbetween First and Last Unicode character.
+''' Where UnicodeData.txt file has given characters in range 
+    Example:
+    3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
+    4DB5;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
+
+    UTF-8 file mention these range by adding 0x3F inbetween First and Last Unicode character.
+    Example:
+    <U3400>..<U343F>     /xe3/x90/x80         <CJK Ideograph Extension A>
+    .
+    .
+    <U4D80>..<U4DB5>     /xe4/xb6/x80         <CJK Ideograph Extension A>
+
+    Note: No idea why Hangul syllable AC00; D7A3; were not expanded in Unicode 
+    5.0 UTF-8. We are following consistency and expanding Hangul as well.
+
 '''
-# No idea why Hangul syllable AC00; D7A3; are not expanded. We are following same rule for all.
 def process_range(start, end, outfile, name):
 
 	for i in range(int(start, 16), int(end, 16), 64 ):
@@ -43,7 +57,10 @@ def process_range(start, end, outfile, name):
 		else:
 			outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 		
-
+''' This function takes single like of UnicodeData.txt and write to UTF-8
+    Unicode-Value  HEX  Unicode-Char-Name
+    <U0010>     /x10         DATA LINK ESCAPE
+'''
 def process_unidata(flines, outfile):
 	l = 0
 	while l < len(flines):
@@ -53,9 +70,9 @@ def process_unidata(flines, outfile):
 		unihex = unichr(int(w[0],16)).encode("UTF-8")
 		hexword = convert_to_hex(unihex)
 
-		# Some characters have <control> as a name, so using "Unicode 1.0 Name"  
-		#  Characters U+0080, U+0081, U+0084 and U+0099 has "<control>" as a name and even no "Unicode 1.0 Name" (10th field) in UnicodeData.txt
-		#  We can write code to take there alternate name from NameAliases.txt
+		''' Some characters have <control> as a name, so using "Unicode 1.0 Name"  
+		    Characters U+0080, U+0081, U+0084 and U+0099 has "<control>" as a name and even no "Unicode 1.0 Name" (10th field) in UnicodeData.txt
+		    We can write code to take there alternate name from NameAliases.txt '''
 		if w[1] == "<control>":
 			if w[10] != "":
 			       w[1] = w[10]
@@ -112,5 +129,6 @@ if __name__ == "__main__":
 	process_unidata(flines, outfile)
 	outfile.write("END CHARMAP\n")
 
+# TODO: Process WIDTH
         outfile.close()
 	unidata_file.close()
