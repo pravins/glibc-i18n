@@ -34,27 +34,36 @@ import os,sys,commands
     .
     <U4D80>..<U4DB5>     /xe4/xb6/x80         <CJK Ideograph Extension A>
 
-    Note: No idea why Hangul syllable AC00; D7A3; were not expanded in Unicode 
-    5.0 UTF-8. We are following consistency and expanding Hangul as well.
-
+   NOTE:  
+   2000-09-24  Bruno Haible  <haible@clisp.cons.org>
+   * charmaps/UTF-8: Expand <Hangul Syllable> and <Private Use> ranges,
+   so they become printable and carry a width.  Comment out surrogate
+   ranges.  Add a WIDTH table.
 '''
 def process_range(start, end, outfile, name):
+	if name.find("Hangul Syllable")!=-1 or name.find("<Private Use, First>")!=-1:
+		for i in range(int(start, 16), int(end, 16)+1 ):
+			unihex = unichr(i).encode("UTF-8")
+			hexword = convert_to_hex(unihex)
+			outfile.write("<U"+('%x' % i).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 
-	for i in range(int(start, 16), int(end, 16), 64 ):
-		unihex = unichr(i).encode("UTF-8")
-		hexword = convert_to_hex(unihex)
 
-		if i > (int(end, 16)-64):
+	else:
+		for i in range(int(start, 16), int(end, 16), 64 ):
+			unihex = unichr(i).encode("UTF-8")
+			hexword = convert_to_hex(unihex)
+	
+			if i > (int(end, 16)-64):
+				if len(start) == 4:
+					outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+				else:
+					outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+				break
+	
 			if len(start) == 4:
-				outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+				outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 			else:
-				outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
-			break
-
-		if len(start) == 4:
-			outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
-		else:
-			outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+				outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 		
 ''' This function takes single like of UnicodeData.txt and write to UTF-8
     Unicode-Value  HEX  Unicode-Char-Name
@@ -99,8 +108,7 @@ def process_charmap(flines, outfile):
 		    outfile.write("<U000"+w[0]+">     " + hexword + "         " + w[1] + "\n")
 		l = l +1
 
-''' Function to convert Unicode characters to /x**/x**/x** 
-   format. 
+''' Function to convert Unicode characters to /x**/x**/x**  format. 
 '''
 def convert_to_hex(unihex):
 	length_hex = len(unihex)
@@ -132,6 +140,8 @@ def write_comments(outfile, flag):
 #             Not needed covered by Cf
 #		outfile.write("% - Zero width characters have width 0; generated from\n")
 #		outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n") 
+		outfile.write("WIDTH\n")
+
 
 ''' For WIDTH we need to process output from 2 files UnicodeData.txt and EastAsianWidth.txt.
    1. Processing two files and gathering output in elist. 2) copying elist to "temp" file
@@ -187,20 +197,16 @@ if __name__ == "__main__":
         easta_file = open(sys.argv[2]) 
         outfile=open("UTF-8","w")
 	flines = unidata_file.readlines()
-	# Writing lines from existing UTF-8 to new UTF-8
-	write_comments(outfile, 0)
 
-	# Processing UnicodeData.txt and write to UTF-8 file
+	# Processing UnicodeData.txt and write CHARMAP to UTF-8 file
+	write_comments(outfile, 0)
 	process_charmap(flines, outfile)
 	outfile.write("END CHARMAP\n\n")
 
-# TODO: Process WIDTH
+	# Processing UnicodeData.txt and write WIDTH to UTF-8 file
 	write_comments(outfile, 1)
-	outfile.write("WIDTH\n")
-
 	status, output = commands.getstatusoutput("grep '^[^;]*;[WF]' EastAsianWidth.txt")
 	elines = output.split("\n")
-
 	process_width(outfile, flines, elines)
 	outfile.write("END WIDTH\n")
 
