@@ -20,8 +20,7 @@
 # Usage: python utf8-gen.py UnicodeData.txt
 # It will output UTF-8 file
 
-import os
-import sys		
+import os,sys,commands
 
 ''' Where UnicodeData.txt file has given characters in range 
     Example:
@@ -61,7 +60,7 @@ def process_range(start, end, outfile, name):
     Unicode-Value  HEX  Unicode-Char-Name
     <U0010>     /x10         DATA LINK ESCAPE
 '''
-def process_unidata(flines, outfile):
+def process_charmap(flines, outfile):
 	l = 0
 	while l < len(flines):
 		w = flines[l].split(";")
@@ -110,26 +109,100 @@ def convert_to_hex(unihex):
               hexword =hexword + "/x" + ('%x' % ord(unihex[i]))
 	return hexword
 
+def write_comments(outfile, flag):
+	if flag == 0:
+	        outfile.write("<code_set_name> UTF-8\n")
+		outfile.write("<comment_char> %\n")
+		outfile.write("<escape_char> /\n")
+		outfile.write("<mb_cur_min> 1\n")
+		outfile.write("<mb_cur_max> 6\n\n")
+		outfile.write("% CHARMAP generated using utf8-gen.py\n")
+		outfile.write("% alias ISO-10646/UTF-8\n")
+		outfile.write("CHARMAP\n")
+	if flag == 1:
+		outfile.write("% Character width according to Unicode 5.0.0.\n")
+		outfile.write("% - Default width is 1.\n")
+		outfile.write("% - Double-width characters have width 2; generated from\n")
+		outfile.write("%        \"grep '^[^;]*;[WF]' EastAsianWidth.txt\"\n")
+		outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")
+		outfile.write("% - Non-spacing characters have width 0; generated from PropList.txt or\n")
+		outfile.write("%   \"grep '^[^;]*;[^;]*;[^;]*;[^;]*;NSM;' UnicodeData.txt\"\n")
+		outfile.write("% - Format control characters have width 0; generated from\n")
+		outfile.write("%   \"grep '^[^;]*;[^;]*;Cf;' UnicodeData.txt\"\n")
+		outfile.write("% - Zero width characters have width 0; generated from\n")
+		outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n")
+
+
+def process_width(outfile, ulines, elines):
+	ftmp = open("temp", "w")
+	list = []
+	for l in ulines:
+		w = l.split(";")
+		if w[4]== "NSM" or w[2] == "Cf":
+			if len(w[0]) < 5:
+				outfile.write("<U"+w[0]+">\t\t\t0" + "\n")
+			else:
+				outfile.write("<U000"+w[0]+">\t\t\t0" + "\n")
+			print w[0]
+			ftmp.write(str(int(w[0],16)) + "\t" + w[0] + "\t0\n")
+			
+	for l in elines:
+		w = l.split(";")
+		if len(w[0])<6:
+			if len(w[0]) == 4:
+				outfile.write("<U"+w[0]+">\t\t\t2" + "\n")
+			else:
+				outfile.write("<U000"+w[0]+">\t\t\t2" + "\n")
+		else:
+			wc = w[0].split("..")
+			if len(wc[0]) == 4:
+				outfile.write("<U"+wc[0]+">..")
+			else:
+				outfile.write("<U000"+wc[0]+">..")
+			if len(wc[1]) == 4:
+				outfile.write("<U"+wc[1]+">\t2\n" )
+			else:
+				outfile.write("<U000"+wc[1]+">\t2\n" )
+		ftmp.write(str(int(wc[0],16)) + "\t" +  w[0] + "\t2\n")
+
+
+
+
+
+
+			
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print  "USAGE: python utf8-gen.py UnicodeData.txt"
+    if len(sys.argv) < 3:
+        print  "USAGE: python utf8-gen.py UnicodeData.txt EastAsianWidth.txt"
     else:
         unidata_file = open(sys.argv[1]) 
+        easta_file = open(sys.argv[2]) 
         outfile=open("UTF-8","w")
 	flines = unidata_file.readlines()
 	# Writing lines from existing UTF-8 to new UTF-8
-        outfile.write("<code_set_name> UTF-8\n")
-	outfile.write("<comment_char> %\n")
-	outfile.write("<escape_char> /\n")
-	outfile.write("<mb_cur_min> 1\n")
-	outfile.write("<mb_cur_max> 6\n\n")
-	outfile.write("% CHARMAP generated using utf8-gen.py\n")
-	outfile.write("% alias ISO-10646/UTF-8\n")
-	outfile.write("CHARMAP\n")
+	write_comments(outfile, 0)
+
 	# Processing UnicodeData.txt and write to UTF-8 file
-	process_unidata(flines, outfile)
-	outfile.write("END CHARMAP\n")
+	process_charmap(flines, outfile)
+	outfile.write("END CHARMAP\n\n")
 
 # TODO: Process WIDTH
+	write_comments(outfile, 1)
+	outfile.write("WIDTH\n")
+#	elines = commands.getstatusoutput("grep '^[^;]*;[WF]' EastAsianWidth.txt")
+	os.system("grep \'^[^;]*;[WF]\' EastAsianWidth.txt > out")
+	fout = open("out")
+	elines = fout.readlines()
+	os.system("grep \'^[^;]*;[WF]\' EastAsianWidth.txt > out")
+#	print len(elines)
+#	print flines
+	process_width(outfile, flines, elines)
+	outfile.write("END WIDTH\n\n")
+
         outfile.close()
 	unidata_file.close()
+	fout.close()
+#     out is temprary file create for capturing grep output
+	os.system("rm out")
