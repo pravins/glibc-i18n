@@ -120,56 +120,62 @@ def write_comments(outfile, flag):
 		outfile.write("% alias ISO-10646/UTF-8\n")
 		outfile.write("CHARMAP\n")
 	if flag == 1:
-		outfile.write("% Character width according to Unicode 5.0.0.\n")
+		outfile.write("% Character width according to Unicode 7.0.0.\n")
 		outfile.write("% - Default width is 1.\n")
 		outfile.write("% - Double-width characters have width 2; generated from\n")
 		outfile.write("%        \"grep '^[^;]*;[WF]' EastAsianWidth.txt\"\n")
-		outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")
+#		outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")  -- This is wrong 
 		outfile.write("% - Non-spacing characters have width 0; generated from PropList.txt or\n")
 		outfile.write("%   \"grep '^[^;]*;[^;]*;[^;]*;[^;]*;NSM;' UnicodeData.txt\"\n")
 		outfile.write("% - Format control characters have width 0; generated from\n")
 		outfile.write("%   \"grep '^[^;]*;[^;]*;Cf;' UnicodeData.txt\"\n")
-		outfile.write("% - Zero width characters have width 0; generated from\n")
-		outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n")
+#             Not needed covered by Cf
+#		outfile.write("% - Zero width characters have width 0; generated from\n")
+#		outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n") 
 
-
+''' For WIDTH we need to process output from 2 files UnicodeData.txt and EastAsianWidth.txt.
+   1. Processing two files and gathering output in elist. 2) copying elist to "temp" file
+   2. Sorting with glibc "sort -n"  and copying to sort_temp file.
+   3. Copying required things to UTF-8 file
+   4. Removing temporary files.
+'''
 def process_width(outfile, ulines, elines):
 	ftmp = open("temp", "w")
-	list = []
+	elist = []
 	for l in ulines:
 		w = l.split(";")
 		if w[4]== "NSM" or w[2] == "Cf":
 			if len(w[0]) < 5:
-				outfile.write("<U"+w[0]+">\t\t\t0" + "\n")
+				elist.append(str(int(w[0],16)) + "\t" + "<U"+w[0]+">\t\t\t0" + "\n")
 			else:
-				outfile.write("<U000"+w[0]+">\t\t\t0" + "\n")
-			print w[0]
-			ftmp.write(str(int(w[0],16)) + "\t" + w[0] + "\t0\n")
+				elist.append(str(int(w[0],16)) + "\t" + "<U000"+w[0]+">\t\t\t0" + "\n")
+#			print w[0]
 			
 	for l in elines:
 		w = l.split(";")
 		if len(w[0])<6:
 			if len(w[0]) == 4:
-				outfile.write("<U"+w[0]+">\t\t\t2" + "\n")
+				elist.append(str(int(w[0],16)) + "\t" + "<U"+w[0]+">\t\t\t2" + "\n")
 			else:
-				outfile.write("<U000"+w[0]+">\t\t\t2" + "\n")
+				elist.append(str(int(w[0],16)) + "\t" + "<U000"+w[0]+">\t\t\t2" + "\n")
 		else:
 			wc = w[0].split("..")
 			if len(wc[0]) == 4:
-				outfile.write("<U"+wc[0]+">..")
+				elist.append(str(int(wc[0],16)) + "\t" + "<U"+wc[0]+">.." + "<U"+wc[1]+">\t2\n" )
 			else:
-				outfile.write("<U000"+wc[0]+">..")
-			if len(wc[1]) == 4:
-				outfile.write("<U"+wc[1]+">\t2\n" )
-			else:
-				outfile.write("<U000"+wc[1]+">\t2\n" )
-		ftmp.write(str(int(wc[0],16)) + "\t" +  w[0] + "\t2\n")
+				elist.append(str(int(wc[0],16)) + "\t" + "<U000"+wc[0]+">.." + "<U000"+wc[1]+">\t2\n")
 
-
-
-
-
-
+	for i in range(len(elist)):
+		ftmp.write(elist[i])
+	ftmp.close()
+	os.system("sort -n temp > sorted_temp")
+	#writing to UTF-8 file
+	ftmp = open("sorted_temp")
+	tlines = ftmp.readlines()
+	for l in tlines:
+		w = l.split()
+		outfile.write(w[1] + "\t" + w[2] + "\n")
+	os.system("rm temp sorted_temp")
 			
 
 
@@ -191,18 +197,12 @@ if __name__ == "__main__":
 # TODO: Process WIDTH
 	write_comments(outfile, 1)
 	outfile.write("WIDTH\n")
-#	elines = commands.getstatusoutput("grep '^[^;]*;[WF]' EastAsianWidth.txt")
-	os.system("grep \'^[^;]*;[WF]\' EastAsianWidth.txt > out")
-	fout = open("out")
-	elines = fout.readlines()
-	os.system("grep \'^[^;]*;[WF]\' EastAsianWidth.txt > out")
-#	print len(elines)
-#	print flines
+
+	status, output = commands.getstatusoutput("grep '^[^;]*;[WF]' EastAsianWidth.txt")
+	elines = output.split("\n")
+
 	process_width(outfile, flines, elines)
-	outfile.write("END WIDTH\n\n")
+	outfile.write("END WIDTH\n")
 
         outfile.close()
 	unidata_file.close()
-	fout.close()
-#     out is temprary file create for capturing grep output
-	os.system("rm out")
