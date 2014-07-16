@@ -41,7 +41,7 @@ import os,sys,commands
    ranges.  Add a WIDTH table.
 '''
 def process_range(start, end, outfile, name):
-	if name.find("Hangul Syllable")!=-1 or name.find("<Private Use, First>")!=-1:
+	if name.find("Hangul Syllable")!=-1:
 		for i in range(int(start, 16), int(end, 16)+1 ):
 			unihex = unichr(i).encode("UTF-8")
 			hexword = convert_to_hex(unihex)
@@ -56,15 +56,18 @@ def process_range(start, end, outfile, name):
 			if i > (int(end, 16)-64):
 				if len(start) == 4:
 					outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
-				else:
+				elif len(start) == 5:
 					outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+				else:
+					outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 				break
 	
 			if len(start) == 4:
 				outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
-			else:
+			elif len(start) == 5:
 				outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
-		
+			else:
+				outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 ''' This function takes single like of UnicodeData.txt and write to UTF-8
     Unicode-Value  HEX  Unicode-Char-Name
     <U0010>     /x10         DATA LINK ESCAPE
@@ -171,9 +174,9 @@ def process_width(outfile, ulines, elines):
 		else:
 			wc = w[0].split("..")
 			if len(wc[0]) == 4:
-				elist.append(str(int(wc[0],16)) + "\t" + "<U"+wc[0]+">.." + "<U"+wc[1]+">\t2\n" )
+				elist.append(str(int(wc[0],16)) + "\t" + "<U"+wc[0]+">..." + "<U"+wc[1]+">\t2\n" )
 			else:
-				elist.append(str(int(wc[0],16)) + "\t" + "<U000"+wc[0]+">.." + "<U000"+wc[1]+">\t2\n")
+				elist.append(str(int(wc[0],16)) + "\t" + "<U000"+wc[0]+">..." + "<U000"+wc[1]+">\t2\n")
 
 	for i in range(len(elist)):
 		ftmp.write(elist[i])
