@@ -30,9 +30,7 @@ def check_charmap(original, new):
 	for l in new:
 		w = l.split()
 		if len(w) > 0:
-#			print w[0]
 			if w[0] == "CHARMAP":
-				print "found charmap"
 				create_dict(ncharmap, new, i+1)
 				break
 		i = i + 1
@@ -43,7 +41,6 @@ def check_charmap(original, new):
 		if len(w) > 0:
 #			print w[0]
 			if w[0] == "CHARMAP":
-				print "found charmap"
 				for x in range(i+1, len(original)):
 					w = original[x].split()
 					if w[0] == "END":
@@ -51,10 +48,10 @@ def check_charmap(original, new):
 #					print w[0]
 					try:
 						if ncharmap[w[0]] != w[1]:
-							print "Issue with: ", w[0]
+							print "This character might be missing in generated charmap: ", w[0]
 					except KeyError:
 						if  w[0] !='%':
-							print "%s might have changed its range in new Unicode" % w[0] 
+							print "This character might be missing in new generated charmap: ", w[0] 
 		i = i + 1
 	
 
@@ -68,7 +65,6 @@ def create_dict(name, lines, i):
 
 
 def process_chars(line_no, lines, dictionary):
-	print line_no
 	for x in range(line_no, len(lines)):
 		w = lines[x].split()
 		if w[0] == "END":
@@ -106,17 +102,15 @@ def extract_univalue_and_width(lines, dictionary):
 		i = i + 1
  
 def check_width(olines, nlines):
-	  owidth = {}
-	  nwidth = {}
-	  extract_univalue_and_width(olines, owidth)
-	  extract_univalue_and_width(nlines, nwidth)
-	  mwidth = dict(set(owidth.iteritems()) - set(owidth.iteritems()).intersection(nwidth.iteritems()))
-	  print len(mwidth)
-	  print mwidth
-#	  for key in owidth.keys():
-#    		if key in nwidth.keys():
-#        		if owidth[key] != owidth[key]:
-#				print "%x key has different width\n" % key
+	owidth = {}
+	nwidth = {}
+	extract_univalue_and_width(olines, owidth)
+	extract_univalue_and_width(nlines, nwidth)
+	mwidth = dict(set(owidth.iteritems()) - set(owidth.iteritems()).intersection(nwidth.iteritems()))
+	print "Total missing characters in newly generated WIDTH: ", len(mwidth)
+	for key, value in sorted(mwidth.items()):
+		print("{} : {}".format(key, value))
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
@@ -127,5 +121,8 @@ if __name__ == "__main__":
         n_utf8 = open(sys.argv[2])
 	o_lines = o_utf8.readlines()
 	n_lines = n_utf8.readlines()
+        print  "Report on CHARMAP:"
 	check_charmap(o_lines, n_lines)
+	print  "************************************************************\n"
+        print  "Report on WIDTH:"
 	check_width(o_lines, n_lines)
