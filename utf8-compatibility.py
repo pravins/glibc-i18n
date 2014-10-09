@@ -18,9 +18,9 @@
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
 
-# This script is useful for checking backward compatibility of newly 
+# This script is useful for checking backward compatibility of newly
 # generated UTF-8 file from utf8-gen.py script
-# USAGE: python utf-compatibility.py existing_utf8_file new_utf8_file 
+# USAGE: python utf-compatibility.py existing_utf8_file new_utf8_file
 import sys
 
 def check_charmap(original, new):
@@ -51,9 +51,9 @@ def check_charmap(original, new):
 							print "This character might be missing in generated charmap: ", w[0]
 					except KeyError:
 						if  w[0] !='%':
-							print "This character might be missing in new generated charmap: ", w[0] 
+							print "This character might be missing in new generated charmap: ", w[0]
 		i = i + 1
-	
+
 
 def create_dict(name, lines, i):
 	for x in range(i, len(lines)):
@@ -100,7 +100,7 @@ def extract_univalue_and_width(lines, dictionary):
 				process_chars(i+1, lines, dictionary)
 				break
 		i = i + 1
- 
+
 def check_width(olines, nlines):
 	owidth = {}
 	nwidth = {}

@@ -22,7 +22,7 @@
 
 import os,sys,commands
 
-''' Where UnicodeData.txt file has given characters in range 
+''' Where UnicodeData.txt file has given characters in range
     Example:
     3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
     4DB5;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
@@ -34,7 +34,7 @@ import os,sys,commands
     .
     <U4D80>..<U4DB5>     /xe4/xb6/x80         <CJK Ideograph Extension A>
 
-   NOTE:  
+   NOTE:
    2000-09-24  Bruno Haible  <haible@clisp.cons.org>
    * charmaps/UTF-8: Expand <Hangul Syllable> and <Private Use> ranges,
    so they become printable and carry a width.  Comment out surrogate
@@ -52,7 +52,7 @@ def process_range(start, end, outfile, name):
 		for i in range(int(start, 16), int(end, 16), 64 ):
 			unihex = unichr(i).encode("UTF-8")
 			hexword = convert_to_hex(unihex)
-	
+
 			if i > (int(end, 16)-64):
 				if len(start) == 4:
 					outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
@@ -61,7 +61,7 @@ def process_range(start, end, outfile, name):
 				else:
 					outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 				break
-	
+
 			if len(start) == 4:
 				outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 			elif len(start) == 5:
@@ -81,7 +81,7 @@ def process_charmap(flines, outfile):
 		unihex = unichr(int(w[0],16)).encode("UTF-8")
 		hexword = convert_to_hex(unihex)
 
-		''' Some characters have <control> as a name, so using "Unicode 1.0 Name"  
+		''' Some characters have <control> as a name, so using "Unicode 1.0 Name"
 		    Characters U+0080, U+0081, U+0084 and U+0099 has "<control>" as a name and even no "Unicode 1.0 Name" (10th field) in UnicodeData.txt
 		    We can write code to take there alternate name from NameAliases.txt '''
 		if w[1] == "<control>":
@@ -111,7 +111,7 @@ def process_charmap(flines, outfile):
 		    outfile.write("<U000"+w[0]+">     " + hexword + "         " + w[1] + "\n")
 		l = l +1
 
-''' Function to convert Unicode characters to /x**/x**/x**  format. 
+''' Function to convert Unicode characters to /x**/x**/x**  format.
 '''
 def convert_to_hex(unihex):
 	length_hex = len(unihex)
@@ -135,14 +135,14 @@ def write_comments(outfile, flag):
 		outfile.write("% - Default width is 1.\n")
 		outfile.write("% - Double-width characters have width 2; generated from\n")
 		outfile.write("%        \"grep '^[^;]*;[WF]' EastAsianWidth.txt\"\n")
-#		outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")  -- This is wrong 
+#		outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")  -- This is wrong
 		outfile.write("% - Non-spacing characters have width 0; generated from PropList.txt or\n")
 		outfile.write("%   \"grep '^[^;]*;[^;]*;[^;]*;[^;]*;NSM;' UnicodeData.txt\"\n")
 		outfile.write("% - Format control characters have width 0; generated from\n")
 		outfile.write("%   \"grep '^[^;]*;[^;]*;Cf;' UnicodeData.txt\"\n")
 #             Not needed covered by Cf
 #		outfile.write("% - Zero width characters have width 0; generated from\n")
-#		outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n") 
+#		outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n")
 		outfile.write("WIDTH\n")
 
 
@@ -163,7 +163,7 @@ def process_width(outfile, ulines, elines):
 			else:
 				elist.append(str(int(w[0],16)) + "\t" + "<U000"+w[0]+">\t\t\t0" + "\n")
 #			print w[0]
-			
+
 	for l in elines:
 		w = l.split(";")
 		if len(w[0])<6:
@@ -189,15 +189,15 @@ def process_width(outfile, ulines, elines):
 		w = l.split()
 		outfile.write(w[1] + "\t" + w[2] + "\n")
 	os.system("rm temp sorted_temp")
-			
+
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print  "USAGE: python utf8-gen.py UnicodeData.txt EastAsianWidth.txt"
     else:
-        unidata_file = open(sys.argv[1]) 
-        easta_file = open(sys.argv[2]) 
+        unidata_file = open(sys.argv[1])
+        easta_file = open(sys.argv[2])
         outfile=open("UTF-8","w")
 	flines = unidata_file.readlines()
 
