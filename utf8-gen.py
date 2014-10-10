@@ -20,7 +20,7 @@
 # Usage: python utf8-gen.py UnicodeData.txt
 # It will output UTF-8 file
 
-import os,sys,commands
+import os,sys,re
 
 ''' Where UnicodeData.txt file has given characters in range
     Example:
@@ -206,10 +206,12 @@ if __name__ == "__main__":
 	process_charmap(flines, outfile)
 	outfile.write("END CHARMAP\n\n")
 
-	# Processing UnicodeData.txt and write WIDTH to UTF-8 file
+	# Processing EastAsianWidth.txt and write WIDTH to UTF-8 file
 	write_comments(outfile, 1)
-	status, output = commands.getstatusoutput("grep '^[^;]*;[WF]' EastAsianWidth.txt")
-	elines = output.split("\n")
+        elines = []
+        for line in easta_file.readlines():
+                if re.match(r'^[^;]*;[WF]', line):
+                        elines.append(line.strip())
 	process_width(outfile, flines, elines)
 	outfile.write("END WIDTH\n")
 
