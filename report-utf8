@@ -1,4 +1,4 @@
-Reprot on CHARMAP
+Report on CHARMAP
 # Just removed "0" from utf8 representation like 0x01 to 0x1 -> It should be fine
 Issue with:  <U0000> 
 Issue with:  <U0001>

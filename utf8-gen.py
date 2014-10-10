@@ -110,7 +110,7 @@ def process_charmap(flines, outfile):
                         l = l +1
                         continue
 
-                # Handling case of CJK IDEAOGRAPH Start (3400) and End(4DB5), ADD 0x3F and create range. some more cases like this
+                # Handling case of CJK IDEOGRAPH Start (3400) and End(4DB5), ADD 0x3F and create range. some more cases like this
                 if w[1].find(", First>")!=-1:
                         start = w[0]
                         end = flines[l+1].split(";")[0]
