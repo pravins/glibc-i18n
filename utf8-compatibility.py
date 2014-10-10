@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -i*-
 # Copyright (C) 2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
@@ -48,10 +48,10 @@ def check_charmap(original, new):
 #                                       print w[0]
                                         try:
                                                 if ncharmap[w[0]] != w[1]:
-                                                        print "This character might be missing in generated charmap: ", w[0]
+                                                        print("This character might be missing in generated charmap: ", w[0])
                                         except KeyError:
                                                 if  w[0] !='%':
-                                                        print "This character might be missing in new generated charmap: ", w[0]
+                                                        print("This character might be missing in new generated charmap: ", w[0])
                 i = i + 1
 
 
@@ -106,23 +106,23 @@ def check_width(olines, nlines):
         nwidth = {}
         extract_univalue_and_width(olines, owidth)
         extract_univalue_and_width(nlines, nwidth)
-        mwidth = dict(set(owidth.iteritems()) - set(owidth.iteritems()).intersection(nwidth.iteritems()))
-        print "Total missing characters in newly generated WIDTH: ", len(mwidth)
+        mwidth = dict(set(owidth.items()) - set(owidth.items()).intersection(nwidth.items()))
+        print("Total missing characters in newly generated WIDTH: ", len(mwidth))
         for key, value in sorted(mwidth.items()):
                 print("{} : {}".format(key, value))
 
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print  "USAGE: python check_backcompatibility existing_ctype_file new_ctype_file "
+        print("USAGE: python check_backcompatibility existing_ctype_file new_ctype_file ")
     else:
         # o_ for Original UTF-8 and n_ for New UTF-8 file
         o_utf8 = open(sys.argv[1])
         n_utf8 = open(sys.argv[2])
         o_lines = o_utf8.readlines()
         n_lines = n_utf8.readlines()
-        print  "Report on CHARMAP:"
+        print("Report on CHARMAP:")
         check_charmap(o_lines, n_lines)
-        print  "************************************************************\n"
-        print  "Report on WIDTH:"
+        print("************************************************************\n")
+        print("Report on WIDTH:")
         check_width(o_lines, n_lines)

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -i*-
 # Copyright (C) 2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
@@ -43,14 +43,14 @@ import os,sys,re
 def process_range(start, end, outfile, name):
         if name.find("Hangul Syllable")!=-1:
                 for i in range(int(start, 16), int(end, 16)+1 ):
-                        unihex = unichr(i).encode("UTF-8")
+                        unihex = chr(i).encode("UTF-8")
                         hexword = convert_to_hex(unihex)
                         outfile.write("<U"+('%x' % i).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
 
 
         else:
                 for i in range(int(start, 16), int(end, 16), 64 ):
-                        unihex = unichr(i).encode("UTF-8")
+                        unihex = chr(i).encode("UTF-8")
                         hexword = convert_to_hex(unihex)
 
                         if i > (int(end, 16)-64):
@@ -77,9 +77,22 @@ def process_charmap(flines, outfile):
         while l < len(flines):
                 w = flines[l].split(";")
 
-                # Getting UTF8 of Unicode characters
-                unihex = unichr(int(w[0],16)).encode("UTF-8")
-                hexword = convert_to_hex(unihex)
+                # Getting UTF8 of Unicode characters.
+                # In Python3, .encode('UTF-8') does not work for
+                # surrogates. Therefore, we use this conversion table
+                surrogates = {
+                        'D800': '/xed/xa0/x80',
+                        'DB7F': '/xed/xad/xbf',
+                        'DB80': '/xed/xae/x80',
+                        'DBFF': '/xed/xaf/xbf',
+                        'DC00': '/xed/xb0/x80',
+                        'DFFF': '/xed/xbf/xbf',
+                        }
+                if w[0] in surrogates:
+                        hexword = surrogates[w[0]]
+                else:
+                        unihex = chr(int(w[0],16)).encode("UTF-8")
+                        hexword = convert_to_hex(unihex)
 
                 ''' Some characters have <control> as a name, so using "Unicode 1.0 Name"
                     Characters U+0080, U+0081, U+0084 and U+0099 has "<control>" as a name and even no "Unicode 1.0 Name" (10th field) in UnicodeData.txt
@@ -117,7 +130,7 @@ def convert_to_hex(unihex):
         length_hex = len(unihex)
         hexword = ""
         for i in range(0, length_hex):
-              hexword =hexword + "/x" + ('%x' % ord(unihex[i]))
+              hexword =hexword + "/x" + ('%x' %unihex[i])
         return hexword
 
 def write_comments(outfile, flag):
@@ -194,7 +207,7 @@ def process_width(outfile, ulines, elines):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print  "USAGE: python utf8-gen.py UnicodeData.txt EastAsianWidth.txt"
+        print("USAGE: python utf8-gen.py UnicodeData.txt EastAsianWidth.txt")
     else:
         unidata_file = open(sys.argv[1])
         easta_file = open(sys.argv[2])
