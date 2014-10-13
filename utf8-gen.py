@@ -166,44 +166,36 @@ def write_comments(outfile, flag):
    4. Removing temporary files.
 '''
 def process_width(outfile, ulines, elines):
-        ftmp = open("temp", "w")
-        elist = []
+        width_dict = {}
         for l in ulines:
                 w = l.split(";")
                 if w[4]== "NSM" or w[2] == "Cf":
                         if len(w[0]) < 5:
-                                elist.append(str(int(w[0],16)) + "\t" + "<U"+w[0]+">\t\t\t0" + "\n")
+                                width_dict[int(w[0], 16)] = '<U'+w[0]+'>\t0'
                         else:
-                                elist.append(str(int(w[0],16)) + "\t" + "<U000"+w[0]+">\t\t\t0" + "\n")
-#                       print w[0]
+                                width_dict[int(w[0], 16)] = '<U000'+w[0]+'>\t0'
 
         for l in elines:
+                # If an entry in EastAsianWidth.txt is found, it overrides entries in
+                # UnicodeData.txt:
                 w = l.split(";")
-                if len(w[0])<6:
+                if not '..' in w[0]:
                         if len(w[0]) == 4:
-                                elist.append(str(int(w[0],16)) + "\t" + "<U"+w[0]+">\t\t\t2" + "\n")
+                                width_dict[int(w[0], 16)] = '<U'+w[0]+'>\t2'
                         else:
-                                elist.append(str(int(w[0],16)) + "\t" + "<U000"+w[0]+">\t\t\t2" + "\n")
+                                width_dict[int(w[0], 16)] = '<U000'+w[0]+'>\t2'
                 else:
                         wc = w[0].split("..")
+                        for key in range(int(wc[0], 16), int(wc[1], 16)+1):
+                                if  key in width_dict:
+                                        del width_dict[key]
                         if len(wc[0]) == 4:
-                                elist.append(str(int(wc[0],16)) + "\t" + "<U"+wc[0]+">..." + "<U"+wc[1]+">\t2\n" )
+                                width_dict[int(wc[0], 16)] = '<U'+wc[0]+'>...<U'+wc[1]+'>\t2'
                         else:
-                                elist.append(str(int(wc[0],16)) + "\t" + "<U000"+wc[0]+">..." + "<U000"+wc[1]+">\t2\n")
+                                width_dict[int(wc[0], 16)] = '<U000'+wc[0]+'>...<U000'+wc[1]+'>\t2'
 
-        for i in range(len(elist)):
-                ftmp.write(elist[i])
-        ftmp.close()
-        os.system("sort -n temp > sorted_temp")
-        #writing to UTF-8 file
-        ftmp = open("sorted_temp")
-        tlines = ftmp.readlines()
-        for l in tlines:
-                w = l.split()
-                outfile.write(w[1] + "\t" + w[2] + "\n")
-        os.system("rm temp sorted_temp")
-
-
+        for l in sorted(width_dict):
+                outfile.write(width_dict[l]+'\n')
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
