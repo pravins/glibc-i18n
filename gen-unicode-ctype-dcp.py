@@ -18,13 +18,13 @@
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
 
-# This script generates alpha, upper and lower ctype from 
-# DerivedCoreProperties.txt file of UCD and add it to "unicode" file generated 
+# This script generates alpha, upper and lower ctype from
+# DerivedCoreProperties.txt file of UCD and add it to "unicode" file generated
 # by gen-unicode-ctype.c
 # USAGE: python gen-unicode-ctype-dcp.py DerivedCoreProperties.txt
 
 import os
-import sys		
+import sys
 
 def process_dcp(dcp_file, outfile):
     ipfile = open(dcp_file)

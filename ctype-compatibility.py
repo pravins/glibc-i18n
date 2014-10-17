@@ -18,9 +18,9 @@
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
 
-# This script is useful for checking backward compatibility of newly 
+# This script is useful for checking backward compatibility of newly
 # generated LC_CTYPE file from gen-unicode-ctype.c and gen-unicode-ctype-dcp.py
-# USAGE: python check-backcompatibility.py existing_ctype_file new_ctype_file 
+# USAGE: python check-backcompatibility.py existing_ctype_file new_ctype_file
 # Existing LC_CTYPE file /usr/share/i18n/locale/i18n and new generated 'unicode-ctype'
 
 import os
@@ -32,7 +32,7 @@ class ctype:
             self.graph, self.printc, self.xdigit, self.blank, self.combining, self.combining3  \
             = [], [], [], [], [], [], [], [], [], [], [], [], []
 
-"""Captures Unicode values from character class and add 
+"""Captures Unicode values from character class and add
 to ctype struct
 """
 def extract_class_and_unichars(filename, struct_ctype):
@@ -87,7 +87,7 @@ def process_chars(line_no, list_name, flines):
 			break
 		if flines[x].split()[0] == "%":
 		    continue
-		
+
 		else:
 # Break line into Unicode value range
 		    l = flines[x].strip().split(";")
@@ -130,7 +130,7 @@ def process_chars(line_no, list_name, flines):
 		l = flines[x].strip().split(";")
 		if l[len(l)-1] != "/":
 			break
-		    
+
 # Compared values added in stuct
 def compare_list(old_list, new_list):
     for property, value in vars(old_list).iteritems():
@@ -172,7 +172,7 @@ def check_pairs(file_old, file_new):
         i = i + 1
 
 
-""" Split the i18n file line into Unicode pairs and check into 
+""" Split the i18n file line into Unicode pairs and check into
 unicode files
 """
 def process_pairs(line_no, flines, file_new, pair_name):
@@ -182,7 +182,6 @@ def process_pairs(line_no, flines, file_new, pair_name):
 			break
 		if flines[x].split()[0] == "%":
 		    continue
-		
 		else:
 # Break line into pairs, separated by ;
 		    l = flines[x].strip().split(";")
