@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -i*-
 # Copyright (C) 2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
@@ -44,7 +44,7 @@ def extract_class_and_unichars(filename, struct_ctype):
         w = l.split()
         if len(w) > 1:
             if l.split()[0] == "upper":
-#                print "found uppper", i
+#                print("found upper %s" %i)
                 process_chars(i+1, struct_ctype.upper, flines)
             if l.split()[0] == "lower":
                 process_chars(i+1, struct_ctype.lower, flines)
@@ -67,14 +67,14 @@ def extract_class_and_unichars(filename, struct_ctype):
             if l.split()[0] == "blank":
                 process_chars(i+1, struct_ctype.blank, flines)
             if l.split()[1] == "\"combining\";":
-#                print "combining"
+#                print("combining")
                 process_chars(i+1, struct_ctype.combining, flines)
             if l.split()[1] == "\"combining_level3\";":
-#                print "combining_level3"
+#                print("combining_level3")
                 process_chars(i+1, struct_ctype.combining3, flines)
 
         i = i+1
-#    print "alpha chars group", struct_ctype.alpha
+#    print("alpha chars group %s" %struct_ctype.alpha)
 
 
 """Breaks each line of i18n and unicode file into Unicode blocks
@@ -82,7 +82,7 @@ Separated by ";" and extract Unicode values and add into Struct
 """
 def process_chars(line_no, list_name, flines):
         for x in range(line_no, len(flines)):
-#               print x
+#               print(x)
                 if len(flines[x].split()) < 1:
                         break
                 if flines[x].split()[0] == "%":
@@ -97,30 +97,30 @@ def process_chars(line_no, list_name, flines):
                         list_lenght = len(l)
                     for i in range (0, list_lenght-1):
                          individual_word = l[i].split("..")
-#                        print  individual_word
+#                        print(individual_word)
 # For blocks of characters in  "<UXXXX>..<UXXXX>"
                          if  len(individual_word ) == 1:
-#                               print individual_word[0]
+#                               print(individual_word[0])
                                 uni_char = individual_word[0][2:len(individual_word[0])-1]
                                 hex_uni_char = hex(int(uni_char,16))
                                 list_name.append(hex_uni_char)
 # For blocks of characters in  "<UXXXX>..<UXXXX>"
                          if  len(individual_word ) == 2:
-#                               print individual_word
+#                               print(individual_word)
                                 uni_char1 = individual_word[0][2:len(individual_word[0])-1]
                                 uni_char2 = individual_word[1][2:len(individual_word[0])-1]
-#                               print int(uni_char1,16), hex(int(uni_char1,16))
+#                               print(int(uni_char1,16), hex(int(uni_char1,16)))
                                 count = 0
                                 for i in range (int(uni_char1,16), int(uni_char2,16)+1):
                                      list_name.append(hex(int(uni_char1,16)+count))
                                      count = count + 1
 # For blocks of characters in  "<UXXXX>..(2)..<UXXXX>"
                          if  len(individual_word ) == 3:
-#                               print individual_word
+#                               print(individual_word)
                                 uni_char1 = individual_word[0][2:len(individual_word[0])-1]
                                 uni_char2 = individual_word[2][2:len(individual_word[0])-1]
-#                               print int(uni_char1,16), hex(int(uni_char1,16))
-#                               print int(uni_char2,16), hex(int(uni_char2,16))
+#                               print(int(uni_char1,16), hex(int(uni_char1,16)))
+#                               print(int(uni_char2,16), hex(int(uni_char2,16)))
                                 count = 0
                                 for i in range (int(uni_char1,16), int(uni_char2,16)+1,2):
                                      list_name.append(hex(int(uni_char1,16)+count))
@@ -133,16 +133,16 @@ def process_chars(line_no, list_name, flines):
 
 # Compared values added in stuct
 def compare_list(old_list, new_list):
-    for property, value in sorted(vars(old_list).iteritems()):
-        exec("prop = %s %s" % ("new_list.",property))
-        print "%s: %d chars in old ctype and %d chars in new ctype" % (property, len(value), len(prop))
+    for property, value in sorted(vars(old_list).items()):
+        prop = eval("new_list.%s" %property)
+        print("%s: %d chars in old ctype and %d chars in new ctype" %(property, len(value), len(prop)))
         report(value, prop)
 
 # Report values to stdout
 def report(old_list, new_list):
    missing_chars = list(set(old_list)-set(old_list).intersection(set(new_list)))
-   print "Missing %d characters of old ctype in new ctype \n " % len(missing_chars), sorted(missing_chars)
-   print "\n****************************************************"
+   print("Missing %(number)d characters of old ctype in new ctype \n  %(list)s" %{'number': len(missing_chars), 'list': sorted(missing_chars)})
+   print("\n****************************************************")
 
 
 # This function compares TOLOWER, TOUPPER and TOTITLE pairs of i18n and unicode file
@@ -156,19 +156,19 @@ def check_pairs(file_old, file_new):
         if len(w) > 1:
             if l.split()[0] == "toupper":
                 pair_name = "toupper"
-                print "Processing for TOUPPER pair group"
+                print("Processing for TOUPPER pair group")
                 process_pairs(i+1, flines, file_new, pair_name)
-                print "Completed processing for TOUPPER pair group"
+                print("Completed processing for TOUPPER pair group")
             if l.split()[0] == "tolower":
                 pair_name = "tolower"
-                print "Processing for TOLOWER pair group"
+                print("Processing for TOLOWER pair group")
                 process_pairs(i+1, flines, file_new, pair_name)
-                print "Completed processing for TOLOWER pair group"
+                print("Completed processing for TOLOWER pair group")
             if l.split()[1] == "\"totitle\";":
                 pair_name = "totitle"
-                print "Processing for TOTITLE pair group"
+                print("Processing for TOTITLE pair group")
                 process_pairs(i+1, flines, file_new, pair_name)
-                print "Completed processing for TOTITLE pair group"
+                print("Completed processing for TOTITLE pair group")
         i = i + 1
 
 
@@ -191,7 +191,7 @@ def process_pairs(line_no, flines, file_new, pair_name):
                         list_lenght = len(l)
                     for i in range (0, list_lenght-1):
                         if l[i] not in f:
-                           print "%s not present in %s pair new ctype" % (l[i], pair_name)
+                           print("%s not present in %s pair new ctype" %(l[i], pair_name))
 # Groups are not separated by line in unicode file
                 l = flines[x].strip().split(";")
                 if l[len(l)-1] != "/":
@@ -200,7 +200,7 @@ def process_pairs(line_no, flines, file_new, pair_name):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print  "USAGE: python check_backcompatibility existing_ctype_file new_ctype_file "
+        print ("USAGE: python check_backcompatibility existing_ctype_file new_ctype_file")
     else:
         file_i18n = sys.argv[1]
         file_unicode = sys.argv[2]
