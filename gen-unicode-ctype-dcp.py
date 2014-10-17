@@ -32,22 +32,22 @@ def process_dcp(dcp_file, outfile):
     linecount = len(flines)
     i = 0
     for l in flines:
-	w = l.split()
-	if len(w) > 3:
-	    if (l.split()[3] == "Uppercase") and (l.split()[2] == "Property:"):
+        w = l.split()
+        if len(w) > 3:
+            if (l.split()[3] == "Uppercase") and (l.split()[2] == "Property:"):
 #               print "uppercase @ ", i
-	       outfile.write("upper \\\n")
-	       write_class(i+3, outfile, flines)
+               outfile.write("upper \\\n")
+               write_class(i+3, outfile, flines)
 
-	    if (l.split()[3] == "Lowercase") and (l.split()[2] == "Property:"):
+            if (l.split()[3] == "Lowercase") and (l.split()[2] == "Property:"):
 #               print "lowercase @ ", i
-	       outfile.write("lower \\\n")
-	       write_class(i+3, outfile, flines)
+               outfile.write("lower \\\n")
+               write_class(i+3, outfile, flines)
 
-	    if (l.split()[3] == "Alphabetic") and (l.split()[2] == "Property:"):
+            if (l.split()[3] == "Alphabetic") and (l.split()[2] == "Property:"):
 #               print "alphabetic @ ", i
-	       outfile.write("alpha \\\n")
-	       write_class(i+3, outfile, flines)
+               outfile.write("alpha \\\n")
+               write_class(i+3, outfile, flines)
         i = i+1
     ipfile.close()
 
@@ -57,20 +57,20 @@ def write_class(line_no, outfile, flines):
     for x in range(line_no, len(flines)):
 # next time counter to write "\n" to file
         if nline_count > 6:
-	    outfile.write("/\n    ")
+            outfile.write("/\n    ")
             nline_count = 0
         if len(flines[x].split()) < 1:
-	    continue
-	if flines[x].split()[1] == "Total":
+            continue
+        if flines[x].split()[1] == "Total":
 #         print x
-	    break
-	if len(flines[x].split()[0].split(".."))==1:
+            break
+        if len(flines[x].split()[0].split(".."))==1:
 #            print flines[x].split()[0].split("..")
-	    outfile.write( "<U"  + flines[x].split()[0].split("..")[0] + ">;")
+            outfile.write( "<U"  + flines[x].split()[0].split("..")[0] + ">;")
             nline_count = nline_count + 1
-	else:
+        else:
 #         print flines[x].split()[0].split("..")
-	    outfile.write( "<U"  + flines[x].split()[0].split("..")[0] + ">..<U" + flines[x].split()[0].split("..")[1] + ">;")
+            outfile.write( "<U"  + flines[x].split()[0].split("..")[0] + ">..<U" + flines[x].split()[0].split("..")[1] + ">;")
             if len(flines[x].split()[0].split("..")[0]) > 4:
                 nline_count = nline_count + 3
             else:
@@ -84,15 +84,15 @@ if __name__ == "__main__":
         dcp_file = sys.argv[1]
         outfile=open("unicode-ctype","w")
         unicode_file=open("unicode")
-	flines = unicode_file.readlines()
-	i = 0
-	for l in flines:
-		outfile.write(l)
-		i = i+1
-		if l == "LC_CTYPE\n":
-		   break
-	process_dcp(dcp_file, outfile)
-       	for x in range(i,len(flines)):
-		outfile.write(flines[x])
+        flines = unicode_file.readlines()
+        i = 0
+        for l in flines:
+                outfile.write(l)
+                i = i+1
+                if l == "LC_CTYPE\n":
+                   break
+        process_dcp(dcp_file, outfile)
+                for x in range(i,len(flines)):
+                outfile.write(flines[x])
         outfile.close()
         unicode_file.close()
