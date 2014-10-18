@@ -133,7 +133,7 @@ def process_chars(line_no, list_name, flines):
 
 # Compared values added in stuct
 def compare_list(old_list, new_list):
-    for property, value in vars(old_list).iteritems():
+    for property, value in sorted(vars(old_list).iteritems()):
         exec("prop = %s %s" % ("new_list.",property))
         print "%s: %d chars in old ctype and %d chars in new ctype" % (property, len(value), len(prop))
         report(value, prop)
