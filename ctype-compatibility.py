@@ -20,7 +20,7 @@
 
 # This script is useful for checking backward compatibility of newly
 # generated LC_CTYPE file from gen-unicode-ctype.c and gen-unicode-ctype-dcp.py
-# USAGE: python check-backcompatibility.py existing_ctype_file new_ctype_file
+# USAGE: python ctype-compatibility.py existing_ctype_file new_ctype_file
 # Existing LC_CTYPE file /usr/share/i18n/locale/i18n and new generated 'unicode-ctype'
 
 import os
@@ -200,7 +200,7 @@ def process_pairs(line_no, flines, file_new, pair_name):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print ("USAGE: python check_backcompatibility existing_ctype_file new_ctype_file")
+        print ("USAGE: python3 ctype-compatibility.py existing_ctype_file new_ctype_file")
     else:
         file_i18n = sys.argv[1]
         file_unicode = sys.argv[2]
