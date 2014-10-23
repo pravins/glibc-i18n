@@ -36,17 +36,17 @@ def process_dcp(dcp_file, outfile):
         if len(w) > 3:
             if (l.split()[3] == "Uppercase") and (l.split()[2] == "Property:"):
 #               print("uppercase @ ", i)
-               outfile.write("upper \\\n")
+               outfile.write("upper /\n")
                write_class(i+3, outfile, flines)
 
             if (l.split()[3] == "Lowercase") and (l.split()[2] == "Property:"):
 #               print("lowercase @ ", i)
-               outfile.write("lower \\\n")
+               outfile.write("lower /\n")
                write_class(i+3, outfile, flines)
 
             if (l.split()[3] == "Alphabetic") and (l.split()[2] == "Property:"):
 #               print("alphabetic @ ", i)
-               outfile.write("alpha \\\n")
+               outfile.write("alpha /\n")
                write_class(i+3, outfile, flines)
         i = i+1
     ipfile.close()
