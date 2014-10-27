@@ -26,6 +26,7 @@
 import os
 import sys
 import re
+import unicodedata
 
 def get_lines_from_file(filename):
     '''Get all non-comment lines from a file
@@ -144,16 +145,42 @@ def compare_lists(old_ctype_dict, new_ctype_dict):
             char_class,
             len(old_ctype_dict[char_class]),
             len(new_ctype_dict[char_class])))
-        report(old_ctype_dict[char_class],
+        report(char_class,
+               old_ctype_dict[char_class],
                new_ctype_dict[char_class])
 
-# Report values to stdout
-def report(old_list, new_list):
+def report_code_points(char_class, code_point_list, text=''):
+   for code_point in sorted(code_point_list):
+       if type(code_point) == type(''):
+           print('%(char_class)s: %(text)s: %(char)s %(code_point)s %(name)s' %{
+               'text': text,
+               'char': chr(int(code_point, 16)),
+               'char_class': char_class,
+               'code_point': code_point,
+               'name': unicodedata.name(chr(int(code_point, 16)), 'name unknown')})
+       else:
+           print('%(char_class)s: %(text)s: %(char0)s → %(char1)s %(code_point0)s → %(code_point1)s %(name0)s → %(name1)s' %{
+               'text': text,
+               'char_class': char_class,
+               'char0': chr(int(code_point[0], 16)),
+               'code_point0': code_point[0],
+               'name0': unicodedata.name(chr(int(code_point[0], 16)), 'name unknown'),
+               'char1': chr(int(code_point[1], 16)),
+               'code_point1': code_point[1],
+               'name1': unicodedata.name(chr(int(code_point[1], 16)), 'name unknown')
+           })
+
+def report(char_class, old_list, new_list):
+   print("****************************************************")
    missing_chars = list(set(old_list)-set(new_list))
-   print("Missing %(number)d characters of old ctype in new ctype " %{
-       'number': len(missing_chars)})
-   print('  %(list)s' %{'list': sorted(missing_chars)})
-   print("\n****************************************************")
+   print("%(char_class)s: Missing %(number)d characters of old ctype in new ctype " %{
+       'char_class': char_class, 'number': len(missing_chars)})
+   report_code_points(char_class, missing_chars, 'Missing')
+   added_chars = list(set(new_list)-set(old_list))
+   print("%(char_class)s: Added %(number)d characters in new ctype which were not in old ctype" %{
+       'char_class': char_class, 'number': len(added_chars)})
+   report_code_points(char_class, added_chars, 'Added')
+   print("----------------------------------------------------")
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
