@@ -101,7 +101,7 @@ def process_chars(char_class_list, code_point_line):
         match = re.match(r'^<U(?P<codepoint>[0-9A-F]{4,8})>$', code_points)
         if match: # <UXXXX>
             char_class_list.append(
-                hex(int(match.group('codepoint'), 16)))
+                int(match.group('codepoint'), 16))
             continue
         match = re.match(
             r'^<U(?P<codepoint1>[0-9A-F]{4,8})>'
@@ -112,7 +112,7 @@ def process_chars(char_class_list, code_point_line):
             for codepoint in range(
                     int(match.group('codepoint1'), 16),
                     int(match.group('codepoint2'), 16) + 1):
-                char_class_list.append(hex(codepoint))
+                char_class_list.append(codepoint)
             continue
         match = re.match(
             r'^<U(?P<codepoint1>[0-9A-F]{4,8})>'
@@ -124,7 +124,7 @@ def process_chars(char_class_list, code_point_line):
                     int(match.group('codepoint1'), 16),
                     int(match.group('codepoint2'), 16) + 1,
                     2):
-                char_class_list.append(hex(codepoint))
+                char_class_list.append(codepoint)
             continue
         match = re.match(
             r'^\('
@@ -135,8 +135,8 @@ def process_chars(char_class_list, code_point_line):
             code_points)
         if match: # (<UXXXX>,<UXXXX>)
             char_class_list.append((
-                (hex(int(match.group('codepoint1'), 16))),
-                (hex(int(match.group('codepoint2'), 16)))))
+                int(match.group('codepoint1'), 16),
+                int(match.group('codepoint2'), 16)))
             continue
 
 def compare_lists(old_ctype_dict, new_ctype_dict):
@@ -151,23 +151,23 @@ def compare_lists(old_ctype_dict, new_ctype_dict):
 
 def report_code_points(char_class, code_point_list, text=''):
    for code_point in sorted(code_point_list):
-       if type(code_point) == type(''):
+       if type(code_point) == type(int()):
            print('%(char_class)s: %(text)s: %(char)s %(code_point)s %(name)s' %{
                'text': text,
-               'char': chr(int(code_point, 16)),
+               'char': chr(code_point),
                'char_class': char_class,
-               'code_point': code_point,
-               'name': unicodedata.name(chr(int(code_point, 16)), 'name unknown')})
+               'code_point': hex(code_point),
+               'name': unicodedata.name(chr(code_point), 'name unknown')})
        else:
            print('%(char_class)s: %(text)s: %(char0)s → %(char1)s %(code_point0)s → %(code_point1)s %(name0)s → %(name1)s' %{
                'text': text,
                'char_class': char_class,
-               'char0': chr(int(code_point[0], 16)),
-               'code_point0': code_point[0],
-               'name0': unicodedata.name(chr(int(code_point[0], 16)), 'name unknown'),
-               'char1': chr(int(code_point[1], 16)),
-               'code_point1': code_point[1],
-               'name1': unicodedata.name(chr(int(code_point[1], 16)), 'name unknown')
+               'char0': chr(code_point[0]),
+               'code_point0': hex(code_point[0]),
+               'name0': unicodedata.name(chr(code_point[0]), 'name unknown'),
+               'char1': chr(code_point[1]),
+               'code_point1': hex(code_point[1]),
+               'name1': unicodedata.name(chr(code_point[1]), 'name unknown')
            })
 
 def report(char_class, old_list, new_list):
