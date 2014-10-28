@@ -27,6 +27,7 @@ import os
 import sys
 import re
 import unicodedata
+import argparse
 
 def get_lines_from_file(filename):
     '''Get all non-comment lines from a file
@@ -183,11 +184,22 @@ def report(char_class, old_list, new_list):
    print("----------------------------------------------------")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print ("USAGE: python3 ctype-compatibility.py existing_ctype_file new_ctype_file")
-    else:
-        file_i18n = sys.argv[1]
-        file_unicode = sys.argv[2]
-        old_ctype_dict = extract_character_classes_and_code_points(file_i18n)
-        new_ctype_dict = extract_character_classes_and_code_points(file_unicode)
-        compare_lists(old_ctype_dict, new_ctype_dict)
+    parser = argparse.ArgumentParser(
+        description='Check compatibility of ctype file.')
+    parser.add_argument('-o', '--old_ctype_file',
+                        nargs='?',
+                        type=str,
+                        default='i18n',
+                        help='The old ctype file, default: %(default)s')
+    parser.add_argument('-n', '--new_ctype_file',
+                        nargs='?',
+                        type=str,
+                        default='unicode-ctype',
+                        help='The new ctype file, default: %(default)s')
+    args = parser.parse_args()
+
+    file_i18n = args.old_ctype_file
+    file_unicode = args.new_ctype_file
+    old_ctype_dict = extract_character_classes_and_code_points(file_i18n)
+    new_ctype_dict = extract_character_classes_and_code_points(file_unicode)
+    compare_lists(old_ctype_dict, new_ctype_dict)
