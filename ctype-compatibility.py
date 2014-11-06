@@ -543,7 +543,7 @@ def tests(ctype_dict):
     cpcheck(ctype_dict2,
             [(0x0940, 0x094C)],
             [('combining', True), ('combining_level3', True), ('alpha', True), ('lower', False), ('upper', False), ('tolower', False), ('toupper', False), ('totitle', False)],
-            '''These have are allcombining
+            '''These are all combining
             characters (“Mc” or “Mn” both in UnicodeData.txt 5.0.0 and 7.0.0).
             According to DerivedCoreProperties.txt (7.0.0) these are
             “Alphabetic”.'''
