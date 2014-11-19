@@ -22,7 +22,11 @@
 # This script is useful for checking backward compatibility of newly
 # generated UTF-8 file from utf8-gen.py script
 # USAGE: python utf8-compatibility.py existing_utf8_file new_utf8_file
+
 import sys
+import argparse
+
+global args
 
 def create_charmap_dictionary(lines):
     charmap_dictionary = {}
@@ -78,14 +82,32 @@ def check_width(olines, nlines):
         print("0x%04x : %d" %(key, mwidth[key]))
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("USAGE: python utf8-compatibility existing_utf8_file new_utf8_file ")
-    else:
-        # o_ for Original UTF-8 and n_ for New UTF-8 file
-        o_lines = open(sys.argv[1]).readlines()
-        n_lines = open(sys.argv[2]).readlines()
-        print("Report on CHARMAP:")
-        check_charmap(o_lines, n_lines)
-        print("************************************************************\n")
-        print("Report on WIDTH:")
-        check_width(o_lines, n_lines)
+    parser = argparse.ArgumentParser(
+        description='Compare the contents of LC_CTYPE in two files and check for errors.')
+    parser.add_argument('-o', '--old_utf8_file',
+                        nargs='?',
+                        required=True,
+                        type=str,
+                        help='The old UTF-8 file.')
+    parser.add_argument('-n', '--new_utf8_file',
+                        nargs='?',
+                        required=True,
+                        type=str,
+                        help='The new UTF-8 file.')
+    parser.add_argument('-a', '--show_added_characters',
+                        action='store_true',
+                        help='Show characters which were added in detail.')
+    parser.add_argument('-m', '--show_missing_characters',
+                        action='store_true',
+                        help='Show characters which were removed in detail.')
+    global args
+    args = parser.parse_args()
+
+    # o_ for Original UTF-8 and n_ for New UTF-8 file
+    o_lines = open(args.old_utf8_file).readlines()
+    n_lines = open(args.new_utf8_file).readlines()
+    print("Report on CHARMAP:")
+    check_charmap(o_lines, n_lines)
+    print("************************************************************\n")
+    print("Report on WIDTH:")
+    check_width(o_lines, n_lines)
