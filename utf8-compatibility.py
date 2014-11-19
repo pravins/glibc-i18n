@@ -21,7 +21,7 @@
 
 # This script is useful for checking backward compatibility of newly
 # generated UTF-8 file from utf8-gen.py script
-# USAGE: python utf-compatibility.py existing_utf8_file new_utf8_file
+# USAGE: python utf8-compatibility.py existing_utf8_file new_utf8_file
 import sys
 
 def check_charmap(original, new):
@@ -102,7 +102,7 @@ def check_width(olines, nlines):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("USAGE: python check_backcompatibility existing_ctype_file new_ctype_file ")
+        print("USAGE: python utf8-compatibility existing_utf8_file new_utf8_file ")
     else:
         # o_ for Original UTF-8 and n_ for New UTF-8 file
         o_utf8 = open(sys.argv[1])
