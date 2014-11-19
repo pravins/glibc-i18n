@@ -39,13 +39,11 @@ def check_charmap(original, new):
         for l in original:
                 w = l.split()
                 if len(w) > 0:
-#                       print w[0]
                         if w[0] == "CHARMAP":
                                 for x in range(i+1, len(original)):
                                         w = original[x].split()
                                         if w[0] == "END":
                                                 break
-#                                       print w[0]
                                         try:
                                                 if ncharmap[w[0]] != w[1]:
                                                         print("This character might be missing in generated charmap: ", w[0])
@@ -61,7 +59,6 @@ def create_dict(name, lines, i):
                 if w[0] == "END":
                         break
                 name[w[0]] = w[1]
-#       print name
 
 
 def process_chars(line_no, lines, dictionary):
@@ -72,30 +69,23 @@ def process_chars(line_no, lines, dictionary):
                 if w[0].find("...")==-1:
                         uni_char = w[0][2:len(w[0])-1]
                         hex_uni_char = hex(int(uni_char,16))
-#                       print hex_uni_char, w[1]
                         dictionary[hex_uni_char]= w[1]
                 else:
                         wc = w[0].split("...")
-#                       print wc
                         uni_char1 = wc[0][2:len(wc[0])-1]
                         hex_uni_char1 = hex(int(uni_char1,16))
                         uni_char2 = wc[1][2:len(wc[0])-1]
                         hex_uni_char2 = hex(int(uni_char2,16))
-#                       print hex_uni_char1, hex_uni_char2
                         count = 0
                         for i in range (int(uni_char1,16), int(uni_char2,16)+1):
                                 dictionary[hex(int(uni_char1,16)+count)] = w[1]
                                 count = count +1
-
-#       print dictionary
-
 
 def extract_univalue_and_width(lines, dictionary):
         i = 0
         for l in lines:
                 w = l.split()
                 if len(w) > 0:
-#                       print w[0]
                         if w[0] == "WIDTH":
                                 process_chars(i+1, lines, dictionary)
                                 break
