@@ -62,17 +62,12 @@ def create_width_dictionary(lines):
         if w[0] == 'END':
             return width_dictionary
         if not '...' in w[0]:
-            uni_char = w[0][2:len(w[0])-1]
-            hex_uni_char = hex(int(uni_char,16))
-            width_dictionary[hex_uni_char]= w[1]
+            width_dictionary[int(w[0][2:len(w[0])-1], 16)] = int(w[1])
         else:
             wc = w[0].split("...")
-            uni_char1 = wc[0][2:len(wc[0])-1]
-            hex_uni_char1 = hex(int(uni_char1,16))
-            uni_char2 = wc[1][2:len(wc[0])-1]
-            hex_uni_char2 = hex(int(uni_char2,16))
-            for i in range (int(uni_char1,16), int(uni_char2,16)+1):
-                width_dictionary[hex(i)] = w[1]
+            for i in range(int(wc[0][2:len(wc[0])-1], 16),
+                           int(wc[1][2:len(wc[0])-1], 16) + 1):
+                width_dictionary[i] = int(w[1])
 
 def check_width(olines, nlines):
     owidth = create_width_dictionary(olines)
@@ -80,7 +75,7 @@ def check_width(olines, nlines):
     mwidth = dict(set(owidth.items()) - set(owidth.items()).intersection(nwidth.items()))
     print("Total missing characters in newly generated WIDTH: ", len(mwidth))
     for key, value in sorted(mwidth.items()):
-        print("{} : {}".format(key, value))
+        print("0x%04x : %d" %(key, value))
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
