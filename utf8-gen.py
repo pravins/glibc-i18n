@@ -130,7 +130,7 @@ def convert_to_hex(unihex):
         length_hex = len(unihex)
         hexword = ""
         for i in range(0, length_hex):
-              hexword =hexword + "/x" + ('%x' %unihex[i])
+              hexword =hexword + "/x" + ('%02x' %unihex[i])
         return hexword
 
 def write_comments(outfile, flag):
