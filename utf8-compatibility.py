@@ -72,10 +72,10 @@ def create_width_dictionary(lines):
 def check_width(olines, nlines):
     owidth = create_width_dictionary(olines)
     nwidth = create_width_dictionary(nlines)
-    mwidth = dict(set(owidth.items()) - set(owidth.items()).intersection(nwidth.items()))
+    mwidth = dict(set(owidth.items()) - set(nwidth.items()))
     print("Total missing characters in newly generated WIDTH: ", len(mwidth))
-    for key, value in sorted(mwidth.items()):
-        print("0x%04x : %d" %(key, value))
+    for key in sorted(mwidth):
+        print("0x%04x : %d" %(key, mwidth[key]))
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
