@@ -24,77 +24,59 @@
 # USAGE: python utf8-compatibility.py existing_utf8_file new_utf8_file
 import sys
 
+def create_charmap_dictionary(lines):
+    charmap_dictionary = {}
+    start = False
+    for l in lines:
+        w = l.split()
+        if len(w) > 0 and w[0] == 'CHARMAP':
+            start = True
+            continue
+        if start == False:
+            continue
+        if w[0] == "END":
+            return charmap_dictionary
+        charmap_dictionary[w[0]] = w[1]
+
 def check_charmap(original, new):
-    ocharmap = {}
-    ncharmap = {}
-    i = 0
-    for l in new:
+    ocharmap = create_charmap_dictionary(original)
+    ncharmap = create_charmap_dictionary(new)
+    for key in ocharmap:
+        if key in ncharmap:
+            if ncharmap[key] != ocharmap[key]:
+                print('This character might be missing in the generated charmap: ', key)
+        else:
+            if key !='%':
+                print('This character might be missing in the generated charmap: ', key)
+
+def create_width_dictionary(lines):
+    width_dictionary = {}
+    start = False
+    for l in lines:
         w = l.split()
-        if len(w) > 0:
-            if w[0] == "CHARMAP":
-                create_dict(ncharmap, new, i+1)
-                break
-        i = i + 1
-
-    i = 0
-    for l in original:
-        w = l.split()
-        if len(w) > 0:
-            if w[0] == "CHARMAP":
-                for x in range(i+1, len(original)):
-                    w = original[x].split()
-                    if w[0] == "END":
-                        break
-                    try:
-                        if ncharmap[w[0]] != w[1]:
-                            print("This character might be missing in generated charmap: ", w[0])
-                    except KeyError:
-                        if  w[0] !='%':
-                            print("This character might be missing in new generated charmap: ", w[0])
-        i = i + 1
-
-def create_dict(name, lines, i):
-    for x in range(i, len(lines)):
-        w = lines[x].split()
-        if w[0] == "END":
-            break
-        name[w[0]] = w[1]
-
-def process_chars(line_no, lines, dictionary):
-    for x in range(line_no, len(lines)):
-        w = lines[x].split()
-        if w[0] == "END":
-            break
-        if w[0].find("...")==-1:
+        if len(w) > 0 and w[0] == 'WIDTH':
+            start = True
+            continue
+        if start == False:
+            continue
+        if w[0] == 'END':
+            return width_dictionary
+        if not '...' in w[0]:
             uni_char = w[0][2:len(w[0])-1]
             hex_uni_char = hex(int(uni_char,16))
-            dictionary[hex_uni_char]= w[1]
+            width_dictionary[hex_uni_char]= w[1]
         else:
             wc = w[0].split("...")
             uni_char1 = wc[0][2:len(wc[0])-1]
             hex_uni_char1 = hex(int(uni_char1,16))
             uni_char2 = wc[1][2:len(wc[0])-1]
             hex_uni_char2 = hex(int(uni_char2,16))
-            count = 0
             for i in range (int(uni_char1,16), int(uni_char2,16)+1):
-                dictionary[hex(int(uni_char1,16)+count)] = w[1]
-                count = count +1
-
-def extract_univalue_and_width(lines, dictionary):
-    i = 0
-    for l in lines:
-        w = l.split()
-        if len(w) > 0:
-            if w[0] == "WIDTH":
-                process_chars(i+1, lines, dictionary)
-                break
-        i = i + 1
+                width_dictionary[hex(i)] = w[1]
 
 def check_width(olines, nlines):
-    owidth = {}
-    nwidth = {}
-    extract_univalue_and_width(olines, owidth)
-    extract_univalue_and_width(nlines, nwidth)
+    owidth = create_width_dictionary(olines)
+    nwidth = create_width_dictionary(nlines)
     mwidth = dict(set(owidth.items()) - set(owidth.items()).intersection(nwidth.items()))
     print("Total missing characters in newly generated WIDTH: ", len(mwidth))
     for key, value in sorted(mwidth.items()):
@@ -105,10 +87,8 @@ if __name__ == "__main__":
         print("USAGE: python utf8-compatibility existing_utf8_file new_utf8_file ")
     else:
         # o_ for Original UTF-8 and n_ for New UTF-8 file
-        o_utf8 = open(sys.argv[1])
-        n_utf8 = open(sys.argv[2])
-        o_lines = o_utf8.readlines()
-        n_lines = n_utf8.readlines()
+        o_lines = open(sys.argv[1]).readlines()
+        n_lines = open(sys.argv[2]).readlines()
         print("Report on CHARMAP:")
         check_charmap(o_lines, n_lines)
         print("************************************************************\n")
