@@ -74,12 +74,19 @@ def create_width_dictionary(lines):
                 width_dictionary[i] = int(w[1])
 
 def check_width(olines, nlines):
+    global args
     owidth = create_width_dictionary(olines)
     nwidth = create_width_dictionary(nlines)
     mwidth = dict(set(owidth.items()) - set(nwidth.items()))
     print("Total missing characters in newly generated WIDTH: ", len(mwidth))
-    for key in sorted(mwidth):
-        print("0x%04x : %d" %(key, mwidth[key]))
+    if args.show_missing_characters:
+        for key in sorted(mwidth):
+            print("0x%04x : %d" %(key, mwidth[key]))
+    awidth = dict(set(nwidth.items()) - set(owidth.items()))
+    print("Total added characters in newly generated WIDTH: ", len(awidth))
+    if args.show_added_characters:
+        for key in sorted(awidth):
+            print("0x%04x : %d" %(key, awidth[key]))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
