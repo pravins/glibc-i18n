@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# -*- coding: UTF-8 -i*-
+# -*- coding: utf-8 -*-
 # Copyright (C) 2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 # Contributed by
