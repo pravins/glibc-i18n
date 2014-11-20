@@ -148,6 +148,28 @@ def check_width(olines, nlines):
     global args
     owidth = create_width_dictionary(olines)
     nwidth = create_width_dictionary(nlines)
+    changed_width = {}
+    for key in owidth:
+        if key in nwidth and owidth[key] != nwidth[key]:
+            changed_width[key] = (owidth[key], nwidth[key])
+    for key in owidth:
+        if key not in nwidth:
+            changed_width[key] = (owidth[key], 1)
+    for key in nwidth:
+        if key not in owidth:
+            changed_width[key] = (1, nwidth[key])
+    print("Total changed characters in newly generated WIDTH: ", len(changed_width))
+    if args.show_changed_characters:
+        for key in sorted(changed_width):
+            print('changed width: 0x%04x : %d->%d eaw=%s category=%2s bidi=%-3s name=%s'
+                  %(key,
+                    changed_width[key][0],
+                    changed_width[key][1],
+                    east_asian_widths[key] if key in east_asian_widths else None,
+                    unicode_attributes[key]['category'] if key in unicode_attributes else None,
+                    unicode_attributes[key]['bidi'] if key in unicode_attributes else None,
+                    unicode_attributes[key]['name'] if key in unicode_attributes else None,
+            ))
     mwidth = dict(set(owidth.items()) - set(nwidth.items()))
     print("Total missing characters in newly generated WIDTH: ", len(mwidth))
     if args.show_missing_characters:
@@ -200,6 +222,9 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--show_missing_characters',
                         action='store_true',
                         help='Show characters which were removed in detail.')
+    parser.add_argument('-c', '--show_changed_characters',
+                        action='store_true',
+                        help='Show characters whose width was changed in detail.')
     global args
     args = parser.parse_args()
 
