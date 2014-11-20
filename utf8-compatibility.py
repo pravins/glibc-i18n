@@ -24,9 +24,80 @@
 # USAGE: python utf8-compatibility.py existing_utf8_file new_utf8_file
 
 import sys
+import re
 import argparse
 
 global args
+
+unicode_attributes = {}
+east_asian_widths = {}
+
+def fill_attribute(code_point, fields):
+    unicode_attributes[code_point] =  {
+        'name': fields[1],
+        'category': fields[2],
+        'combining': fields[3],
+        'bidi': fields[4],
+        'decomposition': fields[5],
+        'decdigit': fields[6],
+        'digit': fields[7],
+        'numeric': fields[8],
+        'mirrored': fields[9],
+        'oldname': fields[10],
+        'comment': fields[11],
+        'upper': int(fields[12], 16) if fields[12] else None,
+        'lower': int(fields[13], 16) if fields[13] else None,
+        'title': int(fields[14], 16) if fields[14] else None,
+    }
+
+def fill_attributes(filename):
+    with open(filename, mode='r') as file:
+        lines = file.readlines()
+        for lineno in range(0, len(lines)):
+            fields = lines[lineno].strip().split(';')
+            if len(fields) != 15:
+                sys.stderr.write(
+                    'short line in file "%(f)s": %(l)s\n' %{
+                    'f': filename, 'l': lines[lineno]})
+                exit(1)
+            if fields[2] == 'Cs':
+                # Surrogates are UTF-16 artefacts,
+                # not real characters. Ignore them.
+                continue
+            if fields[1].endswith(', Last>'):
+                continue
+            if fields[1].endswith(', First>'):
+                fields[1] = fields[1].split(',')[0][1:]
+                fields_end = lines[lineno+1].split(';')
+                if (not fields_end[1].endswith(', Last>')
+                    or len(fields_end) != 15):
+                    sys.stderr.write(
+                        'missing end range in file "%(f)s": %(l)s\n' %{
+                        'f': filename, 'l': lines[lineno+1]})
+                for code_point in range(
+                        int(fields[0], 16),
+                        int(fields_end[0], 16)+1):
+                    fill_attribute(code_point, fields)
+            fill_attribute(int(fields[0], 16), fields)
+
+def fill_east_asian_widths(filename):
+    with open(filename, mode='r') as file:
+        for line in file:
+            match = re.match(
+                r'^(?P<codepoint>[0-9A-F]{4,6})\s*;\s*(?P<property>[a-zA-Z]+)',
+                line)
+            if match:
+                east_asian_widths[
+                        int(match.group('codepoint'), 16)
+                ] = match.group('property')
+            match = re.match(
+                r'^(?P<codepoint1>[0-9A-F]{4,6})\.\.(?P<codepoint2>[0-9A-F]{4,6})\s*;\s*(?P<property>[a-zA-Z]+)',
+                line)
+            if match:
+                for code_point in range(
+                        int(match.group('codepoint1'), 16),
+                        int(match.group('codepoint2'), 16)+1):
+                    east_asian_widths[code_point] = match.group('property')
 
 def create_charmap_dictionary(lines):
     charmap_dictionary = {}
@@ -81,12 +152,26 @@ def check_width(olines, nlines):
     print("Total missing characters in newly generated WIDTH: ", len(mwidth))
     if args.show_missing_characters:
         for key in sorted(mwidth):
-            print("0x%04x : %d" %(key, mwidth[key]))
+            print('removed: 0x%04x : %d eaw=%s category=%2s bidi=%-3s name=%s'
+                  %(key,
+                    mwidth[key],
+                    east_asian_widths[key] if key in east_asian_widths else None,
+                    unicode_attributes[key]['category'] if key in unicode_attributes else None,
+                    unicode_attributes[key]['bidi'] if key in unicode_attributes else None,
+                    unicode_attributes[key]['name'] if key in unicode_attributes else None,
+            ))
     awidth = dict(set(nwidth.items()) - set(owidth.items()))
     print("Total added characters in newly generated WIDTH: ", len(awidth))
     if args.show_added_characters:
         for key in sorted(awidth):
-            print("0x%04x : %d" %(key, awidth[key]))
+            print('added: 0x%04x : %d eaw=%s category=%2s bidi=%-3s name=%s'
+                  %(key,
+                    awidth[key],
+                    east_asian_widths[key] if key in east_asian_widths else None,
+                    unicode_attributes[key]['category'] if key in unicode_attributes else None,
+                    unicode_attributes[key]['bidi'] if key in unicode_attributes else None,
+                    unicode_attributes[key]['name'] if key in unicode_attributes else None,
+            ))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -101,6 +186,14 @@ if __name__ == "__main__":
                         required=True,
                         type=str,
                         help='The new UTF-8 file.')
+    parser.add_argument('-u', '--unicode_data_file',
+                        nargs='?',
+                        type=str,
+                        help='The UnicodeData.txt file to read.')
+    parser.add_argument('-e', '--east_asian_width_file',
+                        nargs='?',
+                        type=str,
+                        help='The EastAsianWidth.txt file to read.')
     parser.add_argument('-a', '--show_added_characters',
                         action='store_true',
                         help='Show characters which were added in detail.')
@@ -110,6 +203,10 @@ if __name__ == "__main__":
     global args
     args = parser.parse_args()
 
+    if args.unicode_data_file:
+        fill_attributes(args.unicode_data_file)
+    if args.east_asian_width_file:
+        fill_east_asian_widths(args.east_asian_width_file)
     # o_ for Original UTF-8 and n_ for New UTF-8 file
     o_lines = open(args.old_utf8_file).readlines()
     n_lines = open(args.new_utf8_file).readlines()
