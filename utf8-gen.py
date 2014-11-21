@@ -21,6 +21,7 @@
 # <http://www.gnu.org/licenses/>.
 # Usage: python3 utf8-gen.py UnicodeData.txt
 # It will output UTF-8 file
+# For issues upstream https://github.com/pravins/glibc-i18n
 
 import os,sys,re
 

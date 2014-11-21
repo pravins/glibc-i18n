@@ -22,6 +22,7 @@
 # This script is useful for checking backward compatibility of newly
 # generated UTF-8 file from utf8-gen.py script
 # USAGE: python3 utf8-compatibility.py -o ../glibc/localedata/charmaps/UTF-8 -n UTF-8  -m -a -u unicode7-0/UnicodeData.txt -e unicode7-0/EastAsianWidth.txt
+# For issues upstream https://github.com/pravins/glibc-i18n
 
 import sys
 import re
