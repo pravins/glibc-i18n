@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
-# Usage: python utf8-gen.py UnicodeData.txt
+# Usage: python3 utf8-gen.py UnicodeData.txt
 # It will output UTF-8 file
 
 import os,sys,re
