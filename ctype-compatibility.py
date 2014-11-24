@@ -73,6 +73,7 @@ def extract_character_classes_and_code_points(filename):
                 'lower',
                 'alpha',
                 'digit',
+                'outdigit',
                 'space',
                 'cntrl',
                 'punct',
@@ -145,6 +146,14 @@ def process_chars(char_class_list, code_point_line):
             continue
 
 def compare_lists(old_ctype_dict, new_ctype_dict):
+    print('****************************************************')
+    print('Character classes which are only in the new or only in the old file:')
+    for char_class in sorted(old_ctype_dict):
+        if char_class not in new_ctype_dict:
+            print('Character class %s is in old ctype but not in new ctype' %char_class)
+    for char_class in sorted(new_ctype_dict):
+        if char_class not in old_ctype_dict:
+            print('Character class %s is in new ctype but not in old ctype' %char_class)
     for char_class in sorted(old_ctype_dict):
         print("****************************************************")
         print("%s: %d chars in old ctype and %d chars in new ctype" %(
