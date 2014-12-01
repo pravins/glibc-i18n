@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
-# Usage: python3 utf8-gen.py UnicodeData.txt
+# Usage: python3 utf8-gen.py UnicodeData.txt EastAsianWidth.txt
 # It will output UTF-8 file
 # For issues upstream https://github.com/pravins/glibc-i18n
 
@@ -48,7 +48,7 @@ def process_range(start, end, outfile, name):
                 for i in range(int(start, 16), int(end, 16)+1 ):
                         unihex = chr(i).encode("UTF-8")
                         hexword = convert_to_hex(unihex)
-                        outfile.write("<U"+('%x' % i).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+                        outfile.write("<U"+('%x' % i).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
 
 
         else:
@@ -58,19 +58,19 @@ def process_range(start, end, outfile, name):
 
                         if i > (int(end, 16)-64):
                                 if len(start) == 4:
-                                        outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+                                        outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
                                 elif len(start) == 5:
-                                        outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+                                        outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
                                 else:
-                                        outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % int(end, 16)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+                                        outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
                                 break
 
                         if len(start) == 4:
-                                outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+                                outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
                         elif len(start) == 5:
-                                outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+                                outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
                         else:
-                                outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % (i+63)).upper()+">     " + hexword + "         " + name.split(",")[0] + ">" + "\n")
+                                outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
 ''' This function takes single like of UnicodeData.txt and write to UTF-8
     Unicode-Value  HEX  Unicode-Char-Name
     <U0010>     /x10         DATA LINK ESCAPE
@@ -107,9 +107,9 @@ def process_charmap(flines, outfile):
                 # Surrogates are disabled in UTF-8 file
                 if w[1].find("Surrogate,")!=-1:
                         if len(w[0]) == 4:
-                                outfile.write("%<U"+w[0]+">     " + hexword + "         " + w[1] + "\n")
+                                outfile.write("%<U"+w[0]+">     " + hexword + " " + w[1] + "\n")
                         else:
-                                outfile.write("%<U000"+w[0]+">     " + hexword + "         " + w[1] + "\n")
+                                outfile.write("%<U000"+w[0]+">     " + hexword + " " + w[1] + "\n")
                         l = l +1
                         continue
 
@@ -122,9 +122,9 @@ def process_charmap(flines, outfile):
                         continue
 
                 if len(w[0]) == 4:
-                    outfile.write("<U"+w[0]+">     " + hexword + "         " + w[1] + "\n")
+                    outfile.write("<U"+w[0]+">     " + hexword + " " + w[1] + "\n")
                 else:
-                    outfile.write("<U000"+w[0]+">     " + hexword + "         " + w[1] + "\n")
+                    outfile.write("<U000"+w[0]+">     " + hexword + " " + w[1] + "\n")
                 l = l +1
 
 ''' Function to convert Unicode characters to /x**/x**/x**  format.
@@ -202,7 +202,7 @@ def process_width(outfile, ulines, elines):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("USAGE: python utf8-gen.py UnicodeData.txt EastAsianWidth.txt")
+        print("USAGE: python3 utf8-gen.py UnicodeData.txt EastAsianWidth.txt")
     else:
         unidata_file = open(sys.argv[1])
         easta_file = open(sys.argv[2])
