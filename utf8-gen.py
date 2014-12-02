@@ -218,6 +218,8 @@ if __name__ == "__main__":
         write_comments(outfile, 1)
         elines = []
         for line in easta_file.readlines():
+                if re.match(r'.*<reserved-.+>\.\.<reserved-.+>.*', line):
+                        continue
                 if re.match(r'^[^;]*;[WF]', line):
                         elines.append(line.strip())
         process_width(outfile, flines, elines)
