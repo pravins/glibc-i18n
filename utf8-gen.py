@@ -218,6 +218,7 @@ if __name__ == "__main__":
         write_comments(outfile, 1)
         elines = []
         for line in easta_file.readlines():
+		# Reserved characters of EastAasianWidth do not appear in charmap and produce "Unknown Character" error.
                 if re.match(r'.*<reserved-.+>\.\.<reserved-.+>.*', line):
                         continue
                 if re.match(r'^[^;]*;[WF]', line):
