@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
-# Contributed by 
+# Contributed by
 # Pravin Satpute <psatpute AT redhat DOT com> and
 # Mike Fabian <mfabian At redhat DOT com> - 2014
 #
