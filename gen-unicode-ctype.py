@@ -125,6 +125,7 @@ def fill_attributes(filename):
                         int(fields[0], 16),
                         int(fields_end[0], 16)+1):
                     fill_attribute(code_point, fields)
+                continue
             fill_attribute(int(fields[0], 16), fields)
 
 def fill_derived_core_property(code_point, property):
