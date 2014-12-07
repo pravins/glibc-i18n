@@ -337,7 +337,10 @@ def output_charclass(file, class_name, is_class_function):
         if is_class_function(code_point):
             if (code_point_ranges
                 and code_point_ranges[-1][-1] == code_point - 1):
-                code_point_ranges[-1].append(code_point)
+                if len(code_point_ranges[-1]) == 1:
+                   code_point_ranges[-1].append(code_point)
+                else:
+                    code_point_ranges[-1][-1] = code_point
             else:
                 code_point_ranges.append([code_point])
     if code_point_ranges:
