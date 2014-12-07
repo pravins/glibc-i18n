@@ -371,13 +371,14 @@ def output_charmap(file, map_name, map_function):
     map_string = ''
     file.write('%s /\n' %map_name)
     for code_point in sorted(unicode_attributes):
-        if code_point != map_function(code_point):
+        mapped = map_function(code_point)
+        if code_point != mapped:
             if line.strip():
                 line += ';'
             map_string = '(' \
                          + ucs_symbol(code_point) \
                          + ',' \
-                         + ucs_symbol(map_function(code_point)) \
+                         + ucs_symbol(mapped) \
                          + ')'
             if len(line+map_string) > max_column:
                 file.write(line+'/\n')
