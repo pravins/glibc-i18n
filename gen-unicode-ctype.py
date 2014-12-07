@@ -99,34 +99,38 @@ def fill_attributes(filename):
     9FCC;<CJK Ideograph, Last>;Lo;0;L;;;;;N;;;;;
     '''
     with open(filename, mode='r') as file:
-        lines = file.readlines()
-        for lineno in range(0, len(lines)):
-            fields = lines[lineno].strip().split(';')
+        fields_start = []
+        for line in file:
+            fields = line.strip().split(';')
             if len(fields) != 15:
                 sys.stderr.write(
                     'short line in file "%(f)s": %(l)s\n' %{
-                    'f': filename, 'l': lines[lineno]})
+                    'f': filename, 'l': line})
                 exit(1)
             if fields[2] == 'Cs':
                 # Surrogates are UTF-16 artefacts,
                 # not real characters. Ignore them.
-                continue
-            if fields[1].endswith(', Last>'):
+                fields_start = []
                 continue
             if fields[1].endswith(', First>'):
+                fields_start = fields
+                fields_start[1] = fields_start[1].split(',')[0][1:]
+                continue
+            if fields[1].endswith(', Last>'):
                 fields[1] = fields[1].split(',')[0][1:]
-                fields_end = lines[lineno+1].split(';')
-                if (not fields_end[1].endswith(', Last>')
-                    or len(fields_end) != 15):
+                if fields[1:] != fields_start[1:]:
                     sys.stderr.write(
-                        'missing end range in file "%(f)s": %(l)s\n' %{
-                        'f': filename, 'l': lines[lineno+1]})
+                        'broken code point range in file "%(f)s": %(l)s\n' %{
+                            'f': filename, 'l': line})
+                    exit(1)
                 for code_point in range(
-                        int(fields[0], 16),
-                        int(fields_end[0], 16)+1):
+                        int(fields_start[0], 16),
+                        int(fields[0], 16)+1):
                     fill_attribute(code_point, fields)
+                fields_start = []
                 continue
             fill_attribute(int(fields[0], 16), fields)
+            fields_start = []
 
 def fill_derived_core_property(code_point, property):
     if code_point in derived_core_properties:
