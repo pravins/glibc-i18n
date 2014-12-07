@@ -57,9 +57,6 @@ unicode_attributes = {}
 # }
 derived_core_properties = {}
 
-i18n_file_head = ''
-i18n_file_tail = ''
-
 def fill_attribute(code_point, fields):
     '''Stores in unicode_attributes[code_point] the values from the fields.
 
@@ -489,36 +486,29 @@ def verifications():
                 'sym': ucs_symbol(code_point)})
 
 def read_input_file(filename):
-    global i18n_file_head
-    global i18n_file_tail
-    in_head = True
-    in_tail = False
+    head = tail = ''
     with open(filename, mode='r') as file:
         for line in file:
-            if in_head:
-                match = re.match(
-                    r'^(?P<key>date\s+)(?P<value>"[0-9]{4}-[0-9]{2}-[0-9]{2}")',
-                    line)
-                if match:
-                    line = match.group('key') + '"{:s}"\n'.format(time.strftime('%Y-%m-%d'))
-                match = re.match(r'^LC_CTYPE\s*', line)
-                if match:
-                    in_head = False
-                i18n_file_head = i18n_file_head + line
-                continue
-            if in_tail:
-                i18n_file_tail = i18n_file_tail + line
-                continue
-            match = re.match(r'^translit_start\s*', line)
+            match = re.match(
+                r'^(?P<key>date\s+)(?P<value>"[0-9]{4}-[0-9]{2}-[0-9]{2}")',
+                line)
             if match:
-                in_tail = True
-                i18n_file_tail = i18n_file_tail + line
-                continue
+                line = match.group('key') + '"{:s}"\n'.format(time.strftime('%Y-%m-%d'))
+            head = head + line
+            if line.startswith('LC_CTYPE'):
+                break
+        for line in file:
+            if line.startswith('translit_start'):
+                tail = line
+                break
+        for line in file:
+            tail = tail + line
+    return (head, tail)
 
-def output_tables(filename, unicode_version):
+def output_tables(filename, unicode_version, head='', tail=''):
     with open(filename, mode='w') as file:
-        if args.input_file:
-            file.write(i18n_file_head)
+        if args.input_file and head:
+            file.write(head)
         else:
             file.write('escape_char /\n')
             file.write('comment_char %\n')
@@ -615,8 +605,8 @@ def output_tables(filename, unicode_version):
         output_charclass(file, 'class "combining_level3";', is_combining_level3)
         file.write('\n')
 
-        if args.input_file:
-            file.write(i18n_file_tail)
+        if args.input_file and tail:
+            file.write(tail)
         else:
             file.write('END LC_CTYPE\n')
 
@@ -662,6 +652,7 @@ if __name__ == "__main__":
     fill_attributes(args.unicode_data_file)
     fill_derived_core_properties(args.derived_core_properties_file)
     verifications()
+    head = tail = ''
     if args.input_file:
-        read_input_file(args.input_file)
-    output_tables(args.output_file, args.unicode_version)
+        (head, tail) = read_input_file(args.input_file)
+    output_tables(args.output_file, args.unicode_version, head=head, tail=tail)
