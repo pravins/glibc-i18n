@@ -44,13 +44,11 @@ import os,sys,re
    ranges.  Add a WIDTH table.
 '''
 def process_range(start, end, outfile, name):
-    if name.find("Hangul Syllable")!=-1:
+    if 'Hangul Syllable' in name:
         for i in range(int(start, 16), int(end, 16)+1 ):
             unihex = chr(i).encode("UTF-8")
             hexword = convert_to_hex(unihex)
-            outfile.write("<U"+('%x' % i).upper()+">     " + hexword + " " + name + "\n")
-
-
+            outfile.write('<U%X' %i+'>     ' + hexword + ' ' + name + '\n')
     else:
         for i in range(int(start, 16), int(end, 16), 64 ):
             unihex = chr(i).encode("UTF-8")
@@ -58,19 +56,19 @@ def process_range(start, end, outfile, name):
 
             if i > (int(end, 16)-64):
                 if len(start) == 4:
-                    outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name + "\n")
+                    outfile.write('<U%X' %i+'>..<U%X' %int(end, 16)+'>     ' + hexword + ' ' + name + '\n')
                 elif len(start) == 5:
-                    outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name + "\n")
+                    outfile.write('<U000%X' %i+'>..<U000%X' %int(end, 16)+'>     ' + hexword + ' ' + name + '\n')
                 else:
-                    outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name + "\n")
+                    outfile.write('<U00%X' %i+'>..<U00%X' %int(end, 16)+'>     ' + hexword + ' ' + name + '\n')
                 break
 
             if len(start) == 4:
-                outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + " " + name + "\n")
+                outfile.write('<U%X' %i+'>..<U%X' %(i+63)+'>     ' + hexword + ' ' + name + '\n')
             elif len(start) == 5:
-                outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + " " + name + "\n")
+                outfile.write('<U000%X' %i+'>..<U000%X' %(i+63)+'>     ' + hexword + ' ' + name + '\n')
             else:
-                outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % (i+63)).upper()+">     " + hexword + " " + name + "\n")
+                outfile.write('<U00%X' %i+'>..<U00%X' %(i+63)+'>     ' + hexword + ' ' + name + '\n')
 
 def process_charmap(flines, outfile):
     '''This function takes an array which contains *all* lines of
