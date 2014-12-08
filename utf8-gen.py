@@ -172,13 +172,11 @@ def write_header_width(outfile):
 #    outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n")
     outfile.write("WIDTH\n")
 
-''' For WIDTH we need to process output from 2 files UnicodeData.txt and EastAsianWidth.txt.
-   1. Processing two files and gathering output in elist. 2) copying elist to "temp" file
-   2. Sorting with glibc "sort -n"  and copying to sort_temp file.
-   3. Copying required things to UTF-8 file
-   4. Removing temporary files.
-'''
 def process_width(outfile, ulines, elines):
+    '''ulines are lines from UnicodeData.txt, elines are lines from
+    EastAsianWidth.txt
+
+    '''
     width_dict = {}
     for l in ulines:
         w = l.split(";")
