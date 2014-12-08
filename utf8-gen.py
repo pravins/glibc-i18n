@@ -101,9 +101,9 @@ def process_charmap(flines, outfile):
     <U0010FFC0>..<U0010FFFD>     /xf4/x8f/xbf/x80 <Plane 16 Private Use>
 
     '''
-    l = 0
-    while l < len(flines):
-        w = flines[l].split(";")
+    wstart = []
+    for line in flines:
+        w = line.split(";")
 
         # Getting UTF8 of Unicode characters.
         # In Python3, .encode('UTF-8') does not work for
@@ -134,12 +134,13 @@ def process_charmap(flines, outfile):
         # 3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
         # 4DB5;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
         if ', First>' in w[1] and not 'Surrogate,' in w[1]:
-            start = w[0]
-            end = flines[l+1].split(";")[0]
-            process_range(start, end, outfile, w[1])
-            l += 2
+            wstart = w
             continue
-
+        if ', Last>' in w[1] and not 'Surrogate,' in w[1]:
+            process_range(wstart[0], w[0], outfile, w[1])
+            wstart = []
+            continue
+        wstart = []
         if 'Surrogate,' in w[1]:
             # Comment out the surrogates in the UTF-8 file.
             # One could of course skip them completely but
@@ -151,7 +152,6 @@ def process_charmap(flines, outfile):
         else:
             format_string = '<U{:08X}>     {:s} {:s}\n'
         outfile.write(format_string.format(int(w[0], 16), hexword, w[1]))
-        l += 1
 
 ''' Function to convert Unicode characters to /x**/x**/x**  format.
 '''
