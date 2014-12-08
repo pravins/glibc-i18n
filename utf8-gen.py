@@ -243,7 +243,15 @@ if __name__ == "__main__":
         write_comments(outfile, 1)
         elines = []
         for line in easta_file.readlines():
-	    # Reserved characters of EastAasianWidth do not appear in charmap and produce "Unknown Character" error.
+            # If characters from EastAasianWidth.txt which are from
+            # from reserved ranges (i.e. not yet assigned code points)
+            # are added to the WIDTH section of the UTF-8 file, then
+            # “make check” produces “Unknown Character” errors for
+            # these code points because such unassigned code points
+            # are not in the CHARMAP section of the UTF-8 file.
+            #
+            # Therefore, we skip all reserved code points when reading
+            # the EastAsianWidth.txt file.
             if re.match(r'.*<reserved-.+>\.\.<reserved-.+>.*', line):
                     continue
             if re.match(r'^[^;]*;[WF]', line):
