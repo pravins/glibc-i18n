@@ -92,9 +92,14 @@ def process_charmap(flines, outfile):
     wstart = []
     for line in flines:
         w = line.split(";")
-        ''' Some characters have <control> as a name, so using "Unicode 1.0 Name"
-            Characters U+0080, U+0081, U+0084 and U+0099 has "<control>" as a name and even no "Unicode 1.0 Name" (10th field) in UnicodeData.txt
-            We can write code to take there alternate name from NameAliases.txt '''
+         # Some characters have “<control>” as their name. We try to
+         # use the “Unicode 1.0 Name” (10th field in
+         # UnicodeData.txt) for them.
+         #
+         # The Characters U+0080, U+0081, U+0084 and U+0099 have
+         # “<control>” as their name but do not even have aa
+         # ”Unicode 1.0 Name”. We could write code to take their
+         # alternate names from NameAliases.txt.
         if w[1] == "<control>" and w[10]:
                 w[1] = w[10]
         # Handling code point ranges like:
