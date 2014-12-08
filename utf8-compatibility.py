@@ -30,56 +30,106 @@ import argparse
 
 global args
 
+# Dictionary holding the entire contents of the UnicodeData.txt file
+#
+# Contents of this dictionary look like this:
+#
+# {0: {'category': 'Cc',
+#      'title': None,
+#      'digit': '',
+#      'name': '<control>',
+#      'bidi': 'BN',
+#      'combining': '0',
+#      'comment': '',
+#      'oldname': 'NULL',
+#      'decomposition': '',
+#      'upper': None,
+#      'mirrored': 'N',
+#      'lower': None,
+#      'decdigit': '',
+#      'numeric': ''},
+#      …
+# }
 unicode_attributes = {}
+
+# Dictionary holding the entire contents of the EastAsianWidths.txt file
+#
+# Contents of this dictionary look like this:
+#
+# {0: 'N', … , 45430: 'W', …}
 east_asian_widths = {}
 
 def fill_attribute(code_point, fields):
+    '''Stores in unicode_attributes[code_point] the values from the fields.
+
+    One entry in the unicode_attributes dictionary represents one line
+    in the UnicodeData.txt file.
+
+    '''
     unicode_attributes[code_point] =  {
-        'name': fields[1],
-        'category': fields[2],
-        'combining': fields[3],
-        'bidi': fields[4],
-        'decomposition': fields[5],
-        'decdigit': fields[6],
-        'digit': fields[7],
-        'numeric': fields[8],
-        'mirrored': fields[9],
-        'oldname': fields[10],
-        'comment': fields[11],
-        'upper': int(fields[12], 16) if fields[12] else None,
-        'lower': int(fields[13], 16) if fields[13] else None,
-        'title': int(fields[14], 16) if fields[14] else None,
+        'name': fields[1],          # Character name
+        'category': fields[2],      # General category
+        'combining': fields[3],     # Canonical combining classes
+        'bidi': fields[4],          # Bidirectional category
+        'decomposition': fields[5], # Character decomposition mapping
+        'decdigit': fields[6],      # Decimal digit value
+        'digit': fields[7],         # Digit value
+        'numeric': fields[8],       # Numeric value
+        'mirrored': fields[9],      # mirrored
+        'oldname': fields[10],      # Old Unicode 1.0 name
+        'comment': fields[11],      # comment
+        'upper': int(fields[12], 16) if fields[12] else None, # Uppercase mapping
+        'lower': int(fields[13], 16) if fields[13] else None, # Lowercase mapping
+        'title': int(fields[14], 16) if fields[14] else None, # Titlecase mapping
     }
 
 def fill_attributes(filename):
+    '''Stores the entire contents of the UnicodeData.txt file
+    in the unicode_attributes dictionary.
+
+    A typical line for a single code point in UnicodeData.txt looks
+    like this:
+
+    0041;LATIN CAPITAL LETTER A;Lu;0;L;;;;;N;;;;0061;
+
+    Code point ranges are indicated by pairs of lines like this:
+
+    4E00;<CJK Ideograph, First>;Lo;0;L;;;;;N;;;;;
+    9FCC;<CJK Ideograph, Last>;Lo;0;L;;;;;N;;;;;
+    '''
     with open(filename, mode='r') as file:
-        lines = file.readlines()
-        for lineno in range(0, len(lines)):
-            fields = lines[lineno].strip().split(';')
+        fields_start = []
+        for line in file:
+            fields = line.strip().split(';')
             if len(fields) != 15:
                 sys.stderr.write(
                     'short line in file "%(f)s": %(l)s\n' %{
-                    'f': filename, 'l': lines[lineno]})
+                    'f': filename, 'l': line})
                 exit(1)
             if fields[2] == 'Cs':
                 # Surrogates are UTF-16 artefacts,
                 # not real characters. Ignore them.
-                continue
-            if fields[1].endswith(', Last>'):
+                fields_start = []
                 continue
             if fields[1].endswith(', First>'):
+                fields_start = fields
+                fields_start[1] = fields_start[1].split(',')[0][1:]
+                continue
+            if fields[1].endswith(', Last>'):
                 fields[1] = fields[1].split(',')[0][1:]
-                fields_end = lines[lineno+1].split(';')
-                if (not fields_end[1].endswith(', Last>')
-                    or len(fields_end) != 15):
+                if fields[1:] != fields_start[1:]:
                     sys.stderr.write(
-                        'missing end range in file "%(f)s": %(l)s\n' %{
-                        'f': filename, 'l': lines[lineno+1]})
+                        'broken code point range in file "%(f)s": %(l)s\n' %{
+                            'f': filename, 'l': line})
+                    exit(1)
                 for code_point in range(
-                        int(fields[0], 16),
-                        int(fields_end[0], 16)+1):
+                        int(fields_start[0], 16),
+                        int(fields[0], 16)+1):
                     fill_attribute(code_point, fields)
+                fields_start = []
+                continue
             fill_attribute(int(fields[0], 16), fields)
+            fields_start = []
 
 def fill_east_asian_widths(filename):
     with open(filename, mode='r') as file:
