@@ -48,7 +48,7 @@ def process_range(start, end, outfile, name):
         for i in range(int(start, 16), int(end, 16)+1 ):
             unihex = chr(i).encode("UTF-8")
             hexword = convert_to_hex(unihex)
-            outfile.write("<U"+('%x' % i).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+            outfile.write("<U"+('%x' % i).upper()+">     " + hexword + " " + name + "\n")
 
 
     else:
@@ -58,19 +58,19 @@ def process_range(start, end, outfile, name):
 
             if i > (int(end, 16)-64):
                 if len(start) == 4:
-                    outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+                    outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name + "\n")
                 elif len(start) == 5:
-                    outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+                    outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name + "\n")
                 else:
-                    outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+                    outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name + "\n")
                 break
 
             if len(start) == 4:
-                outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+                outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + " " + name + "\n")
             elif len(start) == 5:
-                outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+                outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + " " + name + "\n")
             else:
-                outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+                outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % (i+63)).upper()+">     " + hexword + " " + name + "\n")
 
 def process_charmap(flines, outfile):
     '''This function takes an array which contains *all* lines of
@@ -125,19 +125,18 @@ def process_charmap(flines, outfile):
         ''' Some characters have <control> as a name, so using "Unicode 1.0 Name"
             Characters U+0080, U+0081, U+0084 and U+0099 has "<control>" as a name and even no "Unicode 1.0 Name" (10th field) in UnicodeData.txt
             We can write code to take there alternate name from NameAliases.txt '''
-        if w[1] == "<control>":
-            if w[10] != "":
+        if w[1] == "<control>" and w[10]:
                 w[1] = w[10]
 
         # Handling code point ranges like:
         #
         # 3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
         # 4DB5;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
-        if ', First>' in w[1] and not 'Surrogate,' in w[1]:
+        if w[1].endswith(', First>') and not 'Surrogate,' in w[1]:
             wstart = w
             continue
-        if ', Last>' in w[1] and not 'Surrogate,' in w[1]:
-            process_range(wstart[0], w[0], outfile, w[1])
+        if w[1].endswith(', Last>') and not 'Surrogate,' in w[1]:
+            process_range(wstart[0], w[0], outfile, w[1][:-7]+'>')
             wstart = []
             continue
         wstart = []
