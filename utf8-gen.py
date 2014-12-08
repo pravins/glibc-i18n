@@ -46,22 +46,19 @@ import os,sys,re
 def process_range(start, end, outfile, name):
     if 'Hangul Syllable' in name:
         for i in range(int(start, 16), int(end, 16)+1 ):
-            unihex = chr(i).encode("UTF-8")
-            hexword = convert_to_hex(unihex)
             outfile.write('<U{:04X}>     {:s} {:s}\n'.format(
-                    i, hexword, name))
+                i, convert_to_hex(i), name))
         return
     if len(start) <= 4:
         format_string = '<U{:04X}>..<U{:04X}>     {:s} {:s}\n'
     else:
         format_string = '<U{:08X}>..<U{:08X}>     {:s} {:s}\n'
     for i in range(int(start, 16), int(end, 16), 64 ):
-        unihex = chr(i).encode("UTF-8")
-        hexword = convert_to_hex(unihex)
         if i > (int(end, 16)-64):
-            outfile.write(format_string.format(i, int(end,16), hexword, name))
+            outfile.write(format_string.format(
+                i, int(end,16), convert_to_hex(i), name))
             break
-        outfile.write(format_string.format(i, i+63, hexword, name))
+        outfile.write(format_string.format(i, i+63, convert_to_hex(i), name))
 
 def process_charmap(flines, outfile):
     '''This function takes an array which contains *all* lines of
@@ -95,30 +92,11 @@ def process_charmap(flines, outfile):
     wstart = []
     for line in flines:
         w = line.split(";")
-
-        # Getting UTF8 of Unicode characters.
-        # In Python3, .encode('UTF-8') does not work for
-        # surrogates. Therefore, we use this conversion table
-        surrogates = {
-            'D800': '/xed/xa0/x80',
-            'DB7F': '/xed/xad/xbf',
-            'DB80': '/xed/xae/x80',
-            'DBFF': '/xed/xaf/xbf',
-            'DC00': '/xed/xb0/x80',
-            'DFFF': '/xed/xbf/xbf',
-            }
-        if w[0] in surrogates:
-            hexword = surrogates[w[0]]
-        else:
-            unihex = chr(int(w[0],16)).encode("UTF-8")
-            hexword = convert_to_hex(unihex)
-
         ''' Some characters have <control> as a name, so using "Unicode 1.0 Name"
             Characters U+0080, U+0081, U+0084 and U+0099 has "<control>" as a name and even no "Unicode 1.0 Name" (10th field) in UnicodeData.txt
             We can write code to take there alternate name from NameAliases.txt '''
         if w[1] == "<control>" and w[10]:
                 w[1] = w[10]
-
         # Handling code point ranges like:
         #
         # 3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
@@ -141,11 +119,28 @@ def process_charmap(flines, outfile):
             format_string = '<U{:04X}>     {:s} {:s}\n'
         else:
             format_string = '<U{:08X}>     {:s} {:s}\n'
-        outfile.write(format_string.format(int(w[0], 16), hexword, w[1]))
+        outfile.write(format_string.format(
+            int(w[0], 16), convert_to_hex(int(w[0], 16)), w[1]))
 
-def convert_to_hex(unihex):
-    '''Function to convert a string of UTF-8 bytes to /x**/x**/x** format.'''
-    return ''.join(['/x{:02x}'.format(c) for c in unihex])
+def convert_to_hex(code_point):
+    '''Converts a code point to a hexadecimal UTF-8 representation
+    like /x**/x**/x**.'''
+    # Getting UTF8 of Unicode characters.
+    # In Python3, .encode('UTF-8') does not work for
+    # surrogates. Therefore, we use this conversion table
+    surrogates = {
+        0xD800: '/xed/xa0/x80',
+        0xDB7F: '/xed/xad/xbf',
+        0xDB80: '/xed/xae/x80',
+        0xDBFF: '/xed/xaf/xbf',
+        0xDC00: '/xed/xb0/x80',
+        0xDFFF: '/xed/xbf/xbf',
+    }
+    if code_point in surrogates:
+        return surrogates[code_point]
+    return ''.join([
+        '/x{:02x}'.format(c) for c in chr(code_point).encode('UTF-8')
+    ])
 
 def write_header_charmap(outfile):
     outfile.write("<code_set_name> UTF-8\n")
