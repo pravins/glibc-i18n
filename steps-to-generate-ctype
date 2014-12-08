@@ -1,21 +1,25 @@
 Process to generate new CTYPE:
-1. Download  UnicodeData.txt and DerivedCoreProperties.txt from latest Unicode release. 
-2. Make sure you have ctype-gen.sh, gen-unicode-ctype.c and gen-unicode-ctype-dcp.py scripts.
-3. $.ctype-gen.sh UnicodeData.txt DerivedCoreProperties.txt "VERSION"
-4. It will create "unicode" file
-8. New CTYPE is ready in "unicode-ctype" file
 
-Chek backward compatibility:
-It is important to see how many characters has been changed in new CTYPE.
-1. $./check-backcompatibility.py i18n unicode-ctype > Report  --(Here i18n is existing Unicode ctype file in glibc and "unicode" is generated as above)
-2. vi Report
+1. Download UnicodeData.txt and DerivedCoreProperties.txt from latest
+   Unicode release.
 
-Report file will show give stats of how many characters was present in each group and how many are missing in new CTYPE. Do analysis if required.
+2. Use gen-unicode-ctype.py to generate a new i18n file for  glibc:
 
-Final Patch:
-1. Add classes of 'unicode' file into the glibc/localedata/locales/i18n file
-2. Update Unicode version and do manual edit if anything
+   $ python3 ./gen-unicode-ctype.py -u UnicodeData.txt -d DerivedCoreProperties.txt -i ../glibc/localedata/locales/i18n -o i18n-new --unicode_version 7.0.0 
 
-Note:
-See backward-compatibility5_1-to-7_0 for more information
+   The file i18n-new now has its character class data in LC_CTYPE
+   replaced with the new data from Unicode and the time stamp
+   of the file updated. The rest of the i18n-new file is identical
+   to the original i18n file.
 
+3. Run the test program ctype-compatibility.py:
+
+   python3 ctype-compatibility.py -o ../glibc/localedata/locales/i18n -n i18n-new -a -m
+
+   This program compares the character class data in the original i18n file
+   with the character class data in the new i18n-new file and reports
+   the differences and errors in both the old and the new file.
+   Check the output carefully for any problems.
+
+Now one can create a patch for glibc changing to the newly generated
+i18n file.
