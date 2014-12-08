@@ -569,7 +569,7 @@ def tests(ctype_dict):
     cpcheck(ctype_dict2,
             [0x094D],
             [('combining', True), ('combining_level3', True), ('alpha', False), ('lower', False), ('upper', False), ('tolower', False), ('toupper', False), ('totitle', False)],
-            '''Combining charcter, both in UnicodeData.txt 5.0.0 and 7.0.0.
+            '''Combining character, both in UnicodeData.txt 5.0.0 and 7.0.0.
             “094D;DEVANAGARI SIGN VIRAMA;Mn;9;NSM;;;;;N;;;;;”
             According to DerivedCoreProperties.txt (7.0.0) it is *not*
             “Alphabetic”.'''
@@ -577,7 +577,7 @@ def tests(ctype_dict):
     cpcheck(ctype_dict2,
             [(0x0951, 0x0954)],
             [('combining', True), ('combining_level3', False), ('alpha', False), ('lower', False), ('upper', False), ('tolower', False), ('toupper', False), ('totitle', False)],
-            '''Combining charcters, both in UnicodeData.txt 5.0.0 and 7.0.0.
+            '''Combining characters, both in UnicodeData.txt 5.0.0 and 7.0.0.
             According to DerivedCoreProperties.txt (7.0.0) these are *not*
             “Alphabetic”.'''
     )
