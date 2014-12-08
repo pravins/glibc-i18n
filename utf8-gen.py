@@ -44,122 +44,122 @@ import os,sys,re
    ranges.  Add a WIDTH table.
 '''
 def process_range(start, end, outfile, name):
-        if name.find("Hangul Syllable")!=-1:
-                for i in range(int(start, 16), int(end, 16)+1 ):
-                        unihex = chr(i).encode("UTF-8")
-                        hexword = convert_to_hex(unihex)
-                        outfile.write("<U"+('%x' % i).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+    if name.find("Hangul Syllable")!=-1:
+        for i in range(int(start, 16), int(end, 16)+1 ):
+            unihex = chr(i).encode("UTF-8")
+            hexword = convert_to_hex(unihex)
+            outfile.write("<U"+('%x' % i).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
 
 
-        else:
-                for i in range(int(start, 16), int(end, 16), 64 ):
-                        unihex = chr(i).encode("UTF-8")
-                        hexword = convert_to_hex(unihex)
+    else:
+        for i in range(int(start, 16), int(end, 16), 64 ):
+            unihex = chr(i).encode("UTF-8")
+            hexword = convert_to_hex(unihex)
 
-                        if i > (int(end, 16)-64):
-                                if len(start) == 4:
-                                        outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
-                                elif len(start) == 5:
-                                        outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
-                                else:
-                                        outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
-                                break
+            if i > (int(end, 16)-64):
+                if len(start) == 4:
+                    outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+                elif len(start) == 5:
+                    outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+                else:
+                    outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % int(end, 16)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+                break
 
-                        if len(start) == 4:
-                                outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
-                        elif len(start) == 5:
-                                outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
-                        else:
-                                outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+            if len(start) == 4:
+                outfile.write("<U"+('%x' % i).upper()+">.." +  "<U"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+            elif len(start) == 5:
+                outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
+            else:
+                outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
 ''' This function takes single like of UnicodeData.txt and write to UTF-8
     Unicode-Value  HEX  Unicode-Char-Name
     <U0010>     /x10         DATA LINK ESCAPE
 '''
 def process_charmap(flines, outfile):
-        l = 0
-        while l < len(flines):
-                w = flines[l].split(";")
+    l = 0
+    while l < len(flines):
+        w = flines[l].split(";")
 
-                # Getting UTF8 of Unicode characters.
-                # In Python3, .encode('UTF-8') does not work for
-                # surrogates. Therefore, we use this conversion table
-                surrogates = {
-                        'D800': '/xed/xa0/x80',
-                        'DB7F': '/xed/xad/xbf',
-                        'DB80': '/xed/xae/x80',
-                        'DBFF': '/xed/xaf/xbf',
-                        'DC00': '/xed/xb0/x80',
-                        'DFFF': '/xed/xbf/xbf',
-                        }
-                if w[0] in surrogates:
-                        hexword = surrogates[w[0]]
-                else:
-                        unihex = chr(int(w[0],16)).encode("UTF-8")
-                        hexword = convert_to_hex(unihex)
+        # Getting UTF8 of Unicode characters.
+        # In Python3, .encode('UTF-8') does not work for
+        # surrogates. Therefore, we use this conversion table
+        surrogates = {
+            'D800': '/xed/xa0/x80',
+            'DB7F': '/xed/xad/xbf',
+            'DB80': '/xed/xae/x80',
+            'DBFF': '/xed/xaf/xbf',
+            'DC00': '/xed/xb0/x80',
+            'DFFF': '/xed/xbf/xbf',
+            }
+        if w[0] in surrogates:
+            hexword = surrogates[w[0]]
+        else:
+            unihex = chr(int(w[0],16)).encode("UTF-8")
+            hexword = convert_to_hex(unihex)
 
-                ''' Some characters have <control> as a name, so using "Unicode 1.0 Name"
-                    Characters U+0080, U+0081, U+0084 and U+0099 has "<control>" as a name and even no "Unicode 1.0 Name" (10th field) in UnicodeData.txt
-                    We can write code to take there alternate name from NameAliases.txt '''
-                if w[1] == "<control>":
-                        if w[10] != "":
-                               w[1] = w[10]
+        ''' Some characters have <control> as a name, so using "Unicode 1.0 Name"
+            Characters U+0080, U+0081, U+0084 and U+0099 has "<control>" as a name and even no "Unicode 1.0 Name" (10th field) in UnicodeData.txt
+            We can write code to take there alternate name from NameAliases.txt '''
+        if w[1] == "<control>":
+            if w[10] != "":
+                w[1] = w[10]
 
-                # Surrogates are disabled in UTF-8 file
-                if w[1].find("Surrogate,")!=-1:
-                        if len(w[0]) == 4:
-                                outfile.write("%<U"+w[0]+">     " + hexword + " " + w[1] + "\n")
-                        else:
-                                outfile.write("%<U000"+w[0]+">     " + hexword + " " + w[1] + "\n")
-                        l = l +1
-                        continue
+        # Surrogates are disabled in UTF-8 file
+        if w[1].find("Surrogate,")!=-1:
+            if len(w[0]) == 4:
+                outfile.write("%<U"+w[0]+">     " + hexword + " " + w[1] + "\n")
+            else:
+                outfile.write("%<U000"+w[0]+">     " + hexword + " " + w[1] + "\n")
+            l = l +1
+            continue
 
-                # Handling case of CJK IDEOGRAPH Start (3400) and End(4DB5), ADD 0x3F and create range. some more cases like this
-                if w[1].find(", First>")!=-1:
-                        start = w[0]
-                        end = flines[l+1].split(";")[0]
-                        process_range(start, end, outfile, w[1])
-                        l = l +2
-                        continue
+        # Handling case of CJK IDEOGRAPH Start (3400) and End(4DB5), ADD 0x3F and create range. some more cases like this
+        if w[1].find(", First>")!=-1:
+            start = w[0]
+            end = flines[l+1].split(";")[0]
+            process_range(start, end, outfile, w[1])
+            l = l +2
+            continue
 
-                if len(w[0]) == 4:
-                    outfile.write("<U"+w[0]+">     " + hexword + " " + w[1] + "\n")
-                else:
-                    outfile.write("<U000"+w[0]+">     " + hexword + " " + w[1] + "\n")
-                l = l +1
+        if len(w[0]) == 4:
+            outfile.write("<U"+w[0]+">     " + hexword + " " + w[1] + "\n")
+        else:
+            outfile.write("<U000"+w[0]+">     " + hexword + " " + w[1] + "\n")
+        l = l +1
 
 ''' Function to convert Unicode characters to /x**/x**/x**  format.
 '''
 def convert_to_hex(unihex):
-        length_hex = len(unihex)
-        hexword = ""
-        for i in range(0, length_hex):
-              hexword =hexword + "/x" + ('%02x' %unihex[i])
-        return hexword
+    length_hex = len(unihex)
+    hexword = ""
+    for i in range(0, length_hex):
+        hexword =hexword + "/x" + ('%02x' %unihex[i])
+    return hexword
 
 def write_comments(outfile, flag):
-        if flag == 0:
-                outfile.write("<code_set_name> UTF-8\n")
-                outfile.write("<comment_char> %\n")
-                outfile.write("<escape_char> /\n")
-                outfile.write("<mb_cur_min> 1\n")
-                outfile.write("<mb_cur_max> 6\n\n")
-                outfile.write("% CHARMAP generated using utf8-gen.py\n")
-                outfile.write("% alias ISO-10646/UTF-8\n")
-                outfile.write("CHARMAP\n")
-        if flag == 1:
-                outfile.write("% Character width according to Unicode 7.0.0.\n")
-                outfile.write("% - Default width is 1.\n")
-                outfile.write("% - Double-width characters have width 2; generated from\n")
-                outfile.write("%        \"grep '^[^;]*;[WF]' EastAsianWidth.txt\"\n")
-#               outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")  -- This is wrong
-                outfile.write("% - Non-spacing characters have width 0; generated from PropList.txt or\n")
-                outfile.write("%   \"grep '^[^;]*;[^;]*;[^;]*;[^;]*;NSM;' UnicodeData.txt\"\n")
-                outfile.write("% - Format control characters have width 0; generated from\n")
-                outfile.write("%   \"grep '^[^;]*;[^;]*;Cf;' UnicodeData.txt\"\n")
-#             Not needed covered by Cf
-#               outfile.write("% - Zero width characters have width 0; generated from\n")
-#               outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n")
-                outfile.write("WIDTH\n")
+    if flag == 0:
+        outfile.write("<code_set_name> UTF-8\n")
+        outfile.write("<comment_char> %\n")
+        outfile.write("<escape_char> /\n")
+        outfile.write("<mb_cur_min> 1\n")
+        outfile.write("<mb_cur_max> 6\n\n")
+        outfile.write("% CHARMAP generated using utf8-gen.py\n")
+        outfile.write("% alias ISO-10646/UTF-8\n")
+        outfile.write("CHARMAP\n")
+    if flag == 1:
+        outfile.write("% Character width according to Unicode 7.0.0.\n")
+        outfile.write("% - Default width is 1.\n")
+        outfile.write("% - Double-width characters have width 2; generated from\n")
+        outfile.write("%        \"grep '^[^;]*;[WF]' EastAsianWidth.txt\"\n")
+#        outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")  -- This is wrong
+        outfile.write("% - Non-spacing characters have width 0; generated from PropList.txt or\n")
+        outfile.write("%   \"grep '^[^;]*;[^;]*;[^;]*;[^;]*;NSM;' UnicodeData.txt\"\n")
+        outfile.write("% - Format control characters have width 0; generated from\n")
+        outfile.write("%   \"grep '^[^;]*;[^;]*;Cf;' UnicodeData.txt\"\n")
+#       Not needed covered by Cf
+#        outfile.write("% - Zero width characters have width 0; generated from\n")
+#        outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n")
+        outfile.write("WIDTH\n")
 
 
 ''' For WIDTH we need to process output from 2 files UnicodeData.txt and EastAsianWidth.txt.
@@ -169,36 +169,36 @@ def write_comments(outfile, flag):
    4. Removing temporary files.
 '''
 def process_width(outfile, ulines, elines):
-        width_dict = {}
-        for l in ulines:
-                w = l.split(";")
-                if w[4]== "NSM" or w[2] == "Cf":
-                        if len(w[0]) < 5:
-                                width_dict[int(w[0], 16)] = '<U'+w[0]+'>\t0'
-                        else:
-                                width_dict[int(w[0], 16)] = '<U000'+w[0]+'>\t0'
+    width_dict = {}
+    for l in ulines:
+        w = l.split(";")
+        if w[4]== "NSM" or w[2] == "Cf":
+            if len(w[0]) < 5:
+                width_dict[int(w[0], 16)] = '<U'+w[0]+'>\t0'
+            else:
+                width_dict[int(w[0], 16)] = '<U000'+w[0]+'>\t0'
 
-        for l in elines:
-                # If an entry in EastAsianWidth.txt is found, it overrides entries in
-                # UnicodeData.txt:
-                w = l.split(";")
-                if not '..' in w[0]:
-                        if len(w[0]) == 4:
-                                width_dict[int(w[0], 16)] = '<U'+w[0]+'>\t2'
-                        else:
-                                width_dict[int(w[0], 16)] = '<U000'+w[0]+'>\t2'
-                else:
-                        wc = w[0].split("..")
-                        for key in range(int(wc[0], 16), int(wc[1], 16)+1):
-                                if  key in width_dict:
-                                        del width_dict[key]
-                        if len(wc[0]) == 4:
-                                width_dict[int(wc[0], 16)] = '<U'+wc[0]+'>...<U'+wc[1]+'>\t2'
-                        else:
-                                width_dict[int(wc[0], 16)] = '<U000'+wc[0]+'>...<U000'+wc[1]+'>\t2'
+    for l in elines:
+        # If an entry in EastAsianWidth.txt is found, it overrides entries in
+        # UnicodeData.txt:
+        w = l.split(";")
+        if not '..' in w[0]:
+            if len(w[0]) == 4:
+                width_dict[int(w[0], 16)] = '<U'+w[0]+'>\t2'
+            else:
+                width_dict[int(w[0], 16)] = '<U000'+w[0]+'>\t2'
+        else:
+            wc = w[0].split("..")
+            for key in range(int(wc[0], 16), int(wc[1], 16)+1):
+                if  key in width_dict:
+                    del width_dict[key]
+            if len(wc[0]) == 4:
+                width_dict[int(wc[0], 16)] = '<U'+wc[0]+'>...<U'+wc[1]+'>\t2'
+            else:
+                width_dict[int(wc[0], 16)] = '<U000'+wc[0]+'>...<U000'+wc[1]+'>\t2'
 
-        for l in sorted(width_dict):
-                outfile.write(width_dict[l]+'\n')
+    for l in sorted(width_dict):
+        outfile.write(width_dict[l]+'\n')
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
@@ -218,11 +218,11 @@ if __name__ == "__main__":
         write_comments(outfile, 1)
         elines = []
         for line in easta_file.readlines():
-		# Reserved characters of EastAasianWidth do not appear in charmap and produce "Unknown Character" error.
-                if re.match(r'.*<reserved-.+>\.\.<reserved-.+>.*', line):
-                        continue
-                if re.match(r'^[^;]*;[WF]', line):
-                        elines.append(line.strip())
+	    # Reserved characters of EastAasianWidth do not appear in charmap and produce "Unknown Character" error.
+            if re.match(r'.*<reserved-.+>\.\.<reserved-.+>.*', line):
+                    continue
+            if re.match(r'^[^;]*;[WF]', line):
+                    elines.append(line.strip())
         process_width(outfile, flines, elines)
         outfile.write("END WIDTH\n")
 
