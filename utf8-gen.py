@@ -25,26 +25,16 @@
 
 import os,sys,re
 
-''' Where UnicodeData.txt file has given characters in range
-    Example:
-    3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
-    4DB5;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
-
-    UTF-8 file mention these range by adding 0x3F inbetween First and Last Unicode character.
-    Example:
-    <U3400>..<U343F>     /xe3/x90/x80         <CJK Ideograph Extension A>
-    .
-    .
-    <U4D80>..<U4DB5>     /xe4/xb6/x80         <CJK Ideograph Extension A>
-
-   NOTE:
-   2000-09-24  Bruno Haible  <haible@clisp.cons.org>
-   * charmaps/UTF-8: Expand <Hangul Syllable> and <Private Use> ranges,
-   so they become printable and carry a width.  Comment out surrogate
-   ranges.  Add a WIDTH table.
-'''
 def process_range(start, end, outfile, name):
     if 'Hangul Syllable' in name:
+        # from glibc/localedata/ChangeLog:
+        #
+        #   2000-09-24  Bruno Haible  <haible@clisp.cons.org>
+        #   * charmaps/UTF-8: Expand <Hangul Syllable> and <Private Use> ranges,
+        #   so they become printable and carry a width. Comment out surrogate
+        #   ranges. Add a WIDTH table
+        #
+        # So we expand the Hangul Syllables here:
         for i in range(int(start, 16), int(end, 16)+1 ):
             outfile.write('<U{:04X}>     {:s} {:s}\n'.format(
                 i, convert_to_hex(i), name))
@@ -53,6 +43,17 @@ def process_range(start, end, outfile, name):
         format_string = '<U{:04X}>..<U{:04X}>     {:s} {:s}\n'
     else:
         format_string = '<U{:08X}>..<U{:08X}>     {:s} {:s}\n'
+    # UnicodeData.txt file has contains code point ranges like this:
+    #
+    # 3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
+    # 4DB5;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
+    #
+    # The glibc UTF-8 file splits ranges like these into shorter
+    # ranges of 64 code points each:
+    #
+    # <U3400>..<U343F>     /xe3/x90/x80         <CJK Ideograph Extension A>
+    # …
+    # <U4D80>..<U4DB5>     /xe4/xb6/x80         <CJK Ideograph Extension A>
     for i in range(int(start, 16), int(end, 16), 64 ):
         if i > (int(end, 16)-64):
             outfile.write(format_string.format(
