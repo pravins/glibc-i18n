@@ -150,6 +150,11 @@ def process_chars(char_class_list, code_point_line):
                 int(match.group('codepoint1'), 16),
                 int(match.group('codepoint2'), 16)))
             continue
+        sys.stderr.write('None of the regexps matched code_points=%(cp)s in code_point_line=%(cpl)s\n' %{
+            'cp': code_points,
+            'cpl': code_point_line
+        })
+        exit(1)
 
 def compare_lists(old_ctype_dict, new_ctype_dict):
     print('****************************************************')
