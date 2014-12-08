@@ -71,11 +71,36 @@ def process_range(start, end, outfile, name):
                 outfile.write("<U000"+('%x' % i).upper()+">.." +  "<U000"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
             else:
                 outfile.write("<U00"+('%x' % i).upper()+">.." +  "<U00"+('%x' % (i+63)).upper()+">     " + hexword + " " + name.split(",")[0] + ">" + "\n")
-''' This function takes single like of UnicodeData.txt and write to UTF-8
-    Unicode-Value  HEX  Unicode-Char-Name
-    <U0010>     /x10         DATA LINK ESCAPE
-'''
+
 def process_charmap(flines, outfile):
+    '''This function takes an array which contains *all* lines of
+    of UnicodeData.txt and write lines to outfile as used in the
+
+    CHARMAP
+    …
+    END CHARMAP
+
+    section of the UTF-8 file in glibc/localedata/charmaps/UTF-8.
+
+    Samples for input lines:
+
+    0010;<control>;Cc;0;BN;;;;;N;DATA LINK ESCAPE;;;;
+    3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
+    4DB5;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
+    D800;<Non Private Use High Surrogate, First>;Cs;0;L;;;;;N;;;;;
+    DB7F;<Non Private Use High Surrogate, Last>;Cs;0;L;;;;;N;;;;;
+    100000;<Plane 16 Private Use, First>;Co;0;L;;;;;N;;;;;
+    10FFFD;<Plane 16 Private Use, Last>;Co;0;L;;;;;N;;;;;
+
+    Samples for output lines (Unicode-Value UTF-8-HEX Unicode-Char-Name):
+
+    <U0010>     /x10 DATA LINK ESCAPE
+    <U3400>..<U343F>     /xe3/x90/x80 <CJK Ideograph Extension A>
+    %<UD800>     /xed/xa0/x80 <Non Private Use High Surrogate, First>
+    %<UDB7F>     /xed/xad/xbf <Non Private Use High Surrogate, Last>
+    <U0010FFC0>..<U0010FFFD>     /xf4/x8f/xbf/x80 <Plane 16 Private Use>
+
+    '''
     l = 0
     while l < len(flines):
         w = flines[l].split(";")
