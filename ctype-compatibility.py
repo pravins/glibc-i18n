@@ -55,6 +55,8 @@ def get_lines_from_file(filename):
             else:
                 all_lines.append(current_line + line)
                 current_line = ''
+    if current_line: # file ends with a continuation line
+        all_lines.append(current_line)
     return all_lines
 
 def extract_character_classes_and_code_points(filename):
