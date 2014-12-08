@@ -143,14 +143,9 @@ def process_charmap(flines, outfile):
             format_string = '<U{:08X}>     {:s} {:s}\n'
         outfile.write(format_string.format(int(w[0], 16), hexword, w[1]))
 
-''' Function to convert Unicode characters to /x**/x**/x**  format.
-'''
 def convert_to_hex(unihex):
-    length_hex = len(unihex)
-    hexword = ""
-    for i in range(0, length_hex):
-        hexword =hexword + "/x" + ('%02x' %unihex[i])
-    return hexword
+    '''Function to convert a string of UTF-8 bytes to /x**/x**/x** format.'''
+    return ''.join(['/x{:02x}'.format(c) for c in unihex])
 
 def write_header_charmap(outfile):
     outfile.write("<code_set_name> UTF-8\n")
