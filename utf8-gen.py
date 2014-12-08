@@ -229,35 +229,30 @@ if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("USAGE: python3 utf8-gen.py UnicodeData.txt EastAsianWidth.txt")
     else:
-        unidata_file = open(sys.argv[1])
-        easta_file = open(sys.argv[2])
-        outfile=open("UTF-8","w")
-        flines = unidata_file.readlines()
-
-        # Processing UnicodeData.txt and write CHARMAP to UTF-8 file
-        write_comments(outfile, 0)
-        process_charmap(flines, outfile)
-        outfile.write("END CHARMAP\n\n")
-
-        # Processing EastAsianWidth.txt and write WIDTH to UTF-8 file
-        write_comments(outfile, 1)
-        elines = []
-        for line in easta_file.readlines():
-            # If characters from EastAasianWidth.txt which are from
-            # from reserved ranges (i.e. not yet assigned code points)
-            # are added to the WIDTH section of the UTF-8 file, then
-            # “make check” produces “Unknown Character” errors for
-            # these code points because such unassigned code points
-            # are not in the CHARMAP section of the UTF-8 file.
-            #
-            # Therefore, we skip all reserved code points when reading
-            # the EastAsianWidth.txt file.
-            if re.match(r'.*<reserved-.+>\.\.<reserved-.+>.*', line):
+        with open(sys.argv[1], mode='r') as unidata_file:
+            flines = unidata_file.readlines()
+        with open(sys.argv[2], mode='r') as east_asian_width_file:
+            elines = []
+            for line in east_asian_width_file:
+                # If characters from EastAasianWidth.txt which are from
+                # from reserved ranges (i.e. not yet assigned code points)
+                # are added to the WIDTH section of the UTF-8 file, then
+                # “make check” produces “Unknown Character” errors for
+                # these code points because such unassigned code points
+                # are not in the CHARMAP section of the UTF-8 file.
+                #
+                # Therefore, we skip all reserved code points when reading
+                # the EastAsianWidth.txt file.
+                if re.match(r'.*<reserved-.+>\.\.<reserved-.+>.*', line):
                     continue
-            if re.match(r'^[^;]*;[WF]', line):
+                if re.match(r'^[^;]*;[WF]', line):
                     elines.append(line.strip())
-        process_width(outfile, flines, elines)
-        outfile.write("END WIDTH\n")
-
-        outfile.close()
-        unidata_file.close()
+        with open('UTF-8', mode='w') as outfile:
+            # Processing UnicodeData.txt and write CHARMAP to UTF-8 file
+            write_comments(outfile, 0)
+            process_charmap(flines, outfile)
+            outfile.write("END CHARMAP\n\n")
+            # Processing EastAsianWidth.txt and write WIDTH to UTF-8 file
+            write_comments(outfile, 1)
+            process_width(outfile, flines, elines)
+            outfile.write("END WIDTH\n")
