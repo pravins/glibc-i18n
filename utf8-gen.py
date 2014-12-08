@@ -161,31 +161,30 @@ def convert_to_hex(unihex):
         hexword =hexword + "/x" + ('%02x' %unihex[i])
     return hexword
 
-def write_comments(outfile, flag):
-    if flag == 0:
-        outfile.write("<code_set_name> UTF-8\n")
-        outfile.write("<comment_char> %\n")
-        outfile.write("<escape_char> /\n")
-        outfile.write("<mb_cur_min> 1\n")
-        outfile.write("<mb_cur_max> 6\n\n")
-        outfile.write("% CHARMAP generated using utf8-gen.py\n")
-        outfile.write("% alias ISO-10646/UTF-8\n")
-        outfile.write("CHARMAP\n")
-    if flag == 1:
-        outfile.write("% Character width according to Unicode 7.0.0.\n")
-        outfile.write("% - Default width is 1.\n")
-        outfile.write("% - Double-width characters have width 2; generated from\n")
-        outfile.write("%        \"grep '^[^;]*;[WF]' EastAsianWidth.txt\"\n")
-#        outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")  -- This is wrong
-        outfile.write("% - Non-spacing characters have width 0; generated from PropList.txt or\n")
-        outfile.write("%   \"grep '^[^;]*;[^;]*;[^;]*;[^;]*;NSM;' UnicodeData.txt\"\n")
-        outfile.write("% - Format control characters have width 0; generated from\n")
-        outfile.write("%   \"grep '^[^;]*;[^;]*;Cf;' UnicodeData.txt\"\n")
-#       Not needed covered by Cf
-#        outfile.write("% - Zero width characters have width 0; generated from\n")
-#        outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n")
-        outfile.write("WIDTH\n")
+def write_header_charmap(outfile):
+    outfile.write("<code_set_name> UTF-8\n")
+    outfile.write("<comment_char> %\n")
+    outfile.write("<escape_char> /\n")
+    outfile.write("<mb_cur_min> 1\n")
+    outfile.write("<mb_cur_max> 6\n\n")
+    outfile.write("% CHARMAP generated using utf8-gen.py\n")
+    outfile.write("% alias ISO-10646/UTF-8\n")
+    outfile.write("CHARMAP\n")
 
+def write_header_width(outfile):
+    outfile.write("% Character width according to Unicode 7.0.0.\n")
+    outfile.write("% - Default width is 1.\n")
+    outfile.write("% - Double-width characters have width 2; generated from\n")
+    outfile.write("%        \"grep '^[^;]*;[WF]' EastAsianWidth.txt\"\n")
+#    outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")  -- This is wrong
+    outfile.write("% - Non-spacing characters have width 0; generated from PropList.txt or\n")
+    outfile.write("%   \"grep '^[^;]*;[^;]*;[^;]*;[^;]*;NSM;' UnicodeData.txt\"\n")
+    outfile.write("% - Format control characters have width 0; generated from\n")
+    outfile.write("%   \"grep '^[^;]*;[^;]*;Cf;' UnicodeData.txt\"\n")
+#   Not needed covered by Cf
+#    outfile.write("% - Zero width characters have width 0; generated from\n")
+#    outfile.write("%   \"grep '^[^;]*;ZERO WIDTH ' UnicodeData.txt\"\n")
+    outfile.write("WIDTH\n")
 
 ''' For WIDTH we need to process output from 2 files UnicodeData.txt and EastAsianWidth.txt.
    1. Processing two files and gathering output in elist. 2) copying elist to "temp" file
@@ -249,10 +248,10 @@ if __name__ == "__main__":
                     elines.append(line.strip())
         with open('UTF-8', mode='w') as outfile:
             # Processing UnicodeData.txt and write CHARMAP to UTF-8 file
-            write_comments(outfile, 0)
+            write_header_charmap(outfile)
             process_charmap(flines, outfile)
             outfile.write("END CHARMAP\n\n")
             # Processing EastAsianWidth.txt and write WIDTH to UTF-8 file
-            write_comments(outfile, 1)
+            write_header_width(outfile)
             process_width(outfile, flines, elines)
             outfile.write("END WIDTH\n")
