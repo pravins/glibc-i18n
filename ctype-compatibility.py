@@ -88,9 +88,13 @@ def extract_character_classes_and_code_points(filename):
                 'toupper',
                 'tolower',
                 'totitle']:
-            match = re.match(r'^(?:(?:class|map)\s+")?'
-                             +char_class+
-                             '(?:";)?\s+', line)
+            match = re.match(r'^('
+                             +'(?:(?:class|map)\s+")'
+                             +re.escape(char_class)+
+                             '(?:";)\s+'
+                             +'|'
+                             +re.escape(char_class)+'\s+'
+                             +')', line)
             if match:
                 if char_class not in ctype_dict:
                     ctype_dict[char_class] = []
