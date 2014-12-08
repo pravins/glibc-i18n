@@ -129,28 +129,29 @@ def process_charmap(flines, outfile):
             if w[10] != "":
                 w[1] = w[10]
 
-        # Surrogates are disabled in UTF-8 file
-        if w[1].find("Surrogate,")!=-1:
-            if len(w[0]) == 4:
-                outfile.write("%<U"+w[0]+">     " + hexword + " " + w[1] + "\n")
-            else:
-                outfile.write("%<U000"+w[0]+">     " + hexword + " " + w[1] + "\n")
-            l = l +1
-            continue
-
-        # Handling case of CJK IDEOGRAPH Start (3400) and End(4DB5), ADD 0x3F and create range. some more cases like this
-        if w[1].find(", First>")!=-1:
+        # Handling code point ranges like:
+        #
+        # 3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
+        # 4DB5;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
+        if ', First>' in w[1] and not 'Surrogate,' in w[1]:
             start = w[0]
             end = flines[l+1].split(";")[0]
             process_range(start, end, outfile, w[1])
-            l = l +2
+            l += 2
             continue
 
-        if len(w[0]) == 4:
-            outfile.write("<U"+w[0]+">     " + hexword + " " + w[1] + "\n")
+        if 'Surrogate,' in w[1]:
+            # Comment out the surrogates in the UTF-8 file.
+            # One could of course skip them completely but
+            # the original UTF-8 file in glibc had them as
+            # comments, so we keep these comment lines.
+            outfile.write('%')
+        if len(w[0]) <= 4:
+            format_string = '<U{:04X}>     {:s} {:s}\n'
         else:
-            outfile.write("<U000"+w[0]+">     " + hexword + " " + w[1] + "\n")
-        l = l +1
+            format_string = '<U{:08X}>     {:s} {:s}\n'
+        outfile.write(format_string.format(int(w[0], 16), hexword, w[1]))
+        l += 1
 
 ''' Function to convert Unicode characters to /x**/x**/x**  format.
 '''
