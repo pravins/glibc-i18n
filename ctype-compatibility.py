@@ -223,24 +223,20 @@ def cpcheck(ctype_dict, code_point_list_with_ranges, char_classes, reason=''):
 
     '''
     global number_of_errors
-    code_point_list = []
     for r in code_point_list_with_ranges:
-        if type(r) == type(int()):
-            code_point_list.append(r)
-        else:
-            code_point_list += range(r[0], r[1]+1)
-    for code_point in code_point_list:
-        for c in char_classes:
-            char_class = c[0]
-            in_char_class = c[1]
-            if (code_point in ctype_dict[char_class]) != in_char_class:
-                number_of_errors += 1
-                print('error: %(code_point)s %(char)s %(char_class)s %(in)s: %(reason)s' %{
-                    'code_point': hex(code_point),
-                    'char': chr(code_point),
-                    'char_class': char_class,
-                    'in': not in_char_class,
-                    'reason': reason})
+        for code_point in ([r] if type(r) == type(int())
+                           else range(r[0], r[1]+1)):
+            for c in char_classes:
+                char_class = c[0]
+                in_char_class = c[1]
+                if (code_point in ctype_dict[char_class]) != in_char_class:
+                    number_of_errors += 1
+                    print('error: %(code_point)s %(char)s %(char_class)s %(in)s: %(reason)s' %{
+                        'code_point': hex(code_point),
+                        'char': chr(code_point),
+                        'char_class': char_class,
+                        'in': not in_char_class,
+                        'reason': reason})
 
 def tests(ctype_dict):
     global number_of_errors
