@@ -48,27 +48,20 @@ def process_range(start, end, outfile, name):
         for i in range(int(start, 16), int(end, 16)+1 ):
             unihex = chr(i).encode("UTF-8")
             hexword = convert_to_hex(unihex)
-            outfile.write('<U%X' %i+'>     ' + hexword + ' ' + name + '\n')
+            outfile.write('<U{:04X}>     {:s} {:s}\n'.format(
+                    i, hexword, name))
+        return
+    if len(start) <= 4:
+        format_string = '<U{:04X}>..<U{:04X}>     {:s} {:s}\n'
     else:
-        for i in range(int(start, 16), int(end, 16), 64 ):
-            unihex = chr(i).encode("UTF-8")
-            hexword = convert_to_hex(unihex)
-
-            if i > (int(end, 16)-64):
-                if len(start) == 4:
-                    outfile.write('<U%X' %i+'>..<U%X' %int(end, 16)+'>     ' + hexword + ' ' + name + '\n')
-                elif len(start) == 5:
-                    outfile.write('<U000%X' %i+'>..<U000%X' %int(end, 16)+'>     ' + hexword + ' ' + name + '\n')
-                else:
-                    outfile.write('<U00%X' %i+'>..<U00%X' %int(end, 16)+'>     ' + hexword + ' ' + name + '\n')
-                break
-
-            if len(start) == 4:
-                outfile.write('<U%X' %i+'>..<U%X' %(i+63)+'>     ' + hexword + ' ' + name + '\n')
-            elif len(start) == 5:
-                outfile.write('<U000%X' %i+'>..<U000%X' %(i+63)+'>     ' + hexword + ' ' + name + '\n')
-            else:
-                outfile.write('<U00%X' %i+'>..<U00%X' %(i+63)+'>     ' + hexword + ' ' + name + '\n')
+        format_string = '<U{:08X}>..<U{:08X}>     {:s} {:s}\n'
+    for i in range(int(start, 16), int(end, 16), 64 ):
+        unihex = chr(i).encode("UTF-8")
+        hexword = convert_to_hex(unihex)
+        if i > (int(end, 16)-64):
+            outfile.write(format_string.format(i, int(end,16), hexword, name))
+            break
+        outfile.write(format_string.format(i, i+63, hexword, name))
 
 def process_charmap(flines, outfile):
     '''This function takes an array which contains *all* lines of
