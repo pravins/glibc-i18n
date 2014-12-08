@@ -25,6 +25,12 @@
 
 import os,sys,re
 
+def ucs_symbol(code_point):
+    if code_point < 0x10000:
+        return '<U{:04X}>'.format(code_point)
+    else:
+        return '<U{:08X}>'.format(code_point)
+
 def process_range(start, end, outfile, name):
     if 'Hangul Syllable' in name:
         # from glibc/localedata/ChangeLog:
@@ -36,13 +42,9 @@ def process_range(start, end, outfile, name):
         #
         # So we expand the Hangul Syllables here:
         for i in range(int(start, 16), int(end, 16)+1 ):
-            outfile.write('<U{:04X}>     {:s} {:s}\n'.format(
-                i, convert_to_hex(i), name))
+            outfile.write('{:s}     {:s} {:s}\n'.format(
+                ucs_symbol(i), convert_to_hex(i), name))
         return
-    if len(start) <= 4:
-        format_string = '<U{:04X}>..<U{:04X}>     {:s} {:s}\n'
-    else:
-        format_string = '<U{:08X}>..<U{:08X}>     {:s} {:s}\n'
     # UnicodeData.txt file has contains code point ranges like this:
     #
     # 3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
@@ -56,10 +58,17 @@ def process_range(start, end, outfile, name):
     # <U4D80>..<U4DB5>     /xe4/xb6/x80         <CJK Ideograph Extension A>
     for i in range(int(start, 16), int(end, 16), 64 ):
         if i > (int(end, 16)-64):
-            outfile.write(format_string.format(
-                i, int(end,16), convert_to_hex(i), name))
+            outfile.write('{:s}..{:s}     {:s} {:s}\n'.format(
+                    ucs_symbol(i),
+                    ucs_symbol(int(end,16)),
+                    convert_to_hex(i),
+                    name))
             break
-        outfile.write(format_string.format(i, i+63, convert_to_hex(i), name))
+        outfile.write('{:s}..{:s}     {:s} {:s}\n'.format(
+                ucs_symbol(i),
+                ucs_symbol(i+63),
+                convert_to_hex(i),
+                name))
 
 def process_charmap(flines, outfile):
     '''This function takes an array which contains *all* lines of
@@ -121,12 +130,10 @@ def process_charmap(flines, outfile):
             # the original UTF-8 file in glibc had them as
             # comments, so we keep these comment lines.
             outfile.write('%')
-        if len(w[0]) <= 4:
-            format_string = '<U{:04X}>     {:s} {:s}\n'
-        else:
-            format_string = '<U{:08X}>     {:s} {:s}\n'
-        outfile.write(format_string.format(
-            int(w[0], 16), convert_to_hex(int(w[0], 16)), w[1]))
+        outfile.write('{:s}     {:s} {:s}\n'.format(
+                ucs_symbol(int(w[0], 16)),
+                convert_to_hex(int(w[0], 16)),
+                w[1]))
 
 def convert_to_hex(code_point):
     '''Converts a code point to a hexadecimal UTF-8 representation
@@ -182,29 +189,21 @@ def process_width(outfile, ulines, elines):
     for l in ulines:
         w = l.split(";")
         if w[4]== "NSM" or w[2] == "Cf":
-            if len(w[0]) < 5:
-                width_dict[int(w[0], 16)] = '<U'+w[0]+'>\t0'
-            else:
-                width_dict[int(w[0], 16)] = '<U000'+w[0]+'>\t0'
+            width_dict[int(w[0], 16)] = ucs_symbol(int(w[0], 16))+'\t0'
 
     for l in elines:
         # If an entry in EastAsianWidth.txt is found, it overrides entries in
         # UnicodeData.txt:
         w = l.split(";")
         if not '..' in w[0]:
-            if len(w[0]) == 4:
-                width_dict[int(w[0], 16)] = '<U'+w[0]+'>\t2'
-            else:
-                width_dict[int(w[0], 16)] = '<U000'+w[0]+'>\t2'
+            width_dict[int(w[0], 16)] = ucs_symbol(int(w[0], 16))+'\t2'
         else:
             wc = w[0].split("..")
             for key in range(int(wc[0], 16), int(wc[1], 16)+1):
                 if  key in width_dict:
                     del width_dict[key]
-            if len(wc[0]) == 4:
-                width_dict[int(wc[0], 16)] = '<U'+wc[0]+'>...<U'+wc[1]+'>\t2'
-            else:
-                width_dict[int(wc[0], 16)] = '<U000'+wc[0]+'>...<U000'+wc[1]+'>\t2'
+            width_dict[int(wc[0], 16)] = '{:s}...{:s}\t2'.format(
+                    ucs_symbol(int(wc[0], 16)), ucs_symbol(int(wc[1], 16)))
 
     for l in sorted(width_dict):
         outfile.write(width_dict[l]+'\n')
