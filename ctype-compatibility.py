@@ -247,11 +247,13 @@ def tests(ctype_dict):
     ctype_dict2 = {}
     for key in ctype_dict:
         ctype_dict2[key] = {}
-        for value in ctype_dict[key]:
-            if key in ['toupper', 'tolower', 'totitle']:
-                ctype_dict2[key][value[0]] = value[1]
-            else:
-                ctype_dict2[key][value] = 1
+        if ctype_dict[key]:
+            if type(ctype_dict[key][0]) == type(int()):
+                for value in ctype_dict[key]:
+                    ctype_dict2[key][value] = 1
+            else: # key is 'toupper', 'tolower', or 'totitle'
+                for value in ctype_dict[key]:
+                    ctype_dict2[key][value[0]] = value[1]
 
     cpcheck(ctype_dict2,
             [0x0E2F, 0x0E46],
