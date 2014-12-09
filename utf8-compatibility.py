@@ -148,6 +148,12 @@ def fill_east_asian_widths(filename):
             for code_point in range(int(start, 16), int(end, 16)+1):
                 east_asian_widths[code_point] = match.group('property')
 
+def ucs_symbol(code_point):
+    if code_point < 0x10000:
+        return '<U{:04X}>'.format(code_point)
+    else:
+        return '<U{:08X}>'.format(code_point)
+
 def create_charmap_dictionary(file_name):
     with open(file_name, mode='r') as file:
         charmap_dictionary = {}
@@ -157,21 +163,60 @@ def create_charmap_dictionary(file_name):
         for line in file:
             if line.startswith('END CHARMAP'):
                 return charmap_dictionary
-            fields = line.split()
-            charmap_dictionary[fields[0]] = fields[1]
+            if line.startswith('%'):
+                continue
+            match = re.match(
+                r'^<U(?P<codepoint1>[0-9A-F]{4,8})>'
+                +r'(:?\.\.<U(?P<codepoint2>[0-9-A-F]{4,8})>)?'
+                +r'\s+(?P<hexutf8>(/x[0-9a-f]{2}){1,4})',
+                line)
+            if not match:
+                continue
+            codepoint1 = match.group('codepoint1')
+            codepoint2 = match.group('codepoint2')
+            if not codepoint2:
+                codepoint2 = codepoint1
+            for i in range(int(codepoint1, 16),
+                           int(codepoint2, 16) + 1):
+                charmap_dictionary[i] = match.group('hexutf8')
         sys.stderr.write('No “CHARMAP” or no “END CHARMAP” found in %s\n' %file_name)
         exit(1)
 
 def check_charmap(original_file_name, new_file_name):
+    print('************************************************************')
+    print('Report on CHARMAP:')
+    global args
     ocharmap = create_charmap_dictionary(original_file_name)
     ncharmap = create_charmap_dictionary(new_file_name)
-    for key in ocharmap:
-        if key in ncharmap:
-            if ncharmap[key] != ocharmap[key]:
-                print('This character might be missing in the generated charmap: ', key)
-        else:
-            if key !='%':
-                print('This character might be missing in the generated charmap: ', key)
+    changed_charmap = {}
+    for key in set(ocharmap).intersection(set(ncharmap)):
+        if ocharmap[key] != ncharmap[key]:
+            changed_charmap[key] = (ocharmap[key], ncharmap[key])
+    print('Total removed characters in newly generated CHARMAP: %d'
+          %len(set(ocharmap)-set(ncharmap)))
+    if args.show_missing_characters:
+        for key in sorted(set(ocharmap)-set(ncharmap)):
+            print('removed: {:s}     {:s} {:s}'.format(
+                ucs_symbol(key),
+                ocharmap[key],
+                unicode_attributes[key]['name'] if key in unicode_attributes else None))
+    print('Total changed characters in newly generated CHARMAP: %d'
+          %len(changed_charmap))
+    if args.show_changed_characters:
+        for key in sorted(changed_charmap):
+            print('changed: {:s}     {:s}->{:s} {:s}'.format(
+                ucs_symbol(key),
+                changed_charmap[key][0],
+                changed_charmap[key][1],
+                unicode_attributes[key]['name'] if key in unicode_attributes else None))
+    print('Total added characters in newly generated CHARMAP: %d'
+          %len(set(ncharmap)-set(ocharmap)))
+    if args.show_added_characters:
+        for key in sorted(set(ncharmap)-set(ocharmap)):
+            print('added: {:s}     {:s} {:s}'.format(
+                ucs_symbol(key),
+                ncharmap[key],
+                unicode_attributes[key]['name'] if key in unicode_attributes else None))
 
 def create_width_dictionary(file_name):
     with open(file_name, mode='r') as file:
@@ -199,6 +244,8 @@ def create_width_dictionary(file_name):
         sys.stderr.write('No “WIDTH” or no “END WIDTH” found in %s\n' %file)
 
 def check_width(original_file_name, new_file_name):
+    print('************************************************************')
+    print('Report on WIDTH:')
     global args
     owidth = create_width_dictionary(original_file_name)
     nwidth = create_width_dictionary(new_file_name)
@@ -286,8 +333,5 @@ if __name__ == "__main__":
         fill_attributes(args.unicode_data_file)
     if args.east_asian_width_file:
         fill_east_asian_widths(args.east_asian_width_file)
-    print("Report on CHARMAP:")
     check_charmap(args.old_utf8_file, args.new_utf8_file)
-    print("************************************************************\n")
-    print("Report on WIDTH:")
     check_width(args.old_utf8_file, args.new_utf8_file)
