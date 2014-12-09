@@ -188,10 +188,7 @@ def check_charmap(original_file_name, new_file_name):
     global args
     ocharmap = create_charmap_dictionary(original_file_name)
     ncharmap = create_charmap_dictionary(new_file_name)
-    changed_charmap = {}
-    for key in set(ocharmap).intersection(set(ncharmap)):
-        if ocharmap[key] != ncharmap[key]:
-            changed_charmap[key] = (ocharmap[key], ncharmap[key])
+    print('------------------------------------------------------------')
     print('Total removed characters in newly generated CHARMAP: %d'
           %len(set(ocharmap)-set(ncharmap)))
     if args.show_missing_characters:
@@ -200,6 +197,11 @@ def check_charmap(original_file_name, new_file_name):
                 ucs_symbol(key),
                 ocharmap[key],
                 unicode_attributes[key]['name'] if key in unicode_attributes else None))
+    print('------------------------------------------------------------')
+    changed_charmap = {}
+    for key in set(ocharmap).intersection(set(ncharmap)):
+        if ocharmap[key] != ncharmap[key]:
+            changed_charmap[key] = (ocharmap[key], ncharmap[key])
     print('Total changed characters in newly generated CHARMAP: %d'
           %len(changed_charmap))
     if args.show_changed_characters:
@@ -209,6 +211,7 @@ def check_charmap(original_file_name, new_file_name):
                 changed_charmap[key][0],
                 changed_charmap[key][1],
                 unicode_attributes[key]['name'] if key in unicode_attributes else None))
+    print('------------------------------------------------------------')
     print('Total added characters in newly generated CHARMAP: %d'
           %len(set(ncharmap)-set(ocharmap)))
     if args.show_added_characters:
@@ -249,52 +252,49 @@ def check_width(original_file_name, new_file_name):
     global args
     owidth = create_width_dictionary(original_file_name)
     nwidth = create_width_dictionary(new_file_name)
+    print('------------------------------------------------------------')
+    print('Total removed characters in newly generated WIDTH: %d'
+          %len(set(owidth)-set(nwidth)))
+    print('(Characters not in WIDTH get width 1 by default, i.e. these have width 1 now.)')
+    if args.show_missing_characters:
+        for key in sorted(set(owidth)-set(nwidth)):
+            print('removed: {:s} {:d} : eaw={:s} category={:2s} bidi={:3s} name={:s}'.format(
+                ucs_symbol(key),
+                owidth[key],
+                east_asian_widths[key] if key in east_asian_widths else None,
+                unicode_attributes[key]['category'] if key in unicode_attributes else None,
+                unicode_attributes[key]['bidi'] if key in unicode_attributes else None,
+                unicode_attributes[key]['name'] if key in unicode_attributes else None))
+    print('------------------------------------------------------------')
     changed_width = {}
-    for key in owidth:
-        if key in nwidth and owidth[key] != nwidth[key]:
+    for key in set(owidth).intersection(set(nwidth)):
+        if owidth[key] != nwidth[key]:
             changed_width[key] = (owidth[key], nwidth[key])
-    for key in owidth:
-        if key not in nwidth:
-            changed_width[key] = (owidth[key], 1)
-    for key in nwidth:
-        if key not in owidth:
-            changed_width[key] = (1, nwidth[key])
-    print("Total changed characters in newly generated WIDTH: ", len(changed_width))
+    print('Total changed characters in newly generated WIDTH: %d'
+          %len(changed_width))
     if args.show_changed_characters:
         for key in sorted(changed_width):
-            print('changed width: 0x%04x : %d->%d eaw=%s category=%2s bidi=%-3s name=%s'
-                  %(key,
-                    changed_width[key][0],
-                    changed_width[key][1],
-                    east_asian_widths[key] if key in east_asian_widths else None,
-                    unicode_attributes[key]['category'] if key in unicode_attributes else None,
-                    unicode_attributes[key]['bidi'] if key in unicode_attributes else None,
-                    unicode_attributes[key]['name'] if key in unicode_attributes else None,
-            ))
-    mwidth = dict(set(owidth.items()) - set(nwidth.items()))
-    print("Total missing characters in newly generated WIDTH: ", len(mwidth))
-    if args.show_missing_characters:
-        for key in sorted(mwidth):
-            print('removed: 0x%04x : %d eaw=%s category=%2s bidi=%-3s name=%s'
-                  %(key,
-                    mwidth[key],
-                    east_asian_widths[key] if key in east_asian_widths else None,
-                    unicode_attributes[key]['category'] if key in unicode_attributes else None,
-                    unicode_attributes[key]['bidi'] if key in unicode_attributes else None,
-                    unicode_attributes[key]['name'] if key in unicode_attributes else None,
-            ))
-    awidth = dict(set(nwidth.items()) - set(owidth.items()))
-    print("Total added characters in newly generated WIDTH: ", len(awidth))
+            print('changed width: {:s} {:d}->{:d} : eaw={:s} category={:2s} bidi={:3s} name={:s}'.format(
+                ucs_symbol(key),
+                changed_width[key][0],
+                changed_width[key][1],
+                east_asian_widths[key] if key in east_asian_widths else None,
+                unicode_attributes[key]['category'] if key in unicode_attributes else None,
+                unicode_attributes[key]['bidi'] if key in unicode_attributes else None,
+                unicode_attributes[key]['name'] if key in unicode_attributes else None))
+    print('------------------------------------------------------------')
+    print('Total added characters in newly generated WIDTH: %d'
+          %len(set(nwidth)-set(owidth)))
+    print('(Characters not in WIDTH get width 1 by default, i.e. these had width 1 before.)')
     if args.show_added_characters:
-        for key in sorted(awidth):
-            print('added: 0x%04x : %d eaw=%s category=%2s bidi=%-3s name=%s'
-                  %(key,
-                    awidth[key],
-                    east_asian_widths[key] if key in east_asian_widths else None,
-                    unicode_attributes[key]['category'] if key in unicode_attributes else None,
-                    unicode_attributes[key]['bidi'] if key in unicode_attributes else None,
-                    unicode_attributes[key]['name'] if key in unicode_attributes else None,
-            ))
+        for key in sorted(set(nwidth)-set(owidth)):
+            print('added: {:s} {:d} : eaw={:s} category={:2s} bidi={:3s} name={:s}'.format(
+                ucs_symbol(key),
+                nwidth[key],
+                east_asian_widths[key] if key in east_asian_widths else None,
+                unicode_attributes[key]['category'] if key in unicode_attributes else None,
+                unicode_attributes[key]['bidi'] if key in unicode_attributes else None,
+                unicode_attributes[key]['name'] if key in unicode_attributes else None))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
