@@ -23,7 +23,8 @@
 # It will output UTF-8 file
 # For issues upstream https://github.com/pravins/glibc-i18n
 
-import os,sys,re
+import sys
+import re
 
 def ucs_symbol(code_point):
     if code_point < 0x10000:
@@ -111,7 +112,7 @@ def process_charmap(flines, outfile):
          # ”Unicode 1.0 Name”. We could write code to take their
          # alternate names from NameAliases.txt.
         if w[1] == "<control>" and w[10]:
-                w[1] = w[10]
+            w[1] = w[10]
         # Handling code point ranges like:
         #
         # 3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
