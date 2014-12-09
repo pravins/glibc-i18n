@@ -148,23 +148,23 @@ def fill_east_asian_widths(filename):
             for code_point in range(int(start, 16), int(end, 16)+1):
                 east_asian_widths[code_point] = match.group('property')
 
-def create_charmap_dictionary(lines):
-    charmap_dictionary = {}
-    start = False
-    for l in lines:
-        w = l.split()
-        if len(w) > 0 and w[0] == 'CHARMAP':
-            start = True
-            continue
-        if start == False:
-            continue
-        if w[0] == "END":
-            return charmap_dictionary
-        charmap_dictionary[w[0]] = w[1]
+def create_charmap_dictionary(file_name):
+    with open(file_name, mode='r') as file:
+        charmap_dictionary = {}
+        for line in file:
+            if line.startswith('CHARMAP'):
+                break
+        for line in file:
+            if line.startswith('END CHARMAP'):
+                return charmap_dictionary
+            fields = line.split()
+            charmap_dictionary[fields[0]] = fields[1]
+        sys.stderr.write('No “CHARMAP” or no “END CHARMAP” found in %s\n' %file_name)
+        exit(1)
 
-def check_charmap(original, new):
-    ocharmap = create_charmap_dictionary(original)
-    ncharmap = create_charmap_dictionary(new)
+def check_charmap(original_file_name, new_file_name):
+    ocharmap = create_charmap_dictionary(original_file_name)
+    ncharmap = create_charmap_dictionary(new_file_name)
     for key in ocharmap:
         if key in ncharmap:
             if ncharmap[key] != ocharmap[key]:
@@ -173,30 +173,35 @@ def check_charmap(original, new):
             if key !='%':
                 print('This character might be missing in the generated charmap: ', key)
 
-def create_width_dictionary(lines):
-    width_dictionary = {}
-    start = False
-    for l in lines:
-        w = l.split()
-        if len(w) > 0 and w[0] == 'WIDTH':
-            start = True
-            continue
-        if start == False:
-            continue
-        if w[0] == 'END':
-            return width_dictionary
-        if not '...' in w[0]:
-            width_dictionary[int(w[0][2:len(w[0])-1], 16)] = int(w[1])
-        else:
-            wc = w[0].split("...")
-            for i in range(int(wc[0][2:len(wc[0])-1], 16),
-                           int(wc[1][2:len(wc[0])-1], 16) + 1):
-                width_dictionary[i] = int(w[1])
+def create_width_dictionary(file_name):
+    with open(file_name, mode='r') as file:
+        width_dictionary = {}
+        for line in file:
+            if line.startswith('WIDTH'):
+                break
+        for line in file:
+            if line.startswith('END WIDTH'):
+                return width_dictionary
+            match = re.match(
+                r'^<U(?P<codepoint1>[0-9A-F]{4,8})>'
+                +r'(:?\.\.\.<U(?P<codepoint2>[0-9-A-F]{4,8})>)?'
+                +r'\s+(?P<width>[02])',
+                line)
+            if not match:
+                continue
+            codepoint1 = match.group('codepoint1')
+            codepoint2 = match.group('codepoint2')
+            if not codepoint2:
+                codepoint2 = codepoint1
+            for i in range(int(codepoint1, 16),
+                           int(codepoint2, 16) + 1):
+                width_dictionary[i] = int(match.group('width'))
+        sys.stderr.write('No “WIDTH” or no “END WIDTH” found in %s\n' %file)
 
-def check_width(olines, nlines):
+def check_width(original_file_name, new_file_name):
     global args
-    owidth = create_width_dictionary(olines)
-    nwidth = create_width_dictionary(nlines)
+    owidth = create_width_dictionary(original_file_name)
+    nwidth = create_width_dictionary(new_file_name)
     changed_width = {}
     for key in owidth:
         if key in nwidth and owidth[key] != nwidth[key]:
@@ -281,11 +286,8 @@ if __name__ == "__main__":
         fill_attributes(args.unicode_data_file)
     if args.east_asian_width_file:
         fill_east_asian_widths(args.east_asian_width_file)
-    # o_ for Original UTF-8 and n_ for New UTF-8 file
-    o_lines = open(args.old_utf8_file).readlines()
-    n_lines = open(args.new_utf8_file).readlines()
     print("Report on CHARMAP:")
-    check_charmap(o_lines, n_lines)
+    check_charmap(args.old_utf8_file, args.new_utf8_file)
     print("************************************************************\n")
     print("Report on WIDTH:")
-    check_width(o_lines, n_lines)
+    check_width(args.old_utf8_file, args.new_utf8_file)
