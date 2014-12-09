@@ -135,20 +135,18 @@ def fill_east_asian_widths(filename):
     with open(filename, mode='r') as file:
         for line in file:
             match = re.match(
-                r'^(?P<codepoint>[0-9A-F]{4,6})\s*;\s*(?P<property>[a-zA-Z]+)',
+                r'^(?P<codepoint1>[0-9A-F]{4,6})'
+                +r'(?:\.\.(?P<codepoint2>[0-9A-F]{4,6}))?'
+                +r'\s*;\s*(?P<property>[a-zA-Z]+)',
                 line)
-            if match:
-                east_asian_widths[
-                        int(match.group('codepoint'), 16)
-                ] = match.group('property')
-            match = re.match(
-                r'^(?P<codepoint1>[0-9A-F]{4,6})\.\.(?P<codepoint2>[0-9A-F]{4,6})\s*;\s*(?P<property>[a-zA-Z]+)',
-                line)
-            if match:
-                for code_point in range(
-                        int(match.group('codepoint1'), 16),
-                        int(match.group('codepoint2'), 16)+1):
-                    east_asian_widths[code_point] = match.group('property')
+            if not match:
+                continue
+            start = match.group('codepoint1')
+            end = match.group('codepoint2')
+            if not end:
+                end = start
+            for code_point in range(int(start, 16), int(end, 16)+1):
+                east_asian_widths[code_point] = match.group('property')
 
 def create_charmap_dictionary(lines):
     charmap_dictionary = {}
