@@ -152,22 +152,20 @@ def fill_derived_core_properties(filename):
     with open(filename, mode='r') as file:
         for line in file:
             match = re.match(
-                r'^(?P<codepoint>[0-9A-F]{4,6})\s*;\s*(?P<property>[a-zA-Z_]+)',
+                r'^(?P<codepoint1>[0-9A-F]{4,6})'
+                + r'(?:\.\.(?P<codepoint2>[0-9A-F]{4,6}))?'
+                + r'\s*;\s*(?P<property>[a-zA-Z_]+)',
                 line)
-            if match:
+            if not match:
+                continue
+            start = match.group('codepoint1')
+            end = match.group('codepoint2')
+            if not end:
+                end = start
+            for code_point in range(int(start, 16), int(end, 16)+1):
                 fill_derived_core_property(
-                    int(match.group('codepoint'), 16),
+                    code_point,
                     match.group('property'))
-            match = re.match(
-                r'^(?P<codepoint1>[0-9A-F]{4,6})\.\.(?P<codepoint2>[0-9A-F]{4,6})\s*;\s*(?P<property>[a-zA-Z_]+)',
-                line)
-            if match:
-                for code_point in range(
-                        int(match.group('codepoint1'), 16),
-                        int(match.group('codepoint2'), 16)+1):
-                    fill_derived_core_property(
-                        code_point,
-                        match.group('property'))
 
 def to_upper(code_point):
     if (unicode_attributes[code_point]['name']
