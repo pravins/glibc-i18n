@@ -31,24 +31,21 @@ To see how it is used, call it with the “-h” option:
     … prints usage message …
 '''
 
-import os
 import sys
 import re
 import unicodedata
 import argparse
 
-global args
-
 def get_lines_from_file(filename):
-    '''Get all non-comment lines from a file
+    '''Get all non-comment lines from a i18n file
 
     Also merge all lines which are continued on the next line because
     they end in “/” into a single line.
     '''
     all_lines = []
-    with open(filename) as file:
+    with open(filename) as i18n_file:
         current_line = ''
-        for line in file:
+        for line in i18n_file:
             line = line.strip('\n')
             if '%' in line:
                 if line.endswith('/'):
@@ -65,7 +62,7 @@ def get_lines_from_file(filename):
         all_lines.append(current_line)
     return all_lines
 
-def extract_character_classes_and_code_points(filename):
+def extract_character_classes(filename):
     '''Get all Unicode code points for each character class from a file
 
     Store these code points in a dictionary using the character classes
@@ -117,7 +114,7 @@ def process_chars(char_class_list, code_point_line):
     for code_points in code_point_line.split(';'):
         code_points = code_points.strip()
         match = re.match(r'^<U(?P<codepoint>[0-9A-F]{4,8})>$', code_points)
-        if match: # <UXXXX>
+        if match: # <Uxxxx>
             char_class_list.append(
                 int(match.group('codepoint'), 16))
             continue
@@ -126,7 +123,7 @@ def process_chars(char_class_list, code_point_line):
             +'\.\.'+
             '<U(?P<codepoint2>[0-9A-F]{4,8})>$',
             code_points)
-        if match: # <UXXXX>..<UXXXX>
+        if match: # <Uxxxx>..<Uxxxx>
             for codepoint in range(
                     int(match.group('codepoint1'), 16),
                     int(match.group('codepoint2'), 16) + 1):
@@ -137,7 +134,7 @@ def process_chars(char_class_list, code_point_line):
             +'\.\.\(2\)\.\.'+
             '<U(?P<codepoint2>[0-9A-F]{4,8})>$',
             code_points)
-        if match: # <UXXXX>..(2)..<UXXXX>
+        if match: # <Uxxxx>..(2)..<Uxxxx>
             for codepoint in range(
                     int(match.group('codepoint1'), 16),
                     int(match.group('codepoint2'), 16) + 1,
@@ -151,7 +148,7 @@ def process_chars(char_class_list, code_point_line):
             '<U(?P<codepoint2>[0-9A-F]{4,8})>'
             +'\)$',
             code_points)
-        if match: # (<UXXXX>,<UXXXX>)
+        if match: # (<Uxxxx>,<Uxxxx>)
             char_class_list.append((
                 int(match.group('codepoint1'), 16),
                 int(match.group('codepoint2'), 16)))
@@ -219,26 +216,25 @@ def report(char_class, old_list, new_list):
     '''Report the differences for a certain LC_CTYPE character class
     between the old and the newly generated state
     '''
-    global args
     missing_chars = list(set(old_list)-set(new_list))
     print(('%(char_class)s: Missing %(number)d characters '
            + 'of old ctype in new ctype ')
           %{'char_class': char_class, 'number': len(missing_chars)})
-    if args.show_missing_characters:
+    if ARGS.show_missing_characters:
         report_code_points(char_class, missing_chars, 'Missing')
     added_chars = list(set(new_list)-set(old_list))
     print(('%(char_class)s: Added %(number)d characters '
            + 'in new ctype which were not in old ctype')
           %{'char_class': char_class, 'number': len(added_chars)})
-    if args.show_added_characters:
+    if ARGS.show_added_characters:
         report_code_points(char_class, added_chars, 'Added')
 
-number_of_errors = 0
+NUMBER_OF_ERRORS = 0
 
 def cperror(error_message):
     '''Increase number of errors by one and print an error message'''
-    global number_of_errors
-    number_of_errors += 1
+    global NUMBER_OF_ERRORS
+    NUMBER_OF_ERRORS += 1
     print(error_message)
 
 def cpcheck(ctype_dict, code_point_list_with_ranges, char_classes, reason=''):
@@ -251,12 +247,14 @@ def cpcheck(ctype_dict, code_point_list_with_ranges, char_classes, reason=''):
     of the two integers given, including the two integers of the pair.
 
     '''
-    for r in code_point_list_with_ranges:
-        for code_point in ([r] if type(r) == type(int())
-                           else range(r[0], r[1]+1)):
-            for c in char_classes:
-                char_class = c[0]
-                in_char_class = c[1]
+    for code_point_range in code_point_list_with_ranges:
+        for code_point in ([code_point_range]
+                           if type(code_point_range) == type(int())
+                           else range(code_point_range[0],
+                                      code_point_range[1]+1)):
+            for char_class_tuple in char_classes:
+                char_class = char_class_tuple[0]
+                in_char_class = char_class_tuple[1]
                 if (code_point in ctype_dict[char_class]) != in_char_class:
                     cperror(('error: %(code_point)s %(char)s '
                              + '%(char_class)s %(in)s: %(reason)s') %{
@@ -284,10 +282,10 @@ def tests(ctype_dict):
 
     cpcheck(ctype_dict2,
             [0x0E2F, 0x0E46],
-            [('alpha', False), ('punct', True)],
-            '''FIXME: Theppitak Karoonboonyanan <thep@links.nectec.or.th> says
+            [('alpha', True), ('punct', False)],
+            '''Theppitak Karoonboonyanan <thep@links.nectec.or.th> says
             <U0E2F>, <U0E46> should belong to punct. DerivedCoreProperties.txt
-            says it is alpha.'''
+            says it is alpha. We trust DerivedCoreProperties.txt.'''
     )
     cpcheck(ctype_dict2,
             [0x0E31, (0x0E34, 0x0E3A)],
@@ -297,11 +295,24 @@ def tests(ctype_dict):
             are alpha. DerivedCoreProperties.txt agrees.'''
     )
     cpcheck(ctype_dict2,
-            [(0x0E47, 0x0E4E)],
-            [('alpha', True)],
-            '''FIXME: gen-unicode-ctype.c: Theppitak Karoonboonyanan
+            [(0x0E47, 0x0E4C), 0x0E4E],
+            [('alpha', False)],
+            '''gen-unicode-ctype.c: Theppitak Karoonboonyanan
             <thep@links.nectec.or.th> says <U0E47>..<U0E4E> are
-            is_alpha. DerivedCoreProperties does *not*.'''
+            is_alpha. DerivedCoreProperties does says *only* <U0E4D>
+            in that range is alphabetic, the others are *not*. We
+            trust DerivedCoreProperties.txt.
+            '''
+    )
+    cpcheck(ctype_dict2,
+            [0x0E4D],
+            [('alpha', True)],
+            '''gen-unicode-ctype.c: Theppitak Karoonboonyanan
+            <thep@links.nectec.or.th> says <U0E47>..<U0E4E> are
+            is_alpha. DerivedCoreProperties does says *only* <U0E4D>
+            in that range is alphabetic, the others are *not*. We
+            trust DerivedCoreProperties.txt.
+            '''
     )
     cpcheck(ctype_dict2,
             [0x0345],
@@ -1455,62 +1466,60 @@ def tests(ctype_dict):
                 'cp': hex(code_point)})
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    PARSER = argparse.ArgumentParser(
         description='''
         Compare the contents of LC_CTYPE in two files and check for errors.
         ''')
-    parser.add_argument(
+    PARSER.add_argument(
         '-o', '--old_ctype_file',
         nargs='?',
         type=str,
         default='i18n',
         help='The old ctype file, default: %(default)s')
-    parser.add_argument(
+    PARSER.add_argument(
         '-n', '--new_ctype_file',
         nargs='?',
         type=str,
         default='unicode-ctype',
         help='The new ctype file, default: %(default)s')
-    parser.add_argument(
+    PARSER.add_argument(
         '-a', '--show_added_characters',
         action='store_true',
         help=('Show characters which were added to each '
               + 'character class in detail.'))
-    parser.add_argument(
+    PARSER.add_argument(
         '-m', '--show_missing_characters',
         action='store_true',
         help=('Show characters which were removed from each '
               + 'character class in detail.'))
-    global args
-    args = parser.parse_args()
+    ARGS = PARSER.parse_args()
 
-    old_ctype_file = args.old_ctype_file
-    new_ctype_file = args.new_ctype_file
-    old_ctype_dict = extract_character_classes_and_code_points(old_ctype_file)
-    new_ctype_dict = extract_character_classes_and_code_points(new_ctype_file)
-    #    if args.verbose:
-    compare_lists(old_ctype_dict, new_ctype_dict)
+    OLD_CTYPE_DICT = extract_character_classes(
+        ARGS.old_ctype_file)
+    NEW_CTYPE_DICT = extract_character_classes(
+        ARGS.new_ctype_file)
+    compare_lists(OLD_CTYPE_DICT, NEW_CTYPE_DICT)
     print('============================================================')
-    print('Checking for errors in old ctype file: %s' %old_ctype_file)
+    print('Checking for errors in old ctype file: %s' %ARGS.old_ctype_file)
     print('------------------------------------------------------------')
-    tests(old_ctype_dict)
-    number_of_errors_in_old_file = number_of_errors
-    number_of_errors = 0
+    tests(OLD_CTYPE_DICT)
+    NUMBER_OF_ERRORS_IN_OLD_FILE = NUMBER_OF_ERRORS
+    NUMBER_OF_ERRORS = 0
     print('------------------------------------------------------------')
-    print('Old file = %s' %old_ctype_file)
-    print('Number of errors in old file = %s' %number_of_errors_in_old_file)
+    print('Old file = %s' %ARGS.old_ctype_file)
+    print('Number of errors in old file = %s' %NUMBER_OF_ERRORS_IN_OLD_FILE)
     print('------------------------------------------------------------')
     print('============================================================')
-    print('Checking for errors in new ctype file: %s' %new_ctype_file)
+    print('Checking for errors in new ctype file: %s' %ARGS.new_ctype_file)
     print('------------------------------------------------------------')
-    tests(new_ctype_dict)
-    number_of_errors_in_new_file = number_of_errors
-    number_of_errors = 0
+    tests(NEW_CTYPE_DICT)
+    NUMBER_OF_ERRORS_IN_NEW_FILE = NUMBER_OF_ERRORS
+    NUMBER_OF_ERRORS = 0
     print('------------------------------------------------------------')
-    print('New file = %s' %new_ctype_file)
-    print('Number of errors in new file = %s' %number_of_errors_in_new_file)
+    print('New file = %s' %ARGS.new_ctype_file)
+    print('Number of errors in new file = %s' %NUMBER_OF_ERRORS_IN_NEW_FILE)
     print('------------------------------------------------------------')
-    if number_of_errors_in_new_file > 0:
+    if NUMBER_OF_ERRORS_IN_NEW_FILE > 0:
         exit(1)
     else:
         exit(0)
