@@ -27,12 +27,17 @@ import sys
 import re
 
 def ucs_symbol(code_point):
+    '''Return the UCS symbol string for a Unicode character.'''
     if code_point < 0x10000:
         return '<U{:04X}>'.format(code_point)
     else:
         return '<U{:08X}>'.format(code_point)
 
 def process_range(start, end, outfile, name):
+    '''Writes a range of code points into the CHARMAP section of the
+    output file
+
+    '''
     if 'Hangul Syllable' in name:
         # from glibc/localedata/ChangeLog:
         #
@@ -157,6 +162,7 @@ def convert_to_hex(code_point):
     ])
 
 def write_header_charmap(outfile):
+    '''Write the header on top of the CHARMAP section to the output file'''
     outfile.write("<code_set_name> UTF-8\n")
     outfile.write("<comment_char> %\n")
     outfile.write("<escape_char> /\n")
@@ -167,6 +173,7 @@ def write_header_charmap(outfile):
     outfile.write("CHARMAP\n")
 
 def write_header_width(outfile):
+    '''Writes the header on top of the WIDTH section to the output file'''
     outfile.write('% Character width according to Unicode 7.0.0.\n')
     outfile.write('% - Default width is 1.\n')
     outfile.write('% - Double-width characters have width 2; generated from\n')

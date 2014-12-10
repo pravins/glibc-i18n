@@ -160,6 +160,7 @@ def process_chars(char_class_list, code_point_line):
         exit(1)
 
 def compare_lists(old_ctype_dict, new_ctype_dict):
+    '''Compare character classes in the old and the new LC_CTYPE'''
     print('****************************************************')
     print('Character classes which are only in the new '
           + 'or only in the old file:')
@@ -183,47 +184,54 @@ def compare_lists(old_ctype_dict, new_ctype_dict):
                new_ctype_dict[char_class])
 
 def report_code_points(char_class, code_point_list, text=''):
-   for code_point in sorted(code_point_list):
-       if type(code_point) == type(int()):
-           print('%(char_class)s: %(text)s: %(char)s %(code_point)s %(name)s'
-                 %{'text': text,
-                   'char': chr(code_point),
-                   'char_class': char_class,
-                   'code_point': hex(code_point),
-                   'name': unicodedata.name(chr(code_point), 'name unknown')})
-       else:
-           print(('%(char_class)s: %(text)s: '
-                  + '%(char0)s → %(char1)s '
-                  + '%(code_point0)s → %(code_point1)s '
-                  + '%(name0)s → %(name1)s') %{
-               'text': text,
-               'char_class': char_class,
-               'char0': chr(code_point[0]),
-               'code_point0': hex(code_point[0]),
-               'name0': unicodedata.name(chr(code_point[0]), 'name unknown'),
-               'char1': chr(code_point[1]),
-               'code_point1': hex(code_point[1]),
-               'name1': unicodedata.name(chr(code_point[1]), 'name unknown')
-           })
+    '''Report all code points which have been added to or removed from a
+    character class.
+    '''
+    for code_point in sorted(code_point_list):
+        if type(code_point) == type(int()):
+            print('%(char_class)s: %(text)s: %(char)s %(code_point)s %(name)s'
+                  %{'text': text,
+                    'char': chr(code_point),
+                    'char_class': char_class,
+                    'code_point': hex(code_point),
+                    'name': unicodedata.name(chr(code_point), 'name unknown')})
+        else:
+            print(('%(char_class)s: %(text)s: '
+                   + '%(char0)s → %(char1)s '
+                   + '%(code_point0)s → %(code_point1)s '
+                   + '%(name0)s → %(name1)s') %{
+                'text': text,
+                'char_class': char_class,
+                'char0': chr(code_point[0]),
+                'code_point0': hex(code_point[0]),
+                'name0': unicodedata.name(chr(code_point[0]), 'name unknown'),
+                'char1': chr(code_point[1]),
+                'code_point1': hex(code_point[1]),
+                'name1': unicodedata.name(chr(code_point[1]), 'name unknown')
+            })
 
 def report(char_class, old_list, new_list):
-   global args
-   missing_chars = list(set(old_list)-set(new_list))
-   print(('%(char_class)s: Missing %(number)d characters '
-          + 'of old ctype in new ctype ')
-         %{'char_class': char_class, 'number': len(missing_chars)})
-   if args.show_missing_characters:
-       report_code_points(char_class, missing_chars, 'Missing')
-   added_chars = list(set(new_list)-set(old_list))
-   print(('%(char_class)s: Added %(number)d characters '
-          + 'in new ctype which were not in old ctype')
-         %{'char_class': char_class, 'number': len(added_chars)})
-   if args.show_added_characters:
-       report_code_points(char_class, added_chars, 'Added')
+    '''Report the differences for a certain LC_CTYPE character class
+    between the old and the newly generated state
+    '''
+    global args
+    missing_chars = list(set(old_list)-set(new_list))
+    print(('%(char_class)s: Missing %(number)d characters '
+           + 'of old ctype in new ctype ')
+          %{'char_class': char_class, 'number': len(missing_chars)})
+    if args.show_missing_characters:
+        report_code_points(char_class, missing_chars, 'Missing')
+    added_chars = list(set(new_list)-set(old_list))
+    print(('%(char_class)s: Added %(number)d characters '
+           + 'in new ctype which were not in old ctype')
+          %{'char_class': char_class, 'number': len(added_chars)})
+    if args.show_added_characters:
+        report_code_points(char_class, added_chars, 'Added')
 
 number_of_errors = 0
 
 def cperror(error_message):
+    '''Increase number of errors by one and print an error message'''
     global number_of_errors
     number_of_errors += 1
     print(error_message)
@@ -254,6 +262,7 @@ def cpcheck(ctype_dict, code_point_list_with_ranges, char_classes, reason=''):
                         'reason': reason})
 
 def tests(ctype_dict):
+    '''Test a LC_CTYPE character class dictionary for known errors'''
     # copy the information from ctype_dict (which contains lists) in
     # a new dictionary ctype_dict2 (which contains dictionaries).
     # The checks below are easier with that type of data structure.

@@ -132,12 +132,6 @@ def fill_attributes(filename):
             fill_attribute(int(fields[0], 16), fields)
             fields_start = []
 
-def fill_derived_core_property(code_point, property):
-    if code_point in derived_core_properties:
-        derived_core_properties[code_point].append(property)
-    else:
-        derived_core_properties[code_point] = [property]
-
 def fill_derived_core_properties(filename):
     '''Stores the entire contents of the DerivedCoreProperties.txt file
     in the derived_core_properties dictionary.
@@ -166,11 +160,15 @@ def fill_derived_core_properties(filename):
             if not end:
                 end = start
             for code_point in range(int(start, 16), int(end, 16)+1):
-                fill_derived_core_property(
-                    code_point,
-                    match.group('property'))
+                prop = match.group('property')
+                if code_point in derived_core_properties:
+                    derived_core_properties[code_point].append(prop)
+                else:
+                    derived_core_properties[code_point] = [prop]
 
 def to_upper(code_point):
+    '''Returns the code point of the uppercase version
+    of the given code point'''
     if (unicode_attributes[code_point]['name']
         and unicode_attributes[code_point]['upper']):
         return unicode_attributes[code_point]['upper']
@@ -178,6 +176,8 @@ def to_upper(code_point):
         return code_point
 
 def to_lower(code_point):
+    '''Returns the code point of the lowercase version
+    of the given code point'''
     if (unicode_attributes[code_point]['name']
         and unicode_attributes[code_point]['lower']):
         return unicode_attributes[code_point]['lower']
@@ -185,6 +185,8 @@ def to_lower(code_point):
         return code_point
 
 def to_title(code_point):
+    '''Returns the code point of the titlecase version
+    of the given code point'''
     if (unicode_attributes[code_point]['name']
         and unicode_attributes[code_point]['title']):
         return unicode_attributes[code_point]['title']
@@ -192,11 +194,13 @@ def to_title(code_point):
         return code_point
 
 def is_upper(code_point):
+    '''Checks whether the character with this code point is uppercase'''
     return (to_lower(code_point) != code_point
             or (code_point in derived_core_properties
                 and 'Uppercase' in derived_core_properties[code_point]))
 
 def is_lower(code_point):
+    '''Checks whether the character with this code point is lowercase'''
     # Some characters are defined as “Lowercase” in
     # Derived_Core_Properties.txt but do not have a mapping to upper
     # case. For example, ꜰ U+A72F “LATIN LETTER SMALL CAPITAL F” is
@@ -208,6 +212,7 @@ def is_lower(code_point):
                 and 'Lowercase' in derived_core_properties[code_point]))
 
 def is_alpha(code_point):
+    '''Checks whether the character with this code point is alphabetic'''
     return ((code_point in derived_core_properties
              and
              'Alphabetic' in derived_core_properties[code_point])
@@ -219,6 +224,7 @@ def is_alpha(code_point):
              and not (code_point >= 0x0030 and code_point <= 0x0039)))
 
 def is_digit(code_point):
+    '''Checks whether the character with this code point is a digit'''
     if 0:
         return (unicode_attributes[code_point]['name']
                 and unicode_attributes[code_point]['category'] == 'Nd')
@@ -235,9 +241,11 @@ def is_digit(code_point):
         return (code_point >= 0x0030 and code_point <= 0x0039)
 
 def is_outdigit(code_point):
+    '''Checks whether the character with this code point is outdigit'''
     return (code_point >= 0x0030 and code_point <= 0x0039)
 
 def is_blank(code_point):
+    '''Checks whether the character with this code point is blank'''
     return (code_point == 0x0009 # '\t'
             # Category Zs without mention of '<noBreak>'
             or (unicode_attributes[code_point]['name']
@@ -246,6 +254,7 @@ def is_blank(code_point):
                 unicode_attributes[code_point]['decomposition']))
 
 def is_space(code_point):
+    '''Checks whether the character with this code point is a space'''
     # Don’t make U+00A0 a space. Non-breaking space means that all programs
     # should treat it like a punctuation character, not like a space.
     return (code_point == 0x0020 # ' '
@@ -265,12 +274,16 @@ def is_space(code_point):
                   unicode_attributes[code_point]['decomposition']))))
 
 def is_cntrl(code_point):
+    '''Checks whether the character with this code point is
+    a control character'''
     return (unicode_attributes[code_point]['name']
             and (unicode_attributes[code_point]['name'] == '<control>'
                  or
                  unicode_attributes[code_point]['category'] in ['Zl', 'Zp']))
 
 def is_xdigit(code_point):
+    '''Checks whether the character with this code point is
+    a hexadecimal digit'''
     if 0:
         return (is_digit(code_point)
                 or (code_point >= 0x0041 and code_point <= 0x0046)
@@ -290,16 +303,20 @@ def is_xdigit(code_point):
                 or (code_point >= 0x0061 and code_point <= 0x0066))
 
 def is_graph(code_point):
+    '''Checks whether the character with this code point is
+    a graphical character'''
     return (unicode_attributes[code_point]['name']
             and unicode_attributes[code_point]['name'] != '<control>'
             and not is_space(code_point))
 
 def is_print(code_point):
+    '''Checks whether the character with this code point is printable'''
     return (unicode_attributes[code_point]['name']
             and unicode_attributes[code_point]['name'] != '<control>'
             and unicode_attributes[code_point]['category'] not in ['Zl', 'Zp'])
 
 def is_punct(code_point):
+    '''Checks whether the character with this code point is punctuation'''
     if 0:
         return (unicode_attributes[code_point]['name']
                 and unicode_attributes[code_point]['category'].startswith('P'))
@@ -311,6 +328,8 @@ def is_punct(code_point):
                 and not is_digit(code_point))
 
 def is_combining(code_point):
+    '''Checks whether the character with this code point is
+    a combining character'''
     # Up to Unicode 3.0.1 we took the Combining property from the PropList.txt
     # file. In 3.0.1 it was identical to the union of the general categories
     # "Mn", "Mc", "Me". In Unicode 3.1 this property has been dropped from the
@@ -320,6 +339,8 @@ def is_combining(code_point):
             unicode_attributes[code_point]['category'] in ['Mn', 'Mc', 'Me'])
 
 def is_combining_level3(code_point):
+    '''Checks whether the character with this code point is
+    a combining level3 character'''
     return (is_combining(code_point)
             and
             int(unicode_attributes[code_point]['combining']) in range(0, 200))
@@ -332,9 +353,25 @@ def ucs_symbol(code_point):
         return '<U{:08X}>'.format(code_point)
 
 def ucs_symbol_range(code_point_low, code_point_high):
+    '''Returns a string UCS symbol string for a code point range.
+
+    Example:
+
+    <U0041>..<U005A>
+    '''
     return ucs_symbol(code_point_low) + '..' + ucs_symbol(code_point_high)
 
 def output_charclass(file, class_name, is_class_function):
+    '''Output a LC_CTYPE character class section
+
+    Example:
+
+    upper /
+       <U0041>..<U005A>;<U00C0>..<U00D6>;<U00D8>..<U00DE>;<U0100>;<U0102>;/
+       …
+       <U0001D790>..<U0001D7A8>;<U0001D7CA>;<U0001F130>..<U0001F149>;/
+       <U0001F150>..<U0001F169>;<U0001F170>..<U0001F189>
+    '''
     code_point_ranges  = []
     for code_point in sorted(unicode_attributes):
         if is_class_function(code_point):
@@ -368,6 +405,16 @@ def output_charclass(file, class_name, is_class_function):
             file.write(line+'\n')
 
 def output_charmap(file, map_name, map_function):
+    '''Output a LC_CTYPE character map section
+
+    Example:
+
+    toupper /
+      (<U0061>,<U0041>);(<U0062>,<U0042>);(<U0063>,<U0043>);(<U0064>,<U0044>);/
+      …
+      (<U000118DC>,<U000118BC>);(<U000118DD>,<U000118BD>);/
+      (<U000118DE>,<U000118BE>);(<U000118DF>,<U000118BF>)
+    '''
     max_column = 75
     prefix = '   '
     line = prefix
@@ -391,6 +438,7 @@ def output_charmap(file, map_name, map_function):
         file.write(line+'\n')
 
 def verifications():
+    '''Tests whether the is_* functions observe the known restrictions'''
     for code_point in sorted(unicode_attributes):
         # toupper restriction: "Only characters specified for the keywords
         # lower and upper shall be specified.
@@ -494,6 +542,15 @@ def verifications():
                 'sym': ucs_symbol(code_point)})
 
 def read_input_file(filename):
+    '''Reads the original glibc i18n file to get the original head
+    and tail.
+
+    We want to replace only the character classes in LC_CTYPE, and the
+    date stamp. All the rest of the i18n file should stay unchanged.
+    To avoid having to cut and paste the generated data into the
+    original file, it is helpful to read the original file here
+    to be able to generate a complete result file.
+    '''
     head = tail = ''
     with open(filename, mode='r') as file:
         for line in file:
@@ -515,6 +572,7 @@ def read_input_file(filename):
     return (head, tail)
 
 def output_tables(filename, unicode_version, head='', tail=''):
+    '''Write an output file containing the new LC_CTYPE character classes'''
     with open(filename, mode='w') as file:
         if args.input_file and head:
             file.write(head)

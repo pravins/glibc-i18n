@@ -140,6 +140,18 @@ def fill_attributes(filename):
             fields_start = []
 
 def fill_east_asian_widths(filename):
+    '''Stores the entire contents of the EastAsianWidths.txt file
+    in the east_asian_widths dictionary.
+
+    Lines in EastAsianWidths.txt are either a code point range like
+    this:
+
+    9FCD..9FFF;W     # Cn    [51] <reserved-9FCD>..<reserved-9FFF>
+
+    or a single code point like this:
+
+    A015;W           # Lm         YI SYLLABLE WU
+    '''
     with open(filename, mode='r') as file:
         for line in file:
             match = re.match(
@@ -157,12 +169,16 @@ def fill_east_asian_widths(filename):
                 east_asian_widths[code_point] = match.group('property')
 
 def ucs_symbol(code_point):
+    '''Return the UCS symbol string for a Unicode character.'''
     if code_point < 0x10000:
         return '<U{:04X}>'.format(code_point)
     else:
         return '<U{:08X}>'.format(code_point)
 
 def create_charmap_dictionary(file_name):
+    '''Create a dictionary for all code points found in the CHARMAP
+    section of a file
+    '''
     with open(file_name, mode='r') as file:
         charmap_dictionary = {}
         for line in file:
@@ -192,6 +208,9 @@ def create_charmap_dictionary(file_name):
         exit(1)
 
 def check_charmap(original_file_name, new_file_name):
+    '''Report differences in the CHARMAP section between the old and the
+    new file
+    '''
     print('************************************************************')
     print('Report on CHARMAP:')
     global args
@@ -234,6 +253,9 @@ def check_charmap(original_file_name, new_file_name):
                 if key in unicode_attributes else None))
 
 def create_width_dictionary(file_name):
+    '''Create a dictionary for all code points found in the WIDTH
+    section of a file
+    '''
     with open(file_name, mode='r') as file:
         width_dictionary = {}
         for line in file:
@@ -259,6 +281,9 @@ def create_width_dictionary(file_name):
         sys.stderr.write('No “WIDTH” or no “END WIDTH” found in %s\n' %file)
 
 def check_width(original_file_name, new_file_name):
+    '''Report differences in the WIDTH section between the old and the new
+    file
+    '''
     print('************************************************************')
     print('Report on WIDTH:')
     global args
