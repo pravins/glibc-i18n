@@ -35,8 +35,6 @@ import sys
 import re
 import argparse
 
-global args
-
 # Dictionary holding the entire contents of the UnicodeData.txt file
 #
 # Contents of this dictionary look like this:
@@ -57,23 +55,23 @@ global args
 #      'numeric': ''},
 #      …
 # }
-unicode_attributes = {}
+UNICODE_ATTRIBUTES = {}
 
 # Dictionary holding the entire contents of the EastAsianWidths.txt file
 #
 # Contents of this dictionary look like this:
 #
 # {0: 'N', … , 45430: 'W', …}
-east_asian_widths = {}
+EAST_ASIAN_WIDTHS = {}
 
 def fill_attribute(code_point, fields):
-    '''Stores in unicode_attributes[code_point] the values from the fields.
+    '''Stores in UNICODE_ATTRIBUTES[code_point] the values from the fields.
 
-    One entry in the unicode_attributes dictionary represents one line
+    One entry in the UNICODE_ATTRIBUTES dictionary represents one line
     in the UnicodeData.txt file.
 
     '''
-    unicode_attributes[code_point] =  {
+    UNICODE_ATTRIBUTES[code_point] =  {
         'name': fields[1],          # Character name
         'category': fields[2],      # General category
         'combining': fields[3],     # Canonical combining classes
@@ -95,7 +93,7 @@ def fill_attribute(code_point, fields):
 
 def fill_attributes(filename):
     '''Stores the entire contents of the UnicodeData.txt file
-    in the unicode_attributes dictionary.
+    in the UNICODE_ATTRIBUTES dictionary.
 
     A typical line for a single code point in UnicodeData.txt looks
     like this:
@@ -107,9 +105,9 @@ def fill_attributes(filename):
     4E00;<CJK Ideograph, First>;Lo;0;L;;;;;N;;;;;
     9FCC;<CJK Ideograph, Last>;Lo;0;L;;;;;N;;;;;
     '''
-    with open(filename, mode='r') as file:
+    with open(filename, mode='r') as unicode_data_file:
         fields_start = []
-        for line in file:
+        for line in unicode_data_file:
             fields = line.strip().split(';')
             if len(fields) != 15:
                 sys.stderr.write(
@@ -143,7 +141,7 @@ def fill_attributes(filename):
 
 def fill_east_asian_widths(filename):
     '''Stores the entire contents of the EastAsianWidths.txt file
-    in the east_asian_widths dictionary.
+    in the EAST_ASIAN_WIDTHS dictionary.
 
     Lines in EastAsianWidths.txt are either a code point range like
     this:
@@ -154,8 +152,8 @@ def fill_east_asian_widths(filename):
 
     A015;W           # Lm         YI SYLLABLE WU
     '''
-    with open(filename, mode='r') as file:
-        for line in file:
+    with open(filename, mode='r') as east_asian_widths_file:
+        for line in east_asian_widths_file:
             match = re.match(
                 r'^(?P<codepoint1>[0-9A-F]{4,6})'
                 +r'(?:\.\.(?P<codepoint2>[0-9A-F]{4,6}))?'
@@ -168,7 +166,7 @@ def fill_east_asian_widths(filename):
             if not end:
                 end = start
             for code_point in range(int(start, 16), int(end, 16)+1):
-                east_asian_widths[code_point] = match.group('property')
+                EAST_ASIAN_WIDTHS[code_point] = match.group('property')
 
 def ucs_symbol(code_point):
     '''Return the UCS symbol string for a Unicode character.'''
@@ -181,12 +179,12 @@ def create_charmap_dictionary(file_name):
     '''Create a dictionary for all code points found in the CHARMAP
     section of a file
     '''
-    with open(file_name, mode='r') as file:
+    with open(file_name, mode='r') as utf8_file:
         charmap_dictionary = {}
-        for line in file:
+        for line in utf8_file:
             if line.startswith('CHARMAP'):
                 break
-        for line in file:
+        for line in utf8_file:
             if line.startswith('END CHARMAP'):
                 return charmap_dictionary
             if line.startswith('%'):
@@ -215,19 +213,18 @@ def check_charmap(original_file_name, new_file_name):
     '''
     print('************************************************************')
     print('Report on CHARMAP:')
-    global args
     ocharmap = create_charmap_dictionary(original_file_name)
     ncharmap = create_charmap_dictionary(new_file_name)
     print('------------------------------------------------------------')
     print('Total removed characters in newly generated CHARMAP: %d'
           %len(set(ocharmap)-set(ncharmap)))
-    if args.show_missing_characters:
+    if ARGS.show_missing_characters:
         for key in sorted(set(ocharmap)-set(ncharmap)):
             print('removed: {:s}     {:s} {:s}'.format(
                 ucs_symbol(key),
                 ocharmap[key],
-                unicode_attributes[key]['name'] \
-                if key in unicode_attributes else None))
+                UNICODE_ATTRIBUTES[key]['name'] \
+                if key in UNICODE_ATTRIBUTES else None))
     print('------------------------------------------------------------')
     changed_charmap = {}
     for key in set(ocharmap).intersection(set(ncharmap)):
@@ -235,35 +232,35 @@ def check_charmap(original_file_name, new_file_name):
             changed_charmap[key] = (ocharmap[key], ncharmap[key])
     print('Total changed characters in newly generated CHARMAP: %d'
           %len(changed_charmap))
-    if args.show_changed_characters:
+    if ARGS.show_changed_characters:
         for key in sorted(changed_charmap):
             print('changed: {:s}     {:s}->{:s} {:s}'.format(
                 ucs_symbol(key),
                 changed_charmap[key][0],
                 changed_charmap[key][1],
-                unicode_attributes[key]['name'] \
-                if key in unicode_attributes else None))
+                UNICODE_ATTRIBUTES[key]['name'] \
+                if key in UNICODE_ATTRIBUTES else None))
     print('------------------------------------------------------------')
     print('Total added characters in newly generated CHARMAP: %d'
           %len(set(ncharmap)-set(ocharmap)))
-    if args.show_added_characters:
+    if ARGS.show_added_characters:
         for key in sorted(set(ncharmap)-set(ocharmap)):
             print('added: {:s}     {:s} {:s}'.format(
                 ucs_symbol(key),
                 ncharmap[key],
-                unicode_attributes[key]['name'] \
-                if key in unicode_attributes else None))
+                UNICODE_ATTRIBUTES[key]['name'] \
+                if key in UNICODE_ATTRIBUTES else None))
 
 def create_width_dictionary(file_name):
     '''Create a dictionary for all code points found in the WIDTH
     section of a file
     '''
-    with open(file_name, mode='r') as file:
+    with open(file_name, mode='r') as utf8_file:
         width_dictionary = {}
-        for line in file:
+        for line in utf8_file:
             if line.startswith('WIDTH'):
                 break
-        for line in file:
+        for line in utf8_file:
             if line.startswith('END WIDTH'):
                 return width_dictionary
             match = re.match(
@@ -288,7 +285,6 @@ def check_width(original_file_name, new_file_name):
     '''
     print('************************************************************')
     print('Report on WIDTH:')
-    global args
     owidth = create_width_dictionary(original_file_name)
     nwidth = create_width_dictionary(new_file_name)
     print('------------------------------------------------------------')
@@ -296,22 +292,22 @@ def check_width(original_file_name, new_file_name):
           %len(set(owidth)-set(nwidth)))
     print('(Characters not in WIDTH get width 1 by default, '
           + 'i.e. these have width 1 now.)')
-    if args.show_missing_characters:
+    if ARGS.show_missing_characters:
         for key in sorted(set(owidth)-set(nwidth)):
             print('removed: {:s} '.format(ucs_symbol(key))
                   + '{:d} : '.format(owidth[key])
                   + 'eaw={:s} '.format(
-                      east_asian_widths[key]
-                      if key in east_asian_widths else None)
+                      EAST_ASIAN_WIDTHS[key]
+                      if key in EAST_ASIAN_WIDTHS else None)
                   + 'category={:2s} '.format(
-                      unicode_attributes[key]['category']
-                      if key in unicode_attributes else None)
+                      UNICODE_ATTRIBUTES[key]['category']
+                      if key in UNICODE_ATTRIBUTES else None)
                   + 'bidi={:3s} '.format(
-                      unicode_attributes[key]['bidi']
-                      if key in unicode_attributes else None)
+                      UNICODE_ATTRIBUTES[key]['bidi']
+                      if key in UNICODE_ATTRIBUTES else None)
                   + 'name={:s}'.format(
-                      unicode_attributes[key]['name']
-                      if key in unicode_attributes else None))
+                      UNICODE_ATTRIBUTES[key]['name']
+                      if key in UNICODE_ATTRIBUTES else None))
     print('------------------------------------------------------------')
     changed_width = {}
     for key in set(owidth).intersection(set(nwidth)):
@@ -319,90 +315,89 @@ def check_width(original_file_name, new_file_name):
             changed_width[key] = (owidth[key], nwidth[key])
     print('Total changed characters in newly generated WIDTH: %d'
           %len(changed_width))
-    if args.show_changed_characters:
+    if ARGS.show_changed_characters:
         for key in sorted(changed_width):
             print('changed width: {:s} '.format(ucs_symbol(key))
                   + '{:d}->{:d} : '.format(changed_width[key][0],
                                           changed_width[key][1])
                   + 'eaw={:s} '.format(
-                      east_asian_widths[key]
-                      if key in east_asian_widths else None)
+                      EAST_ASIAN_WIDTHS[key]
+                      if key in EAST_ASIAN_WIDTHS else None)
                   + 'category={:2s} '.format(
-                      unicode_attributes[key]['category']
-                      if key in unicode_attributes else None)
+                      UNICODE_ATTRIBUTES[key]['category']
+                      if key in UNICODE_ATTRIBUTES else None)
                   + 'bidi={:3s} '.format(
-                      unicode_attributes[key]['bidi']
-                      if key in unicode_attributes else None)
+                      UNICODE_ATTRIBUTES[key]['bidi']
+                      if key in UNICODE_ATTRIBUTES else None)
                   + 'name={:s}'.format(
-                      unicode_attributes[key]['name']
-                      if key in unicode_attributes else None))
+                      UNICODE_ATTRIBUTES[key]['name']
+                      if key in UNICODE_ATTRIBUTES else None))
     print('------------------------------------------------------------')
     print('Total added characters in newly generated WIDTH: %d'
           %len(set(nwidth)-set(owidth)))
     print('(Characters not in WIDTH get width 1 by default, '
           + 'i.e. these had width 1 before.)')
-    if args.show_added_characters:
+    if ARGS.show_added_characters:
         for key in sorted(set(nwidth)-set(owidth)):
             print('added: {:s} '.format(ucs_symbol(key))
                   + '{:d} : '.format(nwidth[key])
                   + 'eaw={:s} '.format(
-                      east_asian_widths[key]
-                      if key in east_asian_widths else None)
+                      EAST_ASIAN_WIDTHS[key]
+                      if key in EAST_ASIAN_WIDTHS else None)
                   + 'category={:2s} '.format(
-                      unicode_attributes[key]['category']
-                      if key in unicode_attributes else None)
+                      UNICODE_ATTRIBUTES[key]['category']
+                      if key in UNICODE_ATTRIBUTES else None)
                   + 'bidi={:3s} '.format(
-                      unicode_attributes[key]['bidi']
-                      if key in unicode_attributes else None)
+                      UNICODE_ATTRIBUTES[key]['bidi']
+                      if key in UNICODE_ATTRIBUTES else None)
                   + 'name={:s}'.format(
-                      unicode_attributes[key]['name']
-                      if key in unicode_attributes else None))
+                      UNICODE_ATTRIBUTES[key]['name']
+                      if key in UNICODE_ATTRIBUTES else None))
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    PARSER = argparse.ArgumentParser(
         description='''
         Compare the contents of LC_CTYPE in two files and check for errors.
         ''')
-    parser.add_argument(
+    PARSER.add_argument(
         '-o', '--old_utf8_file',
         nargs='?',
         required=True,
         type=str,
         help='The old UTF-8 file.')
-    parser.add_argument(
+    PARSER.add_argument(
         '-n', '--new_utf8_file',
         nargs='?',
         required=True,
         type=str,
         help='The new UTF-8 file.')
-    parser.add_argument(
+    PARSER.add_argument(
         '-u', '--unicode_data_file',
         nargs='?',
         type=str,
         help='The UnicodeData.txt file to read.')
-    parser.add_argument(
+    PARSER.add_argument(
         '-e', '--east_asian_width_file',
         nargs='?',
         type=str,
         help='The EastAsianWidth.txt file to read.')
-    parser.add_argument(
+    PARSER.add_argument(
         '-a', '--show_added_characters',
         action='store_true',
         help='Show characters which were added in detail.')
-    parser.add_argument(
+    PARSER.add_argument(
         '-m', '--show_missing_characters',
         action='store_true',
         help='Show characters which were removed in detail.')
-    parser.add_argument(
+    PARSER.add_argument(
         '-c', '--show_changed_characters',
         action='store_true',
         help='Show characters whose width was changed in detail.')
-    global args
-    args = parser.parse_args()
+    ARGS = PARSER.parse_args()
 
-    if args.unicode_data_file:
-        fill_attributes(args.unicode_data_file)
-    if args.east_asian_width_file:
-        fill_east_asian_widths(args.east_asian_width_file)
-    check_charmap(args.old_utf8_file, args.new_utf8_file)
-    check_width(args.old_utf8_file, args.new_utf8_file)
+    if ARGS.unicode_data_file:
+        fill_attributes(ARGS.unicode_data_file)
+    if ARGS.east_asian_width_file:
+        fill_east_asian_widths(ARGS.east_asian_width_file)
+    check_charmap(ARGS.old_utf8_file, ARGS.new_utf8_file)
+    check_width(ARGS.old_utf8_file, ARGS.new_utf8_file)
