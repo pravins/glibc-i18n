@@ -114,9 +114,9 @@ def process_charmap(flines, outfile):
     <U0010FFC0>..<U0010FFFD>     /xf4/x8f/xbf/x80 <Plane 16 Private Use>
 
     '''
-    wstart = []
+    fields_start = []
     for line in flines:
-        w = line.split(";")
+        fields = line.split(";")
          # Some characters have “<control>” as their name. We try to
          # use the “Unicode 1.0 Name” (10th field in
          # UnicodeData.txt) for them.
@@ -125,30 +125,31 @@ def process_charmap(flines, outfile):
          # “<control>” as their name but do not even have aa
          # ”Unicode 1.0 Name”. We could write code to take their
          # alternate names from NameAliases.txt.
-        if w[1] == "<control>" and w[10]:
-            w[1] = w[10]
+        if fields[1] == "<control>" and fields[10]:
+            fields[1] = fields[10]
         # Handling code point ranges like:
         #
         # 3400;<CJK Ideograph Extension A, First>;Lo;0;L;;;;;N;;;;;
         # 4DB5;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
-        if w[1].endswith(', First>') and not 'Surrogate,' in w[1]:
-            wstart = w
+        if fields[1].endswith(', First>') and not 'Surrogate,' in fields[1]:
+            fields_start = fields
             continue
-        if w[1].endswith(', Last>') and not 'Surrogate,' in w[1]:
-            process_range(wstart[0], w[0], outfile, w[1][:-7]+'>')
-            wstart = []
+        if fields[1].endswith(', Last>') and not 'Surrogate,' in fields[1]:
+            process_range(fields_start[0], fields[0],
+                          outfile, fields[1][:-7]+'>')
+            fields_start = []
             continue
-        wstart = []
-        if 'Surrogate,' in w[1]:
+        fields_start = []
+        if 'Surrogate,' in fields[1]:
             # Comment out the surrogates in the UTF-8 file.
             # One could of course skip them completely but
             # the original UTF-8 file in glibc had them as
             # comments, so we keep these comment lines.
             outfile.write('%')
         outfile.write('{:s}     {:s} {:s}\n'.format(
-                ucs_symbol(int(w[0], 16)),
-                convert_to_hex(int(w[0], 16)),
-                w[1]))
+                ucs_symbol(int(fields[0], 16)),
+                convert_to_hex(int(fields[0], 16)),
+                fields[1]))
 
 def convert_to_hex(code_point):
     '''Converts a code point to a hexadecimal UTF-8 representation
@@ -205,37 +206,41 @@ def process_width(outfile, ulines, elines):
 
     '''
     width_dict = {}
-    for l in ulines:
-        w = l.split(";")
-        if w[4] == "NSM" or w[2] == "Cf":
-            width_dict[int(w[0], 16)] = ucs_symbol(int(w[0], 16))+'\t0'
+    for line in ulines:
+        fields = line.split(";")
+        if fields[4] == "NSM" or fields[2] == "Cf":
+            width_dict[int(fields[0], 16)] = ucs_symbol(
+                int(fields[0], 16)) + '\t0'
 
-    for l in elines:
+    for line in elines:
         # If an entry in EastAsianWidth.txt is found, it overrides entries in
         # UnicodeData.txt:
-        w = l.split(";")
-        if not '..' in w[0]:
-            width_dict[int(w[0], 16)] = ucs_symbol(int(w[0], 16))+'\t2'
+        fields = line.split(";")
+        if not '..' in fields[0]:
+            width_dict[int(fields[0], 16)] = ucs_symbol(
+                int(fields[0], 16)) + '\t2'
         else:
-            wc = w[0].split("..")
-            for key in range(int(wc[0], 16), int(wc[1], 16)+1):
+            code_points = fields[0].split("..")
+            for key in range(int(code_points[0], 16),
+                             int(code_points[1], 16)+1):
                 if  key in width_dict:
                     del width_dict[key]
-            width_dict[int(wc[0], 16)] = '{:s}...{:s}\t2'.format(
-                    ucs_symbol(int(wc[0], 16)), ucs_symbol(int(wc[1], 16)))
+            width_dict[int(code_points[0], 16)] = '{:s}...{:s}\t2'.format(
+                ucs_symbol(int(code_points[0], 16)),
+                ucs_symbol(int(code_points[1], 16)))
 
-    for l in sorted(width_dict):
-        outfile.write(width_dict[l]+'\n')
+    for key in sorted(width_dict):
+        outfile.write(width_dict[key]+'\n')
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("USAGE: python3 utf8_gen.py UnicodeData.txt EastAsianWidth.txt")
     else:
-        with open(sys.argv[1], mode='r') as unidata_file:
-            flines = unidata_file.readlines()
-        with open(sys.argv[2], mode='r') as east_asian_width_file:
-            elines = []
-            for line in east_asian_width_file:
+        with open(sys.argv[1], mode='r') as UNIDATA_FILE:
+            UNICODE_DATA_LINES = UNIDATA_FILE.readlines()
+        with open(sys.argv[2], mode='r') as EAST_ASIAN_WIDTH_FILE:
+            EAST_ASIAN_WIDTH_LINES = []
+            for LINE in EAST_ASIAN_WIDTH_FILE:
                 # If characters from EastAasianWidth.txt which are from
                 # from reserved ranges (i.e. not yet assigned code points)
                 # are added to the WIDTH section of the UTF-8 file, then
@@ -245,16 +250,16 @@ if __name__ == "__main__":
                 #
                 # Therefore, we skip all reserved code points when reading
                 # the EastAsianWidth.txt file.
-                if re.match(r'.*<reserved-.+>\.\.<reserved-.+>.*', line):
+                if re.match(r'.*<reserved-.+>\.\.<reserved-.+>.*', LINE):
                     continue
-                if re.match(r'^[^;]*;[WF]', line):
-                    elines.append(line.strip())
-        with open('UTF-8', mode='w') as outfile:
+                if re.match(r'^[^;]*;[WF]', LINE):
+                    EAST_ASIAN_WIDTH_LINES.append(LINE.strip())
+        with open('UTF-8', mode='w') as OUTFILE:
             # Processing UnicodeData.txt and write CHARMAP to UTF-8 file
-            write_header_charmap(outfile)
-            process_charmap(flines, outfile)
-            outfile.write("END CHARMAP\n\n")
+            write_header_charmap(OUTFILE)
+            process_charmap(UNICODE_DATA_LINES, OUTFILE)
+            OUTFILE.write("END CHARMAP\n\n")
             # Processing EastAsianWidth.txt and write WIDTH to UTF-8 file
-            write_header_width(outfile)
-            process_width(outfile, flines, elines)
-            outfile.write("END WIDTH\n")
+            write_header_width(OUTFILE)
+            process_width(OUTFILE, UNICODE_DATA_LINES, EAST_ASIAN_WIDTH_LINES)
+            OUTFILE.write("END WIDTH\n")
