@@ -55,7 +55,7 @@ import re
 #      'numeric': ''},
 #      …
 # }
-unicode_attributes = {}
+UNICODE_ATTRIBUTES = {}
 
 # Dictionary holding the entire contents of the DerivedCoreProperties.txt file
 #
@@ -65,16 +65,16 @@ unicode_attributes = {}
 #  917505: ['Case_Ignorable', 'Default_Ignorable_Code_Point'],
 #  …
 # }
-derived_core_properties = {}
+DERIVED_CORE_PROPERTIES = {}
 
 def fill_attribute(code_point, fields):
-    '''Stores in unicode_attributes[code_point] the values from the fields.
+    '''Stores in UNICODE_ATTRIBUTES[code_point] the values from the fields.
 
-    One entry in the unicode_attributes dictionary represents one line
+    One entry in the UNICODE_ATTRIBUTES dictionary represents one line
     in the UnicodeData.txt file.
 
     '''
-    unicode_attributes[code_point] =  {
+    UNICODE_ATTRIBUTES[code_point] =  {
         'name': fields[1],          # Character name
         'category': fields[2],      # General category
         'combining': fields[3],     # Canonical combining classes
@@ -96,7 +96,7 @@ def fill_attribute(code_point, fields):
 
 def fill_attributes(filename):
     '''Stores the entire contents of the UnicodeData.txt file
-    in the unicode_attributes dictionary.
+    in the UNICODE_ATTRIBUTES dictionary.
 
     A typical line for a single code point in UnicodeData.txt looks
     like this:
@@ -108,9 +108,9 @@ def fill_attributes(filename):
     4E00;<CJK Ideograph, First>;Lo;0;L;;;;;N;;;;;
     9FCC;<CJK Ideograph, Last>;Lo;0;L;;;;;N;;;;;
     '''
-    with open(filename, mode='r') as file:
+    with open(filename, mode='r') as unicode_data_file:
         fields_start = []
-        for line in file:
+        for line in unicode_data_file:
             fields = line.strip().split(';')
             if len(fields) != 15:
                 sys.stderr.write(
@@ -144,7 +144,7 @@ def fill_attributes(filename):
 
 def fill_derived_core_properties(filename):
     '''Stores the entire contents of the DerivedCoreProperties.txt file
-    in the derived_core_properties dictionary.
+    in the DERIVED_CORE_PROPERTIES dictionary.
 
     Lines in DerivedCoreProperties.txt are either a code point range like
     this:
@@ -156,8 +156,8 @@ def fill_derived_core_properties(filename):
     00AA          ; Lowercase # Lo       FEMININE ORDINAL INDICATOR
 
     '''
-    with open(filename, mode='r') as file:
-        for line in file:
+    with open(filename, mode='r') as derived_core_properties_file:
+        for line in derived_core_properties_file:
             match = re.match(
                 r'^(?P<codepoint1>[0-9A-F]{4,6})'
                 + r'(?:\.\.(?P<codepoint2>[0-9A-F]{4,6}))?'
@@ -171,73 +171,73 @@ def fill_derived_core_properties(filename):
                 end = start
             for code_point in range(int(start, 16), int(end, 16)+1):
                 prop = match.group('property')
-                if code_point in derived_core_properties:
-                    derived_core_properties[code_point].append(prop)
+                if code_point in DERIVED_CORE_PROPERTIES:
+                    DERIVED_CORE_PROPERTIES[code_point].append(prop)
                 else:
-                    derived_core_properties[code_point] = [prop]
+                    DERIVED_CORE_PROPERTIES[code_point] = [prop]
 
 def to_upper(code_point):
     '''Returns the code point of the uppercase version
     of the given code point'''
-    if (unicode_attributes[code_point]['name']
-        and unicode_attributes[code_point]['upper']):
-        return unicode_attributes[code_point]['upper']
+    if (UNICODE_ATTRIBUTES[code_point]['name']
+        and UNICODE_ATTRIBUTES[code_point]['upper']):
+        return UNICODE_ATTRIBUTES[code_point]['upper']
     else:
         return code_point
 
 def to_lower(code_point):
     '''Returns the code point of the lowercase version
     of the given code point'''
-    if (unicode_attributes[code_point]['name']
-        and unicode_attributes[code_point]['lower']):
-        return unicode_attributes[code_point]['lower']
+    if (UNICODE_ATTRIBUTES[code_point]['name']
+        and UNICODE_ATTRIBUTES[code_point]['lower']):
+        return UNICODE_ATTRIBUTES[code_point]['lower']
     else:
         return code_point
 
 def to_title(code_point):
     '''Returns the code point of the titlecase version
     of the given code point'''
-    if (unicode_attributes[code_point]['name']
-        and unicode_attributes[code_point]['title']):
-        return unicode_attributes[code_point]['title']
+    if (UNICODE_ATTRIBUTES[code_point]['name']
+        and UNICODE_ATTRIBUTES[code_point]['title']):
+        return UNICODE_ATTRIBUTES[code_point]['title']
     else:
         return code_point
 
 def is_upper(code_point):
     '''Checks whether the character with this code point is uppercase'''
     return (to_lower(code_point) != code_point
-            or (code_point in derived_core_properties
-                and 'Uppercase' in derived_core_properties[code_point]))
+            or (code_point in DERIVED_CORE_PROPERTIES
+                and 'Uppercase' in DERIVED_CORE_PROPERTIES[code_point]))
 
 def is_lower(code_point):
     '''Checks whether the character with this code point is lowercase'''
     # Some characters are defined as “Lowercase” in
-    # Derived_Core_Properties.txt but do not have a mapping to upper
+    # DerivedCoreProperties.txt but do not have a mapping to upper
     # case. For example, ꜰ U+A72F “LATIN LETTER SMALL CAPITAL F” is
     # one of these.
     return (to_upper(code_point) != code_point
             # <U00DF> is lowercase, but without simple to_upper mapping.
             or code_point == 0x00DF
-            or (code_point in derived_core_properties
-                and 'Lowercase' in derived_core_properties[code_point]))
+            or (code_point in DERIVED_CORE_PROPERTIES
+                and 'Lowercase' in DERIVED_CORE_PROPERTIES[code_point]))
 
 def is_alpha(code_point):
     '''Checks whether the character with this code point is alphabetic'''
-    return ((code_point in derived_core_properties
+    return ((code_point in DERIVED_CORE_PROPERTIES
              and
-             'Alphabetic' in derived_core_properties[code_point])
+             'Alphabetic' in DERIVED_CORE_PROPERTIES[code_point])
             or
             # Consider all the non-ASCII digits as alphabetic.
             # ISO C 99 forbids us to have them in category “digit”,
             # but we want iswalnum to return true on them.
-            (unicode_attributes[code_point]['category'] == 'Nd'
+            (UNICODE_ATTRIBUTES[code_point]['category'] == 'Nd'
              and not (code_point >= 0x0030 and code_point <= 0x0039)))
 
 def is_digit(code_point):
     '''Checks whether the character with this code point is a digit'''
     if 0:
-        return (unicode_attributes[code_point]['name']
-                and unicode_attributes[code_point]['category'] == 'Nd')
+        return (UNICODE_ATTRIBUTES[code_point]['name']
+                and UNICODE_ATTRIBUTES[code_point]['category'] == 'Nd')
         # Note: U+0BE7..U+0BEF and U+1369..U+1371 are digit systems without
         # a zero.  Must add <0> in front of them by hand.
     else:
@@ -258,10 +258,10 @@ def is_blank(code_point):
     '''Checks whether the character with this code point is blank'''
     return (code_point == 0x0009 # '\t'
             # Category Zs without mention of '<noBreak>'
-            or (unicode_attributes[code_point]['name']
-                and unicode_attributes[code_point]['category'] == 'Zs'
+            or (UNICODE_ATTRIBUTES[code_point]['name']
+                and UNICODE_ATTRIBUTES[code_point]['category'] == 'Zs'
                 and '<noBreak>' not in
-                unicode_attributes[code_point]['decomposition']))
+                UNICODE_ATTRIBUTES[code_point]['decomposition']))
 
 def is_space(code_point):
     '''Checks whether the character with this code point is a space'''
@@ -274,22 +274,22 @@ def is_space(code_point):
             or code_point == 0x0009 # '\t'
             or code_point == 0x000B # '\v'
             # Categories Zl, Zp, and Zs without mention of "<noBreak>"
-            or (unicode_attributes[code_point]['name']
+            or (UNICODE_ATTRIBUTES[code_point]['name']
                 and
-                (unicode_attributes[code_point]['category'] in ['Zl', 'Zp']
+                (UNICODE_ATTRIBUTES[code_point]['category'] in ['Zl', 'Zp']
                  or
-                 (unicode_attributes[code_point]['category'] in ['Zs']
+                 (UNICODE_ATTRIBUTES[code_point]['category'] in ['Zs']
                   and
                   '<noBreak>' not in
-                  unicode_attributes[code_point]['decomposition']))))
+                  UNICODE_ATTRIBUTES[code_point]['decomposition']))))
 
 def is_cntrl(code_point):
     '''Checks whether the character with this code point is
     a control character'''
-    return (unicode_attributes[code_point]['name']
-            and (unicode_attributes[code_point]['name'] == '<control>'
+    return (UNICODE_ATTRIBUTES[code_point]['name']
+            and (UNICODE_ATTRIBUTES[code_point]['name'] == '<control>'
                  or
-                 unicode_attributes[code_point]['category'] in ['Zl', 'Zp']))
+                 UNICODE_ATTRIBUTES[code_point]['category'] in ['Zl', 'Zp']))
 
 def is_xdigit(code_point):
     '''Checks whether the character with this code point is
@@ -315,21 +315,21 @@ def is_xdigit(code_point):
 def is_graph(code_point):
     '''Checks whether the character with this code point is
     a graphical character'''
-    return (unicode_attributes[code_point]['name']
-            and unicode_attributes[code_point]['name'] != '<control>'
+    return (UNICODE_ATTRIBUTES[code_point]['name']
+            and UNICODE_ATTRIBUTES[code_point]['name'] != '<control>'
             and not is_space(code_point))
 
 def is_print(code_point):
     '''Checks whether the character with this code point is printable'''
-    return (unicode_attributes[code_point]['name']
-            and unicode_attributes[code_point]['name'] != '<control>'
-            and unicode_attributes[code_point]['category'] not in ['Zl', 'Zp'])
+    return (UNICODE_ATTRIBUTES[code_point]['name']
+            and UNICODE_ATTRIBUTES[code_point]['name'] != '<control>'
+            and UNICODE_ATTRIBUTES[code_point]['category'] not in ['Zl', 'Zp'])
 
 def is_punct(code_point):
     '''Checks whether the character with this code point is punctuation'''
     if 0:
-        return (unicode_attributes[code_point]['name']
-                and unicode_attributes[code_point]['category'].startswith('P'))
+        return (UNICODE_ATTRIBUTES[code_point]['name']
+                and UNICODE_ATTRIBUTES[code_point]['category'].startswith('P'))
     else:
         # The traditional POSIX definition of punctuation is every graphic,
         # non-alphanumeric character.
@@ -344,16 +344,16 @@ def is_combining(code_point):
     # file. In 3.0.1 it was identical to the union of the general categories
     # "Mn", "Mc", "Me". In Unicode 3.1 this property has been dropped from the
     # PropList.txt file, so we take the latter definition.
-    return (unicode_attributes[code_point]['name']
+    return (UNICODE_ATTRIBUTES[code_point]['name']
             and
-            unicode_attributes[code_point]['category'] in ['Mn', 'Mc', 'Me'])
+            UNICODE_ATTRIBUTES[code_point]['category'] in ['Mn', 'Mc', 'Me'])
 
 def is_combining_level3(code_point):
     '''Checks whether the character with this code point is
     a combining level3 character'''
     return (is_combining(code_point)
             and
-            int(unicode_attributes[code_point]['combining']) in range(0, 200))
+            int(UNICODE_ATTRIBUTES[code_point]['combining']) in range(0, 200))
 
 def ucs_symbol(code_point):
     '''Return the UCS symbol string for a Unicode character.'''
@@ -371,7 +371,7 @@ def ucs_symbol_range(code_point_low, code_point_high):
     '''
     return ucs_symbol(code_point_low) + '..' + ucs_symbol(code_point_high)
 
-def output_charclass(file, class_name, is_class_function):
+def output_charclass(i18n_file, class_name, is_class_function):
     '''Output a LC_CTYPE character class section
 
     Example:
@@ -383,7 +383,7 @@ def output_charclass(file, class_name, is_class_function):
        <U0001F150>..<U0001F169>;<U0001F170>..<U0001F189>
     '''
     code_point_ranges  = []
-    for code_point in sorted(unicode_attributes):
+    for code_point in sorted(UNICODE_ATTRIBUTES):
         if is_class_function(code_point):
             if (code_point_ranges
                 and code_point_ranges[-1][-1] == code_point - 1):
@@ -394,7 +394,7 @@ def output_charclass(file, class_name, is_class_function):
             else:
                 code_point_ranges.append([code_point])
     if code_point_ranges:
-        file.write('%s /\n' %class_name)
+        i18n_file.write('%s /\n' %class_name)
         max_column = 75
         prefix = '   '
         line = prefix
@@ -408,13 +408,13 @@ def output_charclass(file, class_name, is_class_function):
                 range_string = ucs_symbol_range(
                     code_point_range[0], code_point_range[-1])
             if len(line+range_string) > max_column:
-                file.write(line+'/\n')
+                i18n_file.write(line+'/\n')
                 line = prefix
             line += range_string
         if line.strip():
-            file.write(line+'\n')
+            i18n_file.write(line+'\n')
 
-def output_charmap(file, map_name, map_function):
+def output_charmap(i18n_file, map_name, map_function):
     '''Output a LC_CTYPE character map section
 
     Example:
@@ -429,8 +429,8 @@ def output_charmap(file, map_name, map_function):
     prefix = '   '
     line = prefix
     map_string = ''
-    file.write('%s /\n' %map_name)
-    for code_point in sorted(unicode_attributes):
+    i18n_file.write('%s /\n' %map_name)
+    for code_point in sorted(UNICODE_ATTRIBUTES):
         mapped = map_function(code_point)
         if code_point != mapped:
             if line.strip():
@@ -441,15 +441,15 @@ def output_charmap(file, map_name, map_function):
                          + ucs_symbol(mapped) \
                          + ')'
             if len(line+map_string) > max_column:
-                file.write(line+'/\n')
+                i18n_file.write(line+'/\n')
                 line = prefix
             line += map_string
     if line.strip():
-        file.write(line+'\n')
+        i18n_file.write(line+'\n')
 
 def verifications():
     '''Tests whether the is_* functions observe the known restrictions'''
-    for code_point in sorted(unicode_attributes):
+    for code_point in sorted(UNICODE_ATTRIBUTES):
         # toupper restriction: "Only characters specified for the keywords
         # lower and upper shall be specified.
         if (to_upper(code_point) != code_point
@@ -562,8 +562,8 @@ def read_input_file(filename):
     to be able to generate a complete result file.
     '''
     head = tail = ''
-    with open(filename, mode='r') as file:
-        for line in file:
+    with open(filename, mode='r') as i18n_file:
+        for line in i18n_file:
             match = re.match(
                 r'^(?P<key>date\s+)(?P<value>"[0-9]{4}-[0-9]{2}-[0-9]{2}")',
                 line)
@@ -573,163 +573,167 @@ def read_input_file(filename):
             head = head + line
             if line.startswith('LC_CTYPE'):
                 break
-        for line in file:
+        for line in i18n_file:
             if line.startswith('translit_start'):
                 tail = line
                 break
-        for line in file:
+        for line in i18n_file:
             tail = tail + line
     return (head, tail)
 
 def output_tables(filename, unicode_version, head='', tail=''):
     '''Write an output file containing the new LC_CTYPE character classes'''
-    with open(filename, mode='w') as file:
-        if args.input_file and head:
-            file.write(head)
+    with open(filename, mode='w') as i18n_file:
+        if ARGS.input_file and head:
+            i18n_file.write(head)
         else:
-            file.write('escape_char /\n')
-            file.write('comment_char %\n')
-            file.write('\n')
-            file.write('% Generated automatically by gen_unicode_ctype.py '
-                       + 'for Unicode {:s}.\n'.format(unicode_version))
-            file.write('\n')
-            file.write('LC_IDENTIFICATION\n')
-            file.write('title     "Unicode {:s} FDCC-set"\n'.format(
+            i18n_file.write('escape_char /\n')
+            i18n_file.write('comment_char %\n')
+            i18n_file.write('\n')
+            i18n_file.write('% Generated automatically by '
+                            + 'gen_unicode_ctype.py '
+                            + 'for Unicode {:s}.\n'.format(unicode_version))
+            i18n_file.write('\n')
+            i18n_file.write('LC_IDENTIFICATION\n')
+            i18n_file.write('title     "Unicode {:s} FDCC-set"\n'.format(
                 unicode_version))
-            file.write('source    "UnicodeData.txt, '
-                       + 'DerivedCoreProperties.txt"\n')
-            file.write('address   ""\n')
-            file.write('contact   ""\n')
-            file.write('email     "bug-glibc-locales@gnu.org"\n')
-            file.write('tel       ""\n')
-            file.write('fax       ""\n')
-            file.write('language  ""\n')
-            file.write('territory "Earth"\n')
-            file.write('revision  "{:s}"\n'.format(unicode_version))
-            file.write('date      "{:s}"\n'.format(time.strftime('%Y-%m-%d')))
-            file.write('category  "unicode:2014";LC_CTYPE\n')
-            file.write('END LC_IDENTIFICATION\n')
-            file.write('\n')
-            file.write('LC_CTYPE\n')
-        file.write('% The following is the 14652 i18n fdcc-set '
-                   + 'LC_CTYPE category.\n')
-        file.write('% It covers Unicode version {:s}.\n'.format(
+            i18n_file.write('source    "UnicodeData.txt, '
+                            + 'DerivedCoreProperties.txt"\n')
+            i18n_file.write('address   ""\n')
+            i18n_file.write('contact   ""\n')
+            i18n_file.write('email     "bug-glibc-locales@gnu.org"\n')
+            i18n_file.write('tel       ""\n')
+            i18n_file.write('fax       ""\n')
+            i18n_file.write('language  ""\n')
+            i18n_file.write('territory "Earth"\n')
+            i18n_file.write('revision  "{:s}"\n'.format(unicode_version))
+            i18n_file.write('date      "{:s}"\n'.format(
+                time.strftime('%Y-%m-%d')))
+            i18n_file.write('category  "unicode:2014";LC_CTYPE\n')
+            i18n_file.write('END LC_IDENTIFICATION\n')
+            i18n_file.write('\n')
+            i18n_file.write('LC_CTYPE\n')
+        i18n_file.write('% The following is the 14652 i18n fdcc-set '
+                        + 'LC_CTYPE category.\n')
+        i18n_file.write('% It covers Unicode version {:s}.\n'.format(
             unicode_version))
-        file.write('% The character classes and mapping tables were '
-                   + 'automatically\n')
-        file.write('% generated using the gen_unicode_ctype.py program.\n')
+        i18n_file.write('% The character classes and mapping tables were '
+                        + 'automatically\n')
+        i18n_file.write('% generated using the gen_unicode_ctype.py '
+                        + 'program.\n')
 
-        file.write('\n')
-        file.write('% The "upper" class reflects the uppercase '
-                   + 'characters of class "alpha"\n')
-        output_charclass(file, 'upper', is_upper)
+        i18n_file.write('\n')
+        i18n_file.write('% The "upper" class reflects the uppercase '
+                        + 'characters of class "alpha"\n')
+        output_charclass(i18n_file, 'upper', is_upper)
 
-        file.write('\n')
-        file.write('% The "lower" class reflects the lowercase '
-                   + 'characters of class "alpha"\n')
-        output_charclass(file, 'lower', is_lower)
+        i18n_file.write('\n')
+        i18n_file.write('% The "lower" class reflects the lowercase '
+                        + 'characters of class "alpha"\n')
+        output_charclass(i18n_file, 'lower', is_lower)
 
-        file.write('\n')
-        file.write('% The "alpha" class of the "i18n" FDCC-set is '
-                   + 'reflecting\n')
-        file.write('% the recommendations in TR 10176 annex A\n')
-        output_charclass(file, 'alpha', is_alpha)
+        i18n_file.write('\n')
+        i18n_file.write('% The "alpha" class of the "i18n" FDCC-set is '
+                        + 'reflecting\n')
+        i18n_file.write('% the recommendations in TR 10176 annex A\n')
+        output_charclass(i18n_file, 'alpha', is_alpha)
 
-        file.write('\n')
-        file.write('% The "digit" class must only contain the '
-                   + 'BASIC LATIN digits, says ISO C 99\n')
-        file.write('% (sections 7.25.2.1.5 and 5.2.1).\n')
-        output_charclass(file, 'digit', is_digit)
+        i18n_file.write('\n')
+        i18n_file.write('% The "digit" class must only contain the '
+                        + 'BASIC LATIN digits, says ISO C 99\n')
+        i18n_file.write('% (sections 7.25.2.1.5 and 5.2.1).\n')
+        output_charclass(i18n_file, 'digit', is_digit)
 
-        file.write('\n')
-        file.write('% The "outdigit" information is by default '
-                   + '"0" to "9".  We don\'t have to\n')
-        file.write('% provide it here since localedef will fill '
+        i18n_file.write('\n')
+        i18n_file.write('% The "outdigit" information is by default '
+                        + '"0" to "9".  We don\'t have to\n')
+        i18n_file.write('% provide it here since localedef will fill '
                    + 'in the bits and it would\n')
-        file.write('% prevent locales copying this file define '
-                   + 'their own values.\n')
-        file.write('% outdigit /\n')
-        file.write('%    <U0030>..<U0039>\n')
-        # output_charclass(file, 'outdigit', is_outdigit)
+        i18n_file.write('% prevent locales copying this file define '
+                        + 'their own values.\n')
+        i18n_file.write('% outdigit /\n')
+        i18n_file.write('%    <U0030>..<U0039>\n')
+        # output_charclass(i18n_file, 'outdigit', is_outdigit)
 
-        file.write('\n')
-        output_charclass(file, 'space', is_space)
+        i18n_file.write('\n')
+        output_charclass(i18n_file, 'space', is_space)
 
-        file.write('\n')
-        output_charclass(file, 'cntrl', is_cntrl)
+        i18n_file.write('\n')
+        output_charclass(i18n_file, 'cntrl', is_cntrl)
 
-        file.write('\n')
-        output_charclass(file, 'punct', is_punct)
+        i18n_file.write('\n')
+        output_charclass(i18n_file, 'punct', is_punct)
 
-        file.write('\n')
-        output_charclass(file, 'graph', is_graph)
+        i18n_file.write('\n')
+        output_charclass(i18n_file, 'graph', is_graph)
 
-        file.write('\n')
-        output_charclass(file, 'print', is_print)
+        i18n_file.write('\n')
+        output_charclass(i18n_file, 'print', is_print)
 
-        file.write('\n')
-        file.write('% The "xdigit" class must only contain the '
-                   + 'BASIC LATIN digits and A-F, a-f,\n')
-        file.write('% says ISO C 99 (sections 7.25.2.1.12 and 6.4.4.1).\n')
-        output_charclass(file, 'xdigit', is_xdigit)
+        i18n_file.write('\n')
+        i18n_file.write('% The "xdigit" class must only contain the '
+                        + 'BASIC LATIN digits and A-F, a-f,\n')
+        i18n_file.write('% says ISO C 99 '
+                        + '(sections 7.25.2.1.12 and 6.4.4.1).\n')
+        output_charclass(i18n_file, 'xdigit', is_xdigit)
 
-        file.write('\n')
-        output_charclass(file, 'blank', is_blank)
+        i18n_file.write('\n')
+        output_charclass(i18n_file, 'blank', is_blank)
 
-        file.write('\n')
-        output_charmap(file, 'toupper', to_upper)
+        i18n_file.write('\n')
+        output_charmap(i18n_file, 'toupper', to_upper)
 
-        file.write('\n')
-        output_charmap(file, 'tolower', to_lower)
+        i18n_file.write('\n')
+        output_charmap(i18n_file, 'tolower', to_lower)
 
-        file.write('\n')
-        output_charmap(file, 'map "totitle";', to_title)
+        i18n_file.write('\n')
+        output_charmap(i18n_file, 'map "totitle";', to_title)
 
-        file.write('\n')
-        file.write('% The "combining" class reflects ISO/IEC 10646-1 '
-                   + 'annex B.1\n')
-        file.write('% That is, all combining characters (level 2+3).\n')
-        output_charclass(file, 'class "combining";', is_combining)
+        i18n_file.write('\n')
+        i18n_file.write('% The "combining" class reflects ISO/IEC 10646-1 '
+                        + 'annex B.1\n')
+        i18n_file.write('% That is, all combining characters (level 2+3).\n')
+        output_charclass(i18n_file, 'class "combining";', is_combining)
 
-        file.write('\n')
-        file.write('% The "combining_level3" class reflects '
-                   + 'ISO/IEC 10646-1 annex B.2\n')
-        file.write('% That is, combining characters of level 3.\n')
-        output_charclass(file,
+        i18n_file.write('\n')
+        i18n_file.write('% The "combining_level3" class reflects '
+                        + 'ISO/IEC 10646-1 annex B.2\n')
+        i18n_file.write('% That is, combining characters of level 3.\n')
+        output_charclass(i18n_file,
                          'class "combining_level3";', is_combining_level3)
-        file.write('\n')
+        i18n_file.write('\n')
 
-        if args.input_file and tail:
-            file.write(tail)
+        if ARGS.input_file and tail:
+            i18n_file.write(tail)
         else:
-            file.write('END LC_CTYPE\n')
+            i18n_file.write('END LC_CTYPE\n')
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    PARSER = argparse.ArgumentParser(
         description='''
         Generate a Unicode conforming LC_CTYPE category from
         UnicodeData.txt and DerivedCoreProperties.txt files.
         ''')
-    parser.add_argument(
+    PARSER.add_argument(
         '-u', '--unicode_data_file',
         nargs='?',
         type=str,
         default='UnicodeData.txt',
         help=('The UnicodeData.txt file to read, '
               + 'default: %(default)s'))
-    parser.add_argument(
+    PARSER.add_argument(
         '-d', '--derived_core_properties_file',
         nargs='?',
         type=str,
         default='DerivedCoreProperties.txt',
         help=('The DerivedCoreProperties.txt file to read, '
               + 'default: %(default)s'))
-    parser.add_argument(
+    PARSER.add_argument(
         '-i', '--input_file',
         nargs='?',
         type=str,
         help='''The original glibc/localedata/locales/i18n file.''')
-    parser.add_argument(
+    PARSER.add_argument(
         '-o', '--output_file',
         nargs='?',
         type=str,
@@ -742,18 +746,18 @@ if __name__ == "__main__":
         classes and the date stamp in
         LC_IDENTIFICATION will be copied unchanged
         into the output file.  ''')
-    parser.add_argument(
+    PARSER.add_argument(
         '--unicode_version',
         nargs='?',
         required=True,
         type=str,
         help='The Unicode version of the input files used.')
-    args = parser.parse_args()
+    ARGS = PARSER.parse_args()
 
-    fill_attributes(args.unicode_data_file)
-    fill_derived_core_properties(args.derived_core_properties_file)
+    fill_attributes(ARGS.unicode_data_file)
+    fill_derived_core_properties(ARGS.derived_core_properties_file)
     verifications()
-    head = tail = ''
-    if args.input_file:
-        (head, tail) = read_input_file(args.input_file)
-    output_tables(args.output_file, args.unicode_version, head=head, tail=tail)
+    HEAD = TAIL = ''
+    if ARGS.input_file:
+        (HEAD, TAIL) = read_input_file(ARGS.input_file)
+    output_tables(ARGS.output_file, ARGS.unicode_version, head=HEAD, tail=TAIL)
