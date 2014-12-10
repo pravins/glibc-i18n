@@ -36,10 +36,10 @@ def process_range(start, end, outfile, name):
     if 'Hangul Syllable' in name:
         # from glibc/localedata/ChangeLog:
         #
-        #   2000-09-24  Bruno Haible  <haible@clisp.cons.org>
-        #   * charmaps/UTF-8: Expand <Hangul Syllable> and <Private Use> ranges,
-        #   so they become printable and carry a width. Comment out surrogate
-        #   ranges. Add a WIDTH table
+        #  2000-09-24  Bruno Haible  <haible@clisp.cons.org>
+        #  * charmaps/UTF-8: Expand <Hangul Syllable> and <Private Use> ranges,
+        #  so they become printable and carry a width. Comment out surrogate
+        #  ranges. Add a WIDTH table
         #
         # So we expand the Hangul Syllables here:
         for i in range(int(start, 16), int(end, 16)+1 ):
@@ -167,14 +167,16 @@ def write_header_charmap(outfile):
     outfile.write("CHARMAP\n")
 
 def write_header_width(outfile):
-    outfile.write("% Character width according to Unicode 7.0.0.\n")
-    outfile.write("% - Default width is 1.\n")
-    outfile.write("% - Double-width characters have width 2; generated from\n")
-    outfile.write("%        \"grep '^[^;]*;[WF]' EastAsianWidth.txt\"\n")
-#    outfile.write("%   and  \"grep '^[^;]*;[^WF]' EastAsianWidth.txt\"\n")  -- This is wrong
-    outfile.write("% - Non-spacing characters have width 0; generated from PropList.txt or\n")
-    outfile.write("%   \"grep '^[^;]*;[^;]*;[^;]*;[^;]*;NSM;' UnicodeData.txt\"\n")
-    outfile.write("% - Format control characters have width 0; generated from\n")
+    outfile.write('% Character width according to Unicode 7.0.0.\n')
+    outfile.write('% - Default width is 1.\n')
+    outfile.write('% - Double-width characters have width 2; generated from\n')
+    outfile.write('%        "grep \'^[^;]*;[WF]\' EastAsianWidth.txt"\n')
+    outfile.write('% - Non-spacing characters have width 0; '
+                  + 'generated from PropList.txt or\n')
+    outfile.write('%   "grep \'^[^;]*;[^;]*;[^;]*;[^;]*;NSM;\' '
+                  + 'UnicodeData.txt"\n')
+    outfile.write('% - Format control characters have width 0; '
+                  + 'generated from\n')
     outfile.write("%   \"grep '^[^;]*;[^;]*;Cf;' UnicodeData.txt\"\n")
 #   Not needed covered by Cf
 #    outfile.write("% - Zero width characters have width 0; generated from\n")

@@ -76,9 +76,12 @@ def fill_attribute(code_point, fields):
         'mirrored': fields[9],      # mirrored
         'oldname': fields[10],      # Old Unicode 1.0 name
         'comment': fields[11],      # comment
-        'upper': int(fields[12], 16) if fields[12] else None, # Uppercase mapping
-        'lower': int(fields[13], 16) if fields[13] else None, # Lowercase mapping
-        'title': int(fields[14], 16) if fields[14] else None, # Titlecase mapping
+        # Uppercase mapping
+        'upper': int(fields[12], 16) if fields[12] else None,
+        # Lowercase mapping
+        'lower': int(fields[13], 16) if fields[13] else None,
+        # Titlecase mapping
+        'title': int(fields[14], 16) if fields[14] else None,
     }
 
 def fill_attributes(filename):
@@ -194,9 +197,10 @@ def is_upper(code_point):
                 and 'Uppercase' in derived_core_properties[code_point]))
 
 def is_lower(code_point):
-    # Some characters are defined as “Lowercase” in Derived_Core_Properties.txt
-    # but do not have a mapping to upper case. For example,
-    # ꜰ U+A72F “LATIN LETTER SMALL CAPITAL F” is one of these.
+    # Some characters are defined as “Lowercase” in
+    # Derived_Core_Properties.txt but do not have a mapping to upper
+    # case. For example, ꜰ U+A72F “LATIN LETTER SMALL CAPITAL F” is
+    # one of these.
     return (to_upper(code_point) != code_point
             # <U00DF> is lowercase, but without simple to_upper mapping.
             or code_point == 0x00DF
@@ -224,8 +228,8 @@ def is_digit(code_point):
         # SUSV2 gives us some freedom for the "digit" category, but ISO C 99
         # takes it away:
         # 7.25.2.1.5:
-        #    The iswdigit function tests for any wide character that corresponds
-        #    to a decimal-digit character (as defined in 5.2.1).
+        #    The iswdigit function tests for any wide character that
+        #    corresponds to a decimal-digit character (as defined in 5.2.1).
         # 5.2.1:
         #    the 10 decimal digits 0 1 2 3 4 5 6 7 8 9
         return (code_point >= 0x0030 and code_point <= 0x0039)
@@ -238,7 +242,8 @@ def is_blank(code_point):
             # Category Zs without mention of '<noBreak>'
             or (unicode_attributes[code_point]['name']
                 and unicode_attributes[code_point]['category'] == 'Zs'
-                and '<noBreak>' not in unicode_attributes[code_point]['decomposition']))
+                and '<noBreak>' not in
+                unicode_attributes[code_point]['decomposition']))
 
 def is_space(code_point):
     # Don’t make U+00A0 a space. Non-breaking space means that all programs
@@ -256,7 +261,8 @@ def is_space(code_point):
                  or
                  (unicode_attributes[code_point]['category'] in ['Zs']
                   and
-                  '<noBreak>' not in unicode_attributes[code_point]['decomposition']))))
+                  '<noBreak>' not in
+                  unicode_attributes[code_point]['decomposition']))))
 
 def is_cntrl(code_point):
     return (unicode_attributes[code_point]['name']
@@ -273,10 +279,12 @@ def is_xdigit(code_point):
         # SUSV2 gives us some freedom for the "xdigit" category, but ISO C 99
         # takes it away:
         # 7.25.2.1.12:
-        #    The iswxdigit function tests for any wide character that corresponds
-        #    to a hexadecimal-digit character (as defined in 6.4.4.1).
+        #    The iswxdigit function tests for any wide character that
+        #    corresponds to a hexadecimal-digit character (as defined
+        #    in 6.4.4.1).
         # 6.4.4.1:
-        #    hexadecimal-digit: one of 0 1 2 3 4 5 6 7 8 9 a b c d e f A B C D E F
+        #    hexadecimal-digit: one of
+        #    0 1 2 3 4 5 6 7 8 9 a b c d e f A B C D E F
         return ((code_point >= 0x0030 and code_point  <= 0x0039)
                 or (code_point >= 0x0041 and code_point <= 0x0046)
                 or (code_point >= 0x0061 and code_point <= 0x0066))
@@ -389,7 +397,8 @@ def verifications():
         if (to_upper(code_point) != code_point
             and not (is_lower(code_point) or is_upper(code_point))):
             sys.stderr.write(
-                '%(sym)s is not upper|lower but toupper(0x%(c)04X) = 0x%(uc)04X\n' %{
+                ('%(sym)s is not upper|lower '
+                 + 'but toupper(0x%(c)04X) = 0x%(uc)04X\n') %{
                     'sym': ucs_symbol(code_point),
                     'c': code_point,
                     'uc': to_upper(code_point)})
@@ -398,7 +407,8 @@ def verifications():
         if (to_lower(code_point) != code_point
             and not (is_lower(code_point) or is_upper(code_point))):
             sys.stderr.write(
-                '%(sym)s is not upper|lower but tolower(0x%(c)04X) = 0x%(uc)04X\n' %{
+                ('%(sym)s is not upper|lower '
+                 + 'but tolower(0x%(c)04X) = 0x%(uc)04X\n') %{
                     'sym': ucs_symbol(code_point),
                     'c': code_point,
                     'uc': to_lower(code_point)})
@@ -491,7 +501,8 @@ def read_input_file(filename):
                 r'^(?P<key>date\s+)(?P<value>"[0-9]{4}-[0-9]{2}-[0-9]{2}")',
                 line)
             if match:
-                line = match.group('key') + '"{:s}"\n'.format(time.strftime('%Y-%m-%d'))
+                line = match.group('key') \
+                       + '"{:s}"\n'.format(time.strftime('%Y-%m-%d'))
             head = head + line
             if line.startswith('LC_CTYPE'):
                 break
@@ -511,11 +522,14 @@ def output_tables(filename, unicode_version, head='', tail=''):
             file.write('escape_char /\n')
             file.write('comment_char %\n')
             file.write('\n')
-            file.write('% Generated automatically by gen-unicode-ctype.py for Unicode {:s}.\n'.format(unicode_version))
+            file.write('% Generated automatically by gen-unicode-ctype.py '
+                       + 'for Unicode {:s}.\n'.format(unicode_version))
             file.write('\n')
             file.write('LC_IDENTIFICATION\n')
-            file.write('title     "Unicode {:s} FDCC-set"\n'.format(unicode_version))
-            file.write('source    "UnicodeData.txt, DerivedCoreProperties.txt"\n')
+            file.write('title     "Unicode {:s} FDCC-set"\n'.format(
+                unicode_version))
+            file.write('source    "UnicodeData.txt, '
+                       + 'DerivedCoreProperties.txt"\n')
             file.write('address   ""\n')
             file.write('contact   ""\n')
             file.write('email     "bug-glibc-locales@gnu.org"\n')
@@ -529,33 +543,43 @@ def output_tables(filename, unicode_version, head='', tail=''):
             file.write('END LC_IDENTIFICATION\n')
             file.write('\n')
             file.write('LC_CTYPE\n')
-        file.write('% The following is the 14652 i18n fdcc-set LC_CTYPE category.\n')
-        file.write('% It covers Unicode version {:s}.\n'.format(unicode_version))
-        file.write('% The character classes and mapping tables were automatically\n')
+        file.write('% The following is the 14652 i18n fdcc-set '
+                   + 'LC_CTYPE category.\n')
+        file.write('% It covers Unicode version {:s}.\n'.format(
+            unicode_version))
+        file.write('% The character classes and mapping tables were '
+                   + 'automatically\n')
         file.write('% generated using the gen-unicode-ctype.py program.\n')
 
         file.write('\n')
-        file.write('% The "upper" class reflects the uppercase characters of class "alpha"\n')
+        file.write('% The "upper" class reflects the uppercase '
+                   + 'characters of class "alpha"\n')
         output_charclass(file, 'upper', is_upper)
 
         file.write('\n')
-        file.write('% The "lower" class reflects the lowercase characters of class "alpha"\n')
+        file.write('% The "lower" class reflects the lowercase '
+                   + 'characters of class "alpha"\n')
         output_charclass(file, 'lower', is_lower)
 
         file.write('\n')
-        file.write('% The "alpha" class of the "i18n" FDCC-set is reflecting\n')
+        file.write('% The "alpha" class of the "i18n" FDCC-set is '
+                   + 'reflecting\n')
         file.write('% the recommendations in TR 10176 annex A\n')
         output_charclass(file, 'alpha', is_alpha)
 
         file.write('\n')
-        file.write('% The "digit" class must only contain the BASIC LATIN digits, says ISO C 99\n')
+        file.write('% The "digit" class must only contain the '
+                   + 'BASIC LATIN digits, says ISO C 99\n')
         file.write('% (sections 7.25.2.1.5 and 5.2.1).\n')
         output_charclass(file, 'digit', is_digit)
 
         file.write('\n')
-        file.write('% The "outdigit" information is by default "0" to "9".  We don\'t have to\n')
-        file.write('% provide it here since localedef will fill in the bits and it would\n')
-        file.write('% prevent locales copying this file define their own values.\n')
+        file.write('% The "outdigit" information is by default '
+                   + '"0" to "9".  We don\'t have to\n')
+        file.write('% provide it here since localedef will fill '
+                   + 'in the bits and it would\n')
+        file.write('% prevent locales copying this file define '
+                   + 'their own values.\n')
         file.write('% outdigit /\n')
         file.write('%    <U0030>..<U0039>\n')
         # output_charclass(file, 'outdigit', is_outdigit)
@@ -576,7 +600,8 @@ def output_tables(filename, unicode_version, head='', tail=''):
         output_charclass(file, 'print', is_print)
 
         file.write('\n')
-        file.write('% The "xdigit" class must only contain the BASIC LATIN digits and A-F, a-f,\n')
+        file.write('% The "xdigit" class must only contain the '
+                   + 'BASIC LATIN digits and A-F, a-f,\n')
         file.write('% says ISO C 99 (sections 7.25.2.1.12 and 6.4.4.1).\n')
         output_charclass(file, 'xdigit', is_xdigit)
 
@@ -593,14 +618,17 @@ def output_tables(filename, unicode_version, head='', tail=''):
         output_charmap(file, 'map "totitle";', to_title)
 
         file.write('\n')
-        file.write('% The "combining" class reflects ISO/IEC 10646-1 annex B.1\n')
+        file.write('% The "combining" class reflects ISO/IEC 10646-1 '
+                   + 'annex B.1\n')
         file.write('% That is, all combining characters (level 2+3).\n')
         output_charclass(file, 'class "combining";', is_combining)
 
         file.write('\n')
-        file.write('% The "combining_level3" class reflects ISO/IEC 10646-1 annex B.2\n')
+        file.write('% The "combining_level3" class reflects '
+                   + 'ISO/IEC 10646-1 annex B.2\n')
         file.write('% That is, combining characters of level 3.\n')
-        output_charclass(file, 'class "combining_level3";', is_combining_level3)
+        output_charclass(file,
+                         'class "combining_level3";', is_combining_level3)
         file.write('\n')
 
         if args.input_file and tail:
@@ -614,37 +642,44 @@ if __name__ == "__main__":
         Generate a Unicode conforming LC_CTYPE category from
         UnicodeData.txt and DerivedCoreProperties.txt files.
         ''')
-    parser.add_argument('-u', '--unicode_data_file',
-                        nargs='?',
-                        type=str,
-                        default='UnicodeData.txt',
-                        help='The UnicodeData.txt file to read, default: %(default)s')
-    parser.add_argument('-d', '--derived_core_properties_file',
-                        nargs='?',
-                        type=str,
-                        default='DerivedCoreProperties.txt',
-                        help='The DerivedCoreProperties.txt file to read, default: %(default)s')
-    parser.add_argument('-i', '--input_file',
-                        nargs='?',
-                        type=str,
-                        help='''The original glibc/localedata/locales/i18n file.''')
-    parser.add_argument('-o', '--output_file',
-                        nargs='?',
-                        type=str,
-                        default='i18n.new',
-                        help='''The file which shall contain the generated LC_CTYPE category,
-                        default: %(default)s.  If the original
-                        glibc/localedata/locales/i18n has been given
-                        as an option, all data from the original file
-                        except the newly generated LC_CTYPE character
-                        classes and the date stamp in
-                        LC_IDENTIFICATION will be copied unchanged
-                        into the output file.  ''')
-    parser.add_argument('--unicode_version',
-                        nargs='?',
-                        required=True,
-                        type=str,
-                        help='The Unicode version of the input files used.')
+    parser.add_argument(
+        '-u', '--unicode_data_file',
+        nargs='?',
+        type=str,
+        default='UnicodeData.txt',
+        help=('The UnicodeData.txt file to read, '
+              + 'default: %(default)s'))
+    parser.add_argument(
+        '-d', '--derived_core_properties_file',
+        nargs='?',
+        type=str,
+        default='DerivedCoreProperties.txt',
+        help=('The DerivedCoreProperties.txt file to read, '
+              + 'default: %(default)s'))
+    parser.add_argument(
+        '-i', '--input_file',
+        nargs='?',
+        type=str,
+        help='''The original glibc/localedata/locales/i18n file.''')
+    parser.add_argument(
+        '-o', '--output_file',
+        nargs='?',
+        type=str,
+        default='i18n.new',
+        help='''The file which shall contain the generated LC_CTYPE category,
+        default: %(default)s.  If the original
+        glibc/localedata/locales/i18n has been given
+        as an option, all data from the original file
+        except the newly generated LC_CTYPE character
+        classes and the date stamp in
+        LC_IDENTIFICATION will be copied unchanged
+        into the output file.  ''')
+    parser.add_argument(
+        '--unicode_version',
+        nargs='?',
+        required=True,
+        type=str,
+        help='The Unicode version of the input files used.')
     args = parser.parse_args()
 
     fill_attributes(args.unicode_data_file)
