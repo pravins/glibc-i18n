@@ -21,8 +21,8 @@
 # <http://www.gnu.org/licenses/>.
 
 # This script is useful for checking backward compatibility of newly
-# generated LC_CTYPE file from gen-unicode-ctype.c and gen-unicode-ctype-dcp.py
-# USAGE: python ctype-compatibility.py existing_ctype_file new_ctype_file
+# generated LC_CTYPE file from gen_unicode_ctype.py
+# USAGE: python ctype_compatibility.py existing_ctype_file new_ctype_file
 # Existing LC_CTYPE file /usr/share/i18n/locale/i18n and
 # new generated 'unicode-ctype'
 

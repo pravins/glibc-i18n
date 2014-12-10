@@ -20,9 +20,9 @@
 # <http://www.gnu.org/licenses/>.
 
 # This script is useful for checking backward compatibility of newly
-# generated UTF-8 file from utf8-gen.py script
+# generated UTF-8 file from utf8_gen.py script
 #
-# USAGE: python3 utf8-compatibility.py \
+# USAGE: python3 utf8_compatibility.py \
 #        -o ../glibc/localedata/charmaps/UTF-8 -n UTF-8 \
 #        -u unicode7-0/UnicodeData.txt -e unicode7-0/EastAsianWidth.txt \
 #        -m -a -c

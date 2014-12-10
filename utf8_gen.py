@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
-# Usage: python3 utf8-gen.py UnicodeData.txt EastAsianWidth.txt
+# Usage: python3 utf8_gen.py UnicodeData.txt EastAsianWidth.txt
 # It will output UTF-8 file
 # For issues upstream https://github.com/pravins/glibc-i18n
 
@@ -168,7 +168,7 @@ def write_header_charmap(outfile):
     outfile.write("<escape_char> /\n")
     outfile.write("<mb_cur_min> 1\n")
     outfile.write("<mb_cur_max> 6\n\n")
-    outfile.write("% CHARMAP generated using utf8-gen.py\n")
+    outfile.write("% CHARMAP generated using utf8_gen.py\n")
     outfile.write("% alias ISO-10646/UTF-8\n")
     outfile.write("CHARMAP\n")
 
@@ -220,7 +220,7 @@ def process_width(outfile, ulines, elines):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("USAGE: python3 utf8-gen.py UnicodeData.txt EastAsianWidth.txt")
+        print("USAGE: python3 utf8_gen.py UnicodeData.txt EastAsianWidth.txt")
     else:
         with open(sys.argv[1], mode='r') as unidata_file:
             flines = unidata_file.readlines()

@@ -21,7 +21,7 @@
 # This script generates alpha, upper and lower ctype from
 # DerivedCoreProperties.txt file of UCD and add it to "unicode" file generated
 # by gen-unicode-ctype.c
-# USAGE: python gen-unicode-ctype-dcp.py DerivedCoreProperties.txt
+# USAGE: python gen_unicode_ctype_dcp.py DerivedCoreProperties.txt
 
 import os
 import sys
@@ -79,7 +79,7 @@ def write_class(line_no, outfile, flines):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("USAGE: python gen-unicode-ctype-dcp.py DerivedCoreProperties.txt\n")
+        print("USAGE: python gen_unicode_ctype_dcp.py DerivedCoreProperties.txt\n")
     else:
         dcp_file = sys.argv[1]
         outfile=open("unicode-ctype","w")

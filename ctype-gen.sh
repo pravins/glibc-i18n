@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script to generate new ctype using gen-unicode-ctype.c and 
-# gen-unicode-ctype-dcp.py
+# gen_unicode_ctype_dcp.py
 # Copyright (C) 2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 # Contributed by Pravin Satpute <psatpute@redhat.com>, 2014.
@@ -25,5 +25,5 @@ if [ $# -eq 0 ]; then
 fi
 gcc -o gen-unicode-ctype.out gen-unicode-ctype.c
 ./gen-unicode-ctype.out $1 $3
-python gen-unicode-ctype-dcp.py $2
+python gen_unicode_ctype_dcp.py $2
 rm -rf unicode

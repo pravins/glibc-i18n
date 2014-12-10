@@ -3,18 +3,18 @@ Process to generate new CTYPE:
 1. Download UnicodeData.txt and DerivedCoreProperties.txt from latest
    Unicode release.
 
-2. Use gen-unicode-ctype.py to generate a new i18n file for  glibc:
+2. Use gen_unicode_ctype.py to generate a new i18n file for  glibc:
 
-   $ python3 ./gen-unicode-ctype.py -u UnicodeData.txt -d DerivedCoreProperties.txt -i ../glibc/localedata/locales/i18n -o i18n-new --unicode_version 7.0.0 
+   $ python3 ./gen_unicode_ctype.py -u UnicodeData.txt -d DerivedCoreProperties.txt -i ../glibc/localedata/locales/i18n -o i18n-new --unicode_version 7.0.0
 
    The file i18n-new now has its character class data in LC_CTYPE
    replaced with the new data from Unicode and the time stamp
    of the file updated. The rest of the i18n-new file is identical
    to the original i18n file.
 
-3. Run the test program ctype-compatibility.py:
+3. Run the test program ctype_compatibility.py:
 
-   python3 ctype-compatibility.py -o ../glibc/localedata/locales/i18n -n i18n-new -a -m
+   python3 ctype_compatibility.py -o ../glibc/localedata/locales/i18n -n i18n-new -a -m
 
    This program compares the character class data in the original i18n file
    with the character class data in the new i18n-new file and reports

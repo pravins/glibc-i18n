@@ -580,7 +580,7 @@ def output_tables(filename, unicode_version, head='', tail=''):
             file.write('escape_char /\n')
             file.write('comment_char %\n')
             file.write('\n')
-            file.write('% Generated automatically by gen-unicode-ctype.py '
+            file.write('% Generated automatically by gen_unicode_ctype.py '
                        + 'for Unicode {:s}.\n'.format(unicode_version))
             file.write('\n')
             file.write('LC_IDENTIFICATION\n')
@@ -607,7 +607,7 @@ def output_tables(filename, unicode_version, head='', tail=''):
             unicode_version))
         file.write('% The character classes and mapping tables were '
                    + 'automatically\n')
-        file.write('% generated using the gen-unicode-ctype.py program.\n')
+        file.write('% generated using the gen_unicode_ctype.py program.\n')
 
         file.write('\n')
         file.write('% The "upper" class reflects the uppercase '
