@@ -198,7 +198,7 @@ def process_width(outfile, ulines, elines):
     width_dict = {}
     for l in ulines:
         w = l.split(";")
-        if w[4]== "NSM" or w[2] == "Cf":
+        if w[4] == "NSM" or w[2] == "Cf":
             width_dict[int(w[0], 16)] = ucs_symbol(int(w[0], 16))+'\t0'
 
     for l in elines:

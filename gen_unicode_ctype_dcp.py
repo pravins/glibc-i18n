@@ -82,8 +82,8 @@ if __name__ == "__main__":
         print("USAGE: python gen_unicode_ctype_dcp.py DerivedCoreProperties.txt\n")
     else:
         dcp_file = sys.argv[1]
-        outfile=open("unicode-ctype","w")
-        unicode_file=open("unicode")
+        outfile = open("unicode-ctype","w")
+        unicode_file = open("unicode")
         flines = unicode_file.readlines()
         i = 0
         for l in flines:
