@@ -20,6 +20,16 @@
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
 
+'''
+Generate a Unicode conforming LC_CTYPE category from UnicodeData.txt and
+DerivedCoreProperties.txt files.
+
+To see how this script is used, call it with the “-h” option:
+
+    $ ./gen_unicode_ctype.py -h
+    … prints usage message …
+'''
+
 import argparse
 import sys
 import time

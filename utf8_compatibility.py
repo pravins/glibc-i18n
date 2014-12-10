@@ -19,15 +19,17 @@
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
 
-# This script is useful for checking backward compatibility of newly
-# generated UTF-8 file from utf8_gen.py script
-#
-# USAGE: python3 utf8_compatibility.py \
-#        -o ../glibc/localedata/charmaps/UTF-8 -n UTF-8 \
-#        -u unicode7-0/UnicodeData.txt -e unicode7-0/EastAsianWidth.txt \
-#        -m -a -c
-#
-# For issues upstream https://github.com/pravins/glibc-i18n
+'''
+This script is useful for checking backward compatibility of newly
+generated UTF-8 file from utf8_gen.py script
+
+To see how this script is used, call it with the “-h” option:
+
+    $ ./utf8_compatibility.py -h
+    … prints usage message …
+
+For issues upstream https://github.com/pravins/glibc-i18n
+'''
 
 import sys
 import re

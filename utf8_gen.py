@@ -19,9 +19,18 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with the GNU C Library; if not, see
 # <http://www.gnu.org/licenses/>.
-# Usage: python3 utf8_gen.py UnicodeData.txt EastAsianWidth.txt
-# It will output UTF-8 file
-# For issues upstream https://github.com/pravins/glibc-i18n
+
+'''glibc/localedata/charmaps/UTF-8 file generator script
+
+This script generates a glibc/localedata/charmaps/UTF-8 file
+from Unicode data.
+
+Usage: python3 utf8_gen.py UnicodeData.txt EastAsianWidth.txt
+
+It will output UTF-8 file
+
+For issues upstream https://github.com/pravins/glibc-i18n
+'''
 
 import sys
 import re
