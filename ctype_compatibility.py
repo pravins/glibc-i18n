@@ -70,8 +70,7 @@ def extract_character_classes(filename):
     these area actually pairs of code points
     '''
     ctype_dict = {}
-    for line in get_lines_from_file(filename):
-        for char_class in [
+    classes = '|'.join([re.escape(x) for x in [
                 'upper',
                 'lower',
                 'alpha',
@@ -88,15 +87,15 @@ def extract_character_classes(filename):
                 'combining_level3',
                 'toupper',
                 'tolower',
-                'totitle']:
-            match = re.match(r'^('
-                             +'(?:(?:class|map)\s+")'
-                             +re.escape(char_class)+
-                             '(?:";)\s+'
-                             +'|'
-                             +re.escape(char_class)+'\s+'
-                             +')', line)
+                'totitle']])
+    rx = re.compile(r'^'
+                    +'(?:(?:class|map)\s+(?P<quote>"))?'
+                    +'(?P<class>' + classes + ')'
+                    '(?P=quote)?;?\s+')
+    for line in get_lines_from_file(filename):
+            match = re.match(rx,line)
             if match:
+                char_class = match.group('class')
                 if char_class not in ctype_dict:
                     ctype_dict[char_class] = []
                 process_chars(
