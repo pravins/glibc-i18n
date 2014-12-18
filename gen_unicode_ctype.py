@@ -235,7 +235,7 @@ def is_alpha(code_point):
 
 def is_digit(code_point):
     '''Checks whether the character with this code point is a digit'''
-    if 0:
+    if False:
         return (UNICODE_ATTRIBUTES[code_point]['name']
                 and UNICODE_ATTRIBUTES[code_point]['category'] == 'Nd')
         # Note: U+0BE7..U+0BEF and U+1369..U+1371 are digit systems without
@@ -294,7 +294,7 @@ def is_cntrl(code_point):
 def is_xdigit(code_point):
     '''Checks whether the character with this code point is
     a hexadecimal digit'''
-    if 0:
+    if False:
         return (is_digit(code_point)
                 or (code_point >= 0x0041 and code_point <= 0x0046)
                 or (code_point >= 0x0061 and code_point <= 0x0066))
@@ -327,7 +327,7 @@ def is_print(code_point):
 
 def is_punct(code_point):
     '''Checks whether the character with this code point is punctuation'''
-    if 0:
+    if False:
         return (UNICODE_ATTRIBUTES[code_point]['name']
                 and UNICODE_ATTRIBUTES[code_point]['category'].startswith('P'))
     else:
