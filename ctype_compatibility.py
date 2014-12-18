@@ -42,7 +42,6 @@ def get_lines_from_file(filename):
     Also merge all lines which are continued on the next line because
     they end in “/” into a single line.
     '''
-    all_lines = []
     with open(filename) as i18n_file:
         current_line = ''
         for line in i18n_file:
@@ -56,11 +55,10 @@ def get_lines_from_file(filename):
             if line.endswith('/'):
                 current_line += line[:-1]
             else:
-                all_lines.append(current_line + line)
+                yield current_line + line
                 current_line = ''
     if current_line: # file ends with a continuation line
-        all_lines.append(current_line)
-    return all_lines
+        yield current_line
 
 def extract_character_classes(filename):
     '''Get all Unicode code points for each character class from a file
