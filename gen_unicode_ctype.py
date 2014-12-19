@@ -581,132 +581,140 @@ def read_input_file(filename):
             tail = tail + line
     return (head, tail)
 
-def output_tables(filename, unicode_version, head='', tail=''):
-    '''Write an output file containing the new LC_CTYPE character classes'''
-    with open(filename, mode='w') as i18n_file:
-        if ARGS.input_file and head:
-            i18n_file.write(head)
-        else:
-            i18n_file.write('escape_char /\n')
-            i18n_file.write('comment_char %\n')
-            i18n_file.write('\n')
-            i18n_file.write('% Generated automatically by '
-                            + 'gen_unicode_ctype.py '
-                            + 'for Unicode {:s}.\n'.format(unicode_version))
-            i18n_file.write('\n')
-            i18n_file.write('LC_IDENTIFICATION\n')
-            i18n_file.write('title     "Unicode {:s} FDCC-set"\n'.format(
-                unicode_version))
-            i18n_file.write('source    "UnicodeData.txt, '
-                            + 'DerivedCoreProperties.txt"\n')
-            i18n_file.write('address   ""\n')
-            i18n_file.write('contact   ""\n')
-            i18n_file.write('email     "bug-glibc-locales@gnu.org"\n')
-            i18n_file.write('tel       ""\n')
-            i18n_file.write('fax       ""\n')
-            i18n_file.write('language  ""\n')
-            i18n_file.write('territory "Earth"\n')
-            i18n_file.write('revision  "{:s}"\n'.format(unicode_version))
-            i18n_file.write('date      "{:s}"\n'.format(
-                time.strftime('%Y-%m-%d')))
-            i18n_file.write('category  "unicode:2014";LC_CTYPE\n')
-            i18n_file.write('END LC_IDENTIFICATION\n')
-            i18n_file.write('\n')
-            i18n_file.write('LC_CTYPE\n')
-        i18n_file.write('% The following is the 14652 i18n fdcc-set '
-                        + 'LC_CTYPE category.\n')
-        i18n_file.write('% It covers Unicode version {:s}.\n'.format(
+def output_head(i18n_file, unicode_version, head=''):
+    '''Write the header of the output file, i.e. the part of the file
+    before the “LC_CTYPE” line.
+    '''
+    if ARGS.input_file and head:
+        i18n_file.write(head)
+    else:
+        i18n_file.write('escape_char /\n')
+        i18n_file.write('comment_char %\n')
+        i18n_file.write('\n')
+        i18n_file.write('% Generated automatically by '
+                        + 'gen_unicode_ctype.py '
+                        + 'for Unicode {:s}.\n'.format(unicode_version))
+        i18n_file.write('\n')
+        i18n_file.write('LC_IDENTIFICATION\n')
+        i18n_file.write('title     "Unicode {:s} FDCC-set"\n'.format(
             unicode_version))
-        i18n_file.write('% The character classes and mapping tables were '
-                        + 'automatically\n')
-        i18n_file.write('% generated using the gen_unicode_ctype.py '
-                        + 'program.\n')
-
+        i18n_file.write('source    "UnicodeData.txt, '
+                        + 'DerivedCoreProperties.txt"\n')
+        i18n_file.write('address   ""\n')
+        i18n_file.write('contact   ""\n')
+        i18n_file.write('email     "bug-glibc-locales@gnu.org"\n')
+        i18n_file.write('tel       ""\n')
+        i18n_file.write('fax       ""\n')
+        i18n_file.write('language  ""\n')
+        i18n_file.write('territory "Earth"\n')
+        i18n_file.write('revision  "{:s}"\n'.format(unicode_version))
+        i18n_file.write('date      "{:s}"\n'.format(
+            time.strftime('%Y-%m-%d')))
+        i18n_file.write('category  "unicode:2014";LC_CTYPE\n')
+        i18n_file.write('END LC_IDENTIFICATION\n')
         i18n_file.write('\n')
-        i18n_file.write('% The "upper" class reflects the uppercase '
-                        + 'characters of class "alpha"\n')
-        output_charclass(i18n_file, 'upper', is_upper)
+        i18n_file.write('LC_CTYPE\n')
 
-        i18n_file.write('\n')
-        i18n_file.write('% The "lower" class reflects the lowercase '
-                        + 'characters of class "alpha"\n')
-        output_charclass(i18n_file, 'lower', is_lower)
+def output_tail(i18n_file, tail=''):
+    '''Write the tail of the output file, i.e. the part of the file
+    after the last “LC_CTYPE” character class.
+    '''
+    if ARGS.input_file and tail:
+        i18n_file.write(tail)
+    else:
+        i18n_file.write('END LC_CTYPE\n')
 
-        i18n_file.write('\n')
-        i18n_file.write('% The "alpha" class of the "i18n" FDCC-set is '
-                        + 'reflecting\n')
-        i18n_file.write('% the recommendations in TR 10176 annex A\n')
-        output_charclass(i18n_file, 'alpha', is_alpha)
+def output_tables(i18n_file, unicode_version):
+    '''Write the new LC_CTYPE character classes to the output file'''
+    i18n_file.write('% The following is the 14652 i18n fdcc-set '
+                    + 'LC_CTYPE category.\n')
+    i18n_file.write('% It covers Unicode version {:s}.\n'.format(
+        unicode_version))
+    i18n_file.write('% The character classes and mapping tables were '
+                    + 'automatically\n')
+    i18n_file.write('% generated using the gen_unicode_ctype.py '
+                    + 'program.\n')
 
-        i18n_file.write('\n')
-        i18n_file.write('% The "digit" class must only contain the '
-                        + 'BASIC LATIN digits, says ISO C 99\n')
-        i18n_file.write('% (sections 7.25.2.1.5 and 5.2.1).\n')
-        output_charclass(i18n_file, 'digit', is_digit)
+    i18n_file.write('\n')
+    i18n_file.write('% The "upper" class reflects the uppercase '
+                    + 'characters of class "alpha"\n')
+    output_charclass(i18n_file, 'upper', is_upper)
 
-        i18n_file.write('\n')
-        i18n_file.write('% The "outdigit" information is by default '
-                        + '"0" to "9".  We don\'t have to\n')
-        i18n_file.write('% provide it here since localedef will fill '
-                   + 'in the bits and it would\n')
-        i18n_file.write('% prevent locales copying this file define '
-                        + 'their own values.\n')
-        i18n_file.write('% outdigit /\n')
-        i18n_file.write('%    <U0030>..<U0039>\n')
-        # output_charclass(i18n_file, 'outdigit', is_outdigit)
+    i18n_file.write('\n')
+    i18n_file.write('% The "lower" class reflects the lowercase '
+                    + 'characters of class "alpha"\n')
+    output_charclass(i18n_file, 'lower', is_lower)
 
-        i18n_file.write('\n')
-        output_charclass(i18n_file, 'space', is_space)
+    i18n_file.write('\n')
+    i18n_file.write('% The "alpha" class of the "i18n" FDCC-set is '
+                    + 'reflecting\n')
+    i18n_file.write('% the recommendations in TR 10176 annex A\n')
+    output_charclass(i18n_file, 'alpha', is_alpha)
 
-        i18n_file.write('\n')
-        output_charclass(i18n_file, 'cntrl', is_cntrl)
+    i18n_file.write('\n')
+    i18n_file.write('% The "digit" class must only contain the '
+                    + 'BASIC LATIN digits, says ISO C 99\n')
+    i18n_file.write('% (sections 7.25.2.1.5 and 5.2.1).\n')
+    output_charclass(i18n_file, 'digit', is_digit)
 
-        i18n_file.write('\n')
-        output_charclass(i18n_file, 'punct', is_punct)
+    i18n_file.write('\n')
+    i18n_file.write('% The "outdigit" information is by default '
+                    + '"0" to "9".  We don\'t have to\n')
+    i18n_file.write('% provide it here since localedef will fill '
+               + 'in the bits and it would\n')
+    i18n_file.write('% prevent locales copying this file define '
+                    + 'their own values.\n')
+    i18n_file.write('% outdigit /\n')
+    i18n_file.write('%    <U0030>..<U0039>\n')
+    # output_charclass(i18n_file, 'outdigit', is_outdigit)
 
-        i18n_file.write('\n')
-        output_charclass(i18n_file, 'graph', is_graph)
+    i18n_file.write('\n')
+    output_charclass(i18n_file, 'space', is_space)
 
-        i18n_file.write('\n')
-        output_charclass(i18n_file, 'print', is_print)
+    i18n_file.write('\n')
+    output_charclass(i18n_file, 'cntrl', is_cntrl)
 
-        i18n_file.write('\n')
-        i18n_file.write('% The "xdigit" class must only contain the '
-                        + 'BASIC LATIN digits and A-F, a-f,\n')
-        i18n_file.write('% says ISO C 99 '
-                        + '(sections 7.25.2.1.12 and 6.4.4.1).\n')
-        output_charclass(i18n_file, 'xdigit', is_xdigit)
+    i18n_file.write('\n')
+    output_charclass(i18n_file, 'punct', is_punct)
 
-        i18n_file.write('\n')
-        output_charclass(i18n_file, 'blank', is_blank)
+    i18n_file.write('\n')
+    output_charclass(i18n_file, 'graph', is_graph)
 
-        i18n_file.write('\n')
-        output_charmap(i18n_file, 'toupper', to_upper)
+    i18n_file.write('\n')
+    output_charclass(i18n_file, 'print', is_print)
 
-        i18n_file.write('\n')
-        output_charmap(i18n_file, 'tolower', to_lower)
+    i18n_file.write('\n')
+    i18n_file.write('% The "xdigit" class must only contain the '
+                    + 'BASIC LATIN digits and A-F, a-f,\n')
+    i18n_file.write('% says ISO C 99 '
+                    + '(sections 7.25.2.1.12 and 6.4.4.1).\n')
+    output_charclass(i18n_file, 'xdigit', is_xdigit)
 
-        i18n_file.write('\n')
-        output_charmap(i18n_file, 'map "totitle";', to_title)
+    i18n_file.write('\n')
+    output_charclass(i18n_file, 'blank', is_blank)
 
-        i18n_file.write('\n')
-        i18n_file.write('% The "combining" class reflects ISO/IEC 10646-1 '
-                        + 'annex B.1\n')
-        i18n_file.write('% That is, all combining characters (level 2+3).\n')
-        output_charclass(i18n_file, 'class "combining";', is_combining)
+    i18n_file.write('\n')
+    output_charmap(i18n_file, 'toupper', to_upper)
 
-        i18n_file.write('\n')
-        i18n_file.write('% The "combining_level3" class reflects '
-                        + 'ISO/IEC 10646-1 annex B.2\n')
-        i18n_file.write('% That is, combining characters of level 3.\n')
-        output_charclass(i18n_file,
-                         'class "combining_level3";', is_combining_level3)
-        i18n_file.write('\n')
+    i18n_file.write('\n')
+    output_charmap(i18n_file, 'tolower', to_lower)
 
-        if ARGS.input_file and tail:
-            i18n_file.write(tail)
-        else:
-            i18n_file.write('END LC_CTYPE\n')
+    i18n_file.write('\n')
+    output_charmap(i18n_file, 'map "totitle";', to_title)
+
+    i18n_file.write('\n')
+    i18n_file.write('% The "combining" class reflects ISO/IEC 10646-1 '
+                    + 'annex B.1\n')
+    i18n_file.write('% That is, all combining characters (level 2+3).\n')
+    output_charclass(i18n_file, 'class "combining";', is_combining)
+
+    i18n_file.write('\n')
+    i18n_file.write('% The "combining_level3" class reflects '
+                    + 'ISO/IEC 10646-1 annex B.2\n')
+    i18n_file.write('% That is, combining characters of level 3.\n')
+    output_charclass(i18n_file,
+                     'class "combining_level3";', is_combining_level3)
+    i18n_file.write('\n')
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(
@@ -760,4 +768,7 @@ if __name__ == "__main__":
     HEAD = TAIL = ''
     if ARGS.input_file:
         (HEAD, TAIL) = read_input_file(ARGS.input_file)
-    output_tables(ARGS.output_file, ARGS.unicode_version, head=HEAD, tail=TAIL)
+    with open(ARGS.output_file, mode='w') as I18N_FILE:
+        output_head(I18N_FILE, ARGS.unicode_version, head=HEAD)
+        output_tables(I18N_FILE, ARGS.unicode_version)
+        output_tail(I18N_FILE, tail=TAIL)
