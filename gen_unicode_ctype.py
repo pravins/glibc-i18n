@@ -413,6 +413,7 @@ def output_charclass(i18n_file, class_name, is_class_function):
             line += range_string
         if line.strip():
             i18n_file.write(line+'\n')
+        i18n_file.write('\n')
 
 def output_charmap(i18n_file, map_name, map_function):
     '''Output a LC_CTYPE character map section
@@ -446,6 +447,7 @@ def output_charmap(i18n_file, map_name, map_function):
             line += map_string
     if line.strip():
         i18n_file.write(line+'\n')
+    i18n_file.write('\n')
 
 def verifications():
     '''Tests whether the is_* functions observe the known restrictions'''
@@ -633,31 +635,21 @@ def output_tables(i18n_file, unicode_version):
     i18n_file.write('% The character classes and mapping tables were '
                     + 'automatically\n')
     i18n_file.write('% generated using the gen_unicode_ctype.py '
-                    + 'program.\n')
-
-    i18n_file.write('\n')
+                    + 'program.\n\n')
     i18n_file.write('% The "upper" class reflects the uppercase '
                     + 'characters of class "alpha"\n')
     output_charclass(i18n_file, 'upper', is_upper)
-
-    i18n_file.write('\n')
     i18n_file.write('% The "lower" class reflects the lowercase '
                     + 'characters of class "alpha"\n')
     output_charclass(i18n_file, 'lower', is_lower)
-
-    i18n_file.write('\n')
     i18n_file.write('% The "alpha" class of the "i18n" FDCC-set is '
                     + 'reflecting\n')
     i18n_file.write('% the recommendations in TR 10176 annex A\n')
     output_charclass(i18n_file, 'alpha', is_alpha)
-
-    i18n_file.write('\n')
     i18n_file.write('% The "digit" class must only contain the '
                     + 'BASIC LATIN digits, says ISO C 99\n')
     i18n_file.write('% (sections 7.25.2.1.5 and 5.2.1).\n')
     output_charclass(i18n_file, 'digit', is_digit)
-
-    i18n_file.write('\n')
     i18n_file.write('% The "outdigit" information is by default '
                     + '"0" to "9".  We don\'t have to\n')
     i18n_file.write('% provide it here since localedef will fill '
@@ -665,56 +657,31 @@ def output_tables(i18n_file, unicode_version):
     i18n_file.write('% prevent locales copying this file define '
                     + 'their own values.\n')
     i18n_file.write('% outdigit /\n')
-    i18n_file.write('%    <U0030>..<U0039>\n')
+    i18n_file.write('%    <U0030>..<U0039>\n\n')
     # output_charclass(i18n_file, 'outdigit', is_outdigit)
-
-    i18n_file.write('\n')
     output_charclass(i18n_file, 'space', is_space)
-
-    i18n_file.write('\n')
     output_charclass(i18n_file, 'cntrl', is_cntrl)
-
-    i18n_file.write('\n')
     output_charclass(i18n_file, 'punct', is_punct)
-
-    i18n_file.write('\n')
     output_charclass(i18n_file, 'graph', is_graph)
-
-    i18n_file.write('\n')
     output_charclass(i18n_file, 'print', is_print)
-
-    i18n_file.write('\n')
     i18n_file.write('% The "xdigit" class must only contain the '
                     + 'BASIC LATIN digits and A-F, a-f,\n')
     i18n_file.write('% says ISO C 99 '
                     + '(sections 7.25.2.1.12 and 6.4.4.1).\n')
     output_charclass(i18n_file, 'xdigit', is_xdigit)
-
-    i18n_file.write('\n')
     output_charclass(i18n_file, 'blank', is_blank)
-
-    i18n_file.write('\n')
     output_charmap(i18n_file, 'toupper', to_upper)
-
-    i18n_file.write('\n')
     output_charmap(i18n_file, 'tolower', to_lower)
-
-    i18n_file.write('\n')
     output_charmap(i18n_file, 'map "totitle";', to_title)
-
-    i18n_file.write('\n')
     i18n_file.write('% The "combining" class reflects ISO/IEC 10646-1 '
                     + 'annex B.1\n')
     i18n_file.write('% That is, all combining characters (level 2+3).\n')
     output_charclass(i18n_file, 'class "combining";', is_combining)
-
-    i18n_file.write('\n')
     i18n_file.write('% The "combining_level3" class reflects '
                     + 'ISO/IEC 10646-1 annex B.2\n')
     i18n_file.write('% That is, combining characters of level 3.\n')
     output_charclass(i18n_file,
                      'class "combining_level3";', is_combining_level3)
-    i18n_file.write('\n')
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(
