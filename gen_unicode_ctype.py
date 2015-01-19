@@ -371,6 +371,27 @@ def ucs_symbol_range(code_point_low, code_point_high):
     '''
     return ucs_symbol(code_point_low) + '..' + ucs_symbol(code_point_high)
 
+def code_point_ranges(is_class_function):
+    '''Returns a list of ranges of code points for which is_class_function
+    returns True.
+
+    Example:
+
+    [[65, 90], [192, 214], [216, 222], [256], … ]
+    '''
+    cp_ranges  = []
+    for code_point in sorted(UNICODE_ATTRIBUTES):
+        if is_class_function(code_point):
+            if (cp_ranges
+                and cp_ranges[-1][-1] == code_point - 1):
+                if len(cp_ranges[-1]) == 1:
+                    cp_ranges[-1].append(code_point)
+                else:
+                    cp_ranges[-1][-1] = code_point
+            else:
+                cp_ranges.append([code_point])
+    return cp_ranges
+
 def output_charclass(i18n_file, class_name, is_class_function):
     '''Output a LC_CTYPE character class section
 
@@ -382,24 +403,14 @@ def output_charclass(i18n_file, class_name, is_class_function):
        <U0001D790>..<U0001D7A8>;<U0001D7CA>;<U0001F130>..<U0001F149>;/
        <U0001F150>..<U0001F169>;<U0001F170>..<U0001F189>
     '''
-    code_point_ranges  = []
-    for code_point in sorted(UNICODE_ATTRIBUTES):
-        if is_class_function(code_point):
-            if (code_point_ranges
-                and code_point_ranges[-1][-1] == code_point - 1):
-                if len(code_point_ranges[-1]) == 1:
-                    code_point_ranges[-1].append(code_point)
-                else:
-                    code_point_ranges[-1][-1] = code_point
-            else:
-                code_point_ranges.append([code_point])
-    if code_point_ranges:
+    cp_ranges = code_point_ranges(is_class_function)
+    if cp_ranges:
         i18n_file.write('%s /\n' %class_name)
         max_column = 75
         prefix = '   '
         line = prefix
         range_string = ''
-        for code_point_range in code_point_ranges:
+        for code_point_range in cp_ranges:
             if line.strip():
                 line  += ';'
             if len(code_point_range) == 1:
