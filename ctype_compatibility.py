@@ -229,15 +229,14 @@ def report(char_class, old_list, new_list):
     if ARGS.show_added_characters:
         report_code_points(char_class, added_chars, 'Added')
 
-NUMBER_OF_ERRORS = 0
 
-def cperror(error_message):
+def cperror(error_message, errorcounter=0):
     '''Increase number of errors by one and print an error message'''
-    global NUMBER_OF_ERRORS
-    NUMBER_OF_ERRORS += 1
     print(error_message)
+    return errorcounter + 1
 
-def cpcheck(ctype_dict, code_point_list_with_ranges, char_classes, reason=''):
+def cpcheck(ctype_dict, code_point_list_with_ranges, char_classes, reason='',
+            errorcounter=0):
     '''The parameter “code_point_list_with_ranges” is a list of
     integers or pairs of integers, for example:
 
@@ -256,15 +255,18 @@ def cpcheck(ctype_dict, code_point_list_with_ranges, char_classes, reason=''):
                 char_class = char_class_tuple[0]
                 in_char_class = char_class_tuple[1]
                 if (code_point in ctype_dict[char_class]) != in_char_class:
-                    cperror(('error: %(code_point)s %(char)s '
-                             + '%(char_class)s %(in)s: %(reason)s') %{
-                        'code_point': hex(code_point),
-                        'char': chr(code_point),
-                        'char_class': char_class,
-                        'in': not in_char_class,
-                        'reason': reason})
+                    errorcounter = cperror(
+                        ('error: %(code_point)s %(char)s '
+                         + '%(char_class)s %(in)s: %(reason)s') %{
+                             'code_point': hex(code_point),
+                             'char': chr(code_point),
+                             'char_class': char_class,
+                             'in': not in_char_class,
+                             'reason': reason},
+                        errorcounter)
+    return errorcounter
 
-def tests(ctype_dict):
+def tests(ctype_dict, errorcounter = 0):
     '''Test a LC_CTYPE character class dictionary for known errors'''
     # copy the information from ctype_dict (which contains lists) in
     # a new dictionary ctype_dict2 (which contains dictionaries).
@@ -282,10 +284,11 @@ def tests(ctype_dict):
                     ctype_dict2[key][value[0]] = value[1]
 
     for test_case in TEST_CASES:
-        cpcheck(ctype_dict2,
-                test_case[0],
-                test_case[1],
-                test_case[2])
+        errorcounter = cpcheck(ctype_dict2,
+                               test_case[0],
+                               test_case[1],
+                               test_case[2],
+                               errorcounter = errorcounter)
 
     for code_point in range(0, 0x110000):
         # toupper restriction: "Only characters specified for the keywords
@@ -294,118 +297,172 @@ def tests(ctype_dict):
             and code_point != ctype_dict2['toupper'][code_point]
             and not (code_point in ctype_dict2['lower']
                      or code_point in ctype_dict2['upper'])):
-            cperror(('error: %(char1)s is not upper|lower '
-                     + 'but toupper(%(cp1)s)=%(cp2)s (%(char2)s)') %{
-                'char1': chr(code_point),
-                'cp1': hex(code_point),
-                'cp2': hex(ctype_dict2['toupper'][code_point]),
-                'char2': chr(ctype_dict2['toupper'][code_point])})
+            errorcounter = cperror(
+                ('error: %(char1)s is not upper|lower '
+                 + 'but toupper(%(cp1)s)=%(cp2)s (%(char2)s)') %{
+                     'char1': chr(code_point),
+                     'cp1': hex(code_point),
+                     'cp2': hex(ctype_dict2['toupper'][code_point]),
+                     'char2': chr(ctype_dict2['toupper'][code_point])
+                 },
+                errorcounter)
         # tolower restriction: "Only characters specified for the keywords
 	# lower and upper shall be specified.
         if (code_point in ctype_dict2['tolower']
             and code_point != ctype_dict2['tolower'][code_point]
             and not (code_point in ctype_dict2['lower']
                      or code_point in ctype_dict2['upper'])):
-            cperror(('error: %(char1)s is not upper|lower '
-                     + 'but tolower(%(cp1)s)=%(cp2)s (%(char2)s)') %{
-                'char1': chr(code_point),
-                'cp1': hex(code_point),
-                'cp2': hex(ctype_dict2['tolower'][code_point]),
-                'char2': chr(ctype_dict2['tolower'][code_point])})
+            errorcounter = cperror(
+                ('error: %(char1)s is not upper|lower '
+                 + 'but tolower(%(cp1)s)=%(cp2)s (%(char2)s)') %{
+                     'char1': chr(code_point),
+                     'cp1': hex(code_point),
+                     'cp2': hex(ctype_dict2['tolower'][code_point]),
+                     'char2': chr(ctype_dict2['tolower'][code_point])
+                 },
+                errorcounter)
         # alpha restriction: "Characters classified as either upper or lower
 	# shall automatically belong to this class.
         if ((code_point in ctype_dict2['lower']
              or code_point in ctype_dict2['upper'])
             and code_point not in ctype_dict2['alpha']):
-            cperror('error: %(char)s %(cp)s is upper|lower but not alpha' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is upper|lower but not alpha' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         # alpha restriction: "No character specified for the keywords cntrl,
 	# digit, punct or space shall be specified."
         if (code_point in ctype_dict2['alpha']
             and code_point in ctype_dict2['cntrl']):
-            cperror('error: %(char)s %(cp)s is alpha and cntrl' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is alpha and cntrl' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['alpha']
             and code_point in ctype_dict2['digit']):
-            cperror('error: %(char)s %(cp)s is alpha and digit' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is alpha and digit' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['alpha']
             and code_point in ctype_dict2['punct']):
-            cperror('error: %(char)s %(cp)s is alpha and punct' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is alpha and punct' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['alpha']
             and code_point in ctype_dict2['space']):
-            cperror('error: %(char)s %(cp)s is alpha and space' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is alpha and space' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         # space restriction: "No character specified for the keywords upper,
 	# lower, alpha, digit, graph or xdigit shall be specified."
 	# upper, lower, alpha already checked above.
         if (code_point in ctype_dict2['space']
             and code_point in ctype_dict2['digit']):
-            cperror('error: %(char)s %(cp)s is space and digit' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is space and digit' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['space']
             and code_point in ctype_dict2['graph']):
-            cperror('error: %(char)s %(cp)s is space and graph' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is space and graph' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['space']
             and code_point in ctype_dict2['xdigit']):
-            cperror('error: %(char)s %(cp)s is space and xdigit' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is space and xdigit' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         # cntrl restriction: "No character specified for the keywords upper,
 	# lower, alpha, digit, punct, graph, print or xdigit shall be
 	# specified."  upper, lower, alpha already checked above.
         if (code_point in ctype_dict2['cntrl']
             and code_point in ctype_dict2['digit']):
-            cperror('error: %(char)s %(cp)s is cntrl and digit' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is cntrl and digit' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['cntrl']
             and code_point in ctype_dict2['punct']):
-            cperror('error: %(char)s %(cp)s is cntrl and punct' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is cntrl and punct' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['cntrl']
             and code_point in ctype_dict2['graph']):
-            cperror('error: %(char)s %(cp)s is cntrl and graph' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is cntrl and graph' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['cntrl']
             and code_point in ctype_dict2['print']):
-            cperror('error: %(char)s %(cp)s is cntrl and print' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is cntrl and print' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['cntrl']
             and code_point in ctype_dict2['xdigit']):
-            cperror('error: %(char)s %(cp)s is cntrl and xdigit' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is cntrl and xdigit' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         # punct restriction: "No character specified for the keywords upper,
 	# lower, alpha, digit, cntrl, xdigit or as the <space> character shall
 	# be specified."  upper, lower, alpha, cntrl already checked above.
         if (code_point in ctype_dict2['punct']
             and code_point in ctype_dict2['digit']):
-            cperror('error: %(char)s %(cp)s is punct and digit' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is punct and digit' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['punct']
             and code_point in ctype_dict2['xdigit']):
-            cperror('error: %(char)s %(cp)s is punct and xdigit' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is punct and xdigit' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point in ctype_dict2['punct']
             and code_point == 0x0020):
-            cperror('error: %(char)s %(cp)s is punct.' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is punct.' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         # graph restriction: "No character specified for the keyword cntrl
 	# shall be specified."  Already checked above.
 
@@ -419,15 +476,22 @@ def tests(ctype_dict):
         if (code_point in ctype_dict2['print']
             and not (code_point in ctype_dict2['graph']
                      or code_point in ctype_dict2['space'])):
-            cperror('error: %(char)s %(cp)s is print but not graph|space' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s is print but not graph|space' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
         if (code_point not in ctype_dict2['print']
             and (code_point in ctype_dict2['graph']
                  or code_point ==  0x0020)):
-            cperror('error: %(char)s %(cp)s graph|space but not print' %{
-                'char': chr(code_point),
-                'cp': hex(code_point)})
+            errorcounter = cperror(
+                'error: %(char)s %(cp)s graph|space but not print' %{
+                    'char': chr(code_point),
+                    'cp': hex(code_point)
+                },
+                errorcounter)
+    return errorcounter
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(
@@ -466,9 +530,7 @@ if __name__ == "__main__":
     print('============================================================')
     print('Checking for errors in old ctype file: %s' %ARGS.old_ctype_file)
     print('------------------------------------------------------------')
-    tests(OLD_CTYPE_DICT)
-    NUMBER_OF_ERRORS_IN_OLD_FILE = NUMBER_OF_ERRORS
-    NUMBER_OF_ERRORS = 0
+    NUMBER_OF_ERRORS_IN_OLD_FILE = tests(OLD_CTYPE_DICT, errorcounter = 0)
     print('------------------------------------------------------------')
     print('Old file = %s' %ARGS.old_ctype_file)
     print('Number of errors in old file = %s' %NUMBER_OF_ERRORS_IN_OLD_FILE)
@@ -476,9 +538,7 @@ if __name__ == "__main__":
     print('============================================================')
     print('Checking for errors in new ctype file: %s' %ARGS.new_ctype_file)
     print('------------------------------------------------------------')
-    tests(NEW_CTYPE_DICT)
-    NUMBER_OF_ERRORS_IN_NEW_FILE = NUMBER_OF_ERRORS
-    NUMBER_OF_ERRORS = 0
+    NUMBER_OF_ERRORS_IN_NEW_FILE = tests(NEW_CTYPE_DICT, errorcounter = 0)
     print('------------------------------------------------------------')
     print('New file = %s' %ARGS.new_ctype_file)
     print('Number of errors in new file = %s' %NUMBER_OF_ERRORS_IN_NEW_FILE)
