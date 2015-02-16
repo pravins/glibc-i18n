@@ -35,6 +35,25 @@ For issues upstream https://github.com/pravins/glibc-i18n
 import sys
 import re
 
+# Auxiliary tables for Hangul syllable names, see the Unicode 3.0 book,
+# sections 3.11 and 4.4.
+
+jamo_initial_short_name = [
+    'G', 'GG', 'N', 'D', 'DD', 'R', 'M', 'B', 'BB', 'S', 'SS', '', 'J', 'JJ',
+    'C', 'K', 'T', 'P', 'H'
+]
+
+jamo_medial_short_name = [
+    'A', 'AE', 'YA', 'YAE', 'EO', 'E', 'YEO', 'YE', 'O', 'WA', 'WAE', 'OE',
+    'YO', 'U', 'WEO', 'WE', 'WI', 'YU', 'EU', 'YI', 'I'
+]
+
+jamo_final_short_name = [
+    '', 'G', 'GG', 'GS', 'N', 'NI', 'NH', 'D', 'L', 'LG', 'LM', 'LB', 'LS',
+    'LT', 'LP', 'LH', 'M', 'B', 'BS', 'S', 'SS', 'NG', 'J', 'C', 'K', 'T',
+    'P', 'H'
+]
+
 def ucs_symbol(code_point):
     '''Return the UCS symbol string for a Unicode character.'''
     if code_point < 0x10000:
@@ -57,8 +76,15 @@ def process_range(start, end, outfile, name):
         #
         # So we expand the Hangul Syllables here:
         for i in range(int(start, 16), int(end, 16)+1 ):
+            index2, index3 = divmod(i - 0xaC00, 28)
+            index1, index2 = divmod(index2, 21)
+            hangul_syllable_name = 'HANGUL SYLLABLE ' \
+                                   + jamo_initial_short_name[index1] \
+                                   + jamo_medial_short_name[index2] \
+                                   + jamo_final_short_name[index3]
             outfile.write('{:<11s} {:<12s} {:s}\n'.format(
-                ucs_symbol(i), convert_to_hex(i), name))
+                ucs_symbol(i), convert_to_hex(i),
+                hangul_syllable_name))
         return
     # UnicodeData.txt file has contains code point ranges like this:
     #
