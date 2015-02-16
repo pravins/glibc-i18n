@@ -57,7 +57,7 @@ def process_range(start, end, outfile, name):
         #
         # So we expand the Hangul Syllables here:
         for i in range(int(start, 16), int(end, 16)+1 ):
-            outfile.write('{:s}     {:s} {:s}\n'.format(
+            outfile.write('{:<11s} {:<12s} {:s}\n'.format(
                 ucs_symbol(i), convert_to_hex(i), name))
         return
     # UnicodeData.txt file has contains code point ranges like this:
@@ -73,13 +73,13 @@ def process_range(start, end, outfile, name):
     # <U4D80>..<U4DB5>     /xe4/xb6/x80         <CJK Ideograph Extension A>
     for i in range(int(start, 16), int(end, 16), 64 ):
         if i > (int(end, 16)-64):
-            outfile.write('{:s}..{:s}     {:s} {:s}\n'.format(
+            outfile.write('{:s}..{:s} {:<12s} {:s}\n'.format(
                     ucs_symbol(i),
                     ucs_symbol(int(end,16)),
                     convert_to_hex(i),
                     name))
             break
-        outfile.write('{:s}..{:s}     {:s} {:s}\n'.format(
+        outfile.write('{:s}..{:s} {:<12s} {:s}\n'.format(
                 ucs_symbol(i),
                 ucs_symbol(i+63),
                 convert_to_hex(i),
@@ -146,7 +146,7 @@ def process_charmap(flines, outfile):
             # the original UTF-8 file in glibc had them as
             # comments, so we keep these comment lines.
             outfile.write('%')
-        outfile.write('{:s}     {:s} {:s}\n'.format(
+        outfile.write('{:<11s} {:<12s} {:s}\n'.format(
                 ucs_symbol(int(fields[0], 16)),
                 convert_to_hex(int(fields[0], 16)),
                 fields[1]))
