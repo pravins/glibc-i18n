@@ -1,10 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014 Free Software Foundation, Inc.
+# Copyright (C) 2014, 2015 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
-# Contributed by
-# Pravin Satpute <psatpute AT redhat DOT com> and
-# Mike Fabian <mfabian At redhat DOT com> - 2014
 #
 # The GNU C Library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -28,8 +25,6 @@ from Unicode data.
 Usage: python3 utf8_gen.py UnicodeData.txt EastAsianWidth.txt
 
 It will output UTF-8 file
-
-For issues upstream https://github.com/pravins/glibc-i18n
 '''
 
 import sys

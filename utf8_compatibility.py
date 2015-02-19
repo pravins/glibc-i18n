@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-# Copyright (C) 2014 Free Software Foundation, Inc.
+# Copyright (C) 2014, 2015 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
-# Contributed by Pravin Satpute <psatpute@redhat.com>, 2014.
-#                Mike FABIAN <mfabian@redhat.com>, 2014
 #
 # The GNU C Library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -27,8 +25,6 @@ To see how this script is used, call it with the “-h” option:
 
     $ ./utf8_compatibility.py -h
     … prints usage message …
-
-For issues upstream https://github.com/pravins/glibc-i18n
 '''
 
 import sys
