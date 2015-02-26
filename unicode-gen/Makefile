@@ -41,7 +41,7 @@ PYTHON3 = python3
 WGET = wget
 
 DOWNLOADS = UnicodeData.txt DerivedCoreProperties.txt EastAsianWidth.txt
-GENERATED = i18n UTF-8
+GENERATED = i18n UTF-8 translit_combining
 REPORTS = i18n-report UTF-8-report
 
 all: $(GENERATED)
@@ -51,6 +51,7 @@ check: check-i18n check-UTF-8
 install:
 	cp -p i18n ../locales/i18n
 	cp -p UTF-8 ../charmaps/UTF-8
+	cp -p translit_combining ../locales/translit_combining
 
 clean: mostlyclean
 	-rm -rf __pycache__
@@ -90,6 +91,10 @@ check-UTF-8: UTF-8-report
 	@if grep '^Total.*: [^0]' UTF-8-report; \
 	then echo manual verification required; false; else true; fi
 
+translit_combining: UnicodeData.txt
+translit_combining: gen_translit_combining.py
+	$(PYTHON3) ./gen_translit_combining.py -u UnicodeData.txt \
+	-o $@ --unicode_version $(UNICODE_VERSION)
 
 .PHONY: downloads clean-downloads
 downloads: $(DOWNLOADS)
