@@ -360,3 +360,107 @@ def ucs_symbol_range(code_point_low, code_point_high):
     <U0041>..<U005A>
     '''
     return ucs_symbol(code_point_low) + '..' + ucs_symbol(code_point_high)
+
+def verifications():
+    '''Tests whether the is_* functions observe the known restrictions'''
+    for code_point in sorted(UNICODE_ATTRIBUTES):
+        # toupper restriction: "Only characters specified for the keywords
+        # lower and upper shall be specified.
+        if (to_upper(code_point) != code_point
+            and not (is_lower(code_point) or is_upper(code_point))):
+            sys.stderr.write(
+                ('%(sym)s is not upper|lower '
+                 + 'but toupper(0x%(c)04X) = 0x%(uc)04X\n') %{
+                    'sym': ucs_symbol(code_point),
+                    'c': code_point,
+                    'uc': to_upper(code_point)})
+        # tolower restriction: "Only characters specified for the keywords
+        # lower and upper shall be specified.
+        if (to_lower(code_point) != code_point
+            and not (is_lower(code_point) or is_upper(code_point))):
+            sys.stderr.write(
+                ('%(sym)s is not upper|lower '
+                 + 'but tolower(0x%(c)04X) = 0x%(uc)04X\n') %{
+                    'sym': ucs_symbol(code_point),
+                    'c': code_point,
+                    'uc': to_lower(code_point)})
+        # alpha restriction: "Characters classified as either upper or lower
+        # shall automatically belong to this class.
+        if ((is_lower(code_point) or is_upper(code_point))
+             and not is_alpha(code_point)):
+            sys.stderr.write('%(sym)s is upper|lower but not alpha\n' %{
+                'sym': ucs_symbol(code_point)})
+        # alpha restriction: “No character specified for the keywords cntrl,
+        # digit, punct or space shall be specified.”
+        if (is_alpha(code_point) and is_cntrl(code_point)):
+            sys.stderr.write('%(sym)s is alpha and cntrl\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_alpha(code_point) and is_digit(code_point)):
+            sys.stderr.write('%(sym)s is alpha and digit\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_alpha(code_point) and is_punct(code_point)):
+            sys.stderr.write('%(sym)s is alpha and punct\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_alpha(code_point) and is_space(code_point)):
+            sys.stderr.write('%(sym)s is alpha and space\n' %{
+                'sym': ucs_symbol(code_point)})
+        # space restriction: “No character specified for the keywords upper,
+        # lower, alpha, digit, graph or xdigit shall be specified.”
+        # upper, lower, alpha already checked above.
+        if (is_space(code_point) and is_digit(code_point)):
+            sys.stderr.write('%(sym)s is space and digit\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_space(code_point) and is_graph(code_point)):
+            sys.stderr.write('%(sym)s is space and graph\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_space(code_point) and is_xdigit(code_point)):
+            sys.stderr.write('%(sym)s is space and xdigit\n' %{
+                'sym': ucs_symbol(code_point)})
+        # cntrl restriction: “No character specified for the keywords upper,
+        # lower, alpha, digit, punct, graph, print or xdigit shall be
+        # specified.”  upper, lower, alpha already checked above.
+        if (is_cntrl(code_point) and is_digit(code_point)):
+            sys.stderr.write('%(sym)s is cntrl and digit\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_cntrl(code_point) and is_punct(code_point)):
+            sys.stderr.write('%(sym)s is cntrl and punct\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_cntrl(code_point) and is_graph(code_point)):
+            sys.stderr.write('%(sym)s is cntrl and graph\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_cntrl(code_point) and is_print(code_point)):
+            sys.stderr.write('%(sym)s is cntrl and print\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_cntrl(code_point) and is_xdigit(code_point)):
+            sys.stderr.write('%(sym)s is cntrl and xdigit\n' %{
+                'sym': ucs_symbol(code_point)})
+        # punct restriction: “No character specified for the keywords upper,
+        # lower, alpha, digit, cntrl, xdigit or as the <space> character shall
+        # be specified.”  upper, lower, alpha, cntrl already checked above.
+        if (is_punct(code_point) and is_digit(code_point)):
+            sys.stderr.write('%(sym)s is punct and digit\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_punct(code_point) and is_xdigit(code_point)):
+            sys.stderr.write('%(sym)s is punct and xdigit\n' %{
+                'sym': ucs_symbol(code_point)})
+        if (is_punct(code_point) and code_point == 0x0020):
+            sys.stderr.write('%(sym)s is punct\n' %{
+                'sym': ucs_symbol(code_point)})
+        # graph restriction: “No character specified for the keyword cntrl
+        # shall be specified.”  Already checked above.
+
+        # print restriction: “No character specified for the keyword cntrl
+        # shall be specified.”  Already checked above.
+
+        # graph - print relation: differ only in the <space> character.
+        # How is this possible if there are more than one space character?!
+        # I think susv2/xbd/locale.html should speak of “space characters”,
+        # not “space character”.
+        if (is_print(code_point)
+            and not (is_graph(code_point) or is_space(code_point))):
+            sys.stderr.write('%(sym)s is print but not graph|<space>\n' %{
+                'sym': unicode_utils.ucs_symbol(code_point)})
+        if (not is_print(code_point)
+            and (is_graph(code_point) or code_point == 0x0020)):
+            sys.stderr.write('%(sym)s is graph|<space> but not print\n' %{
+                'sym': unicode_utils.ucs_symbol(code_point)})
