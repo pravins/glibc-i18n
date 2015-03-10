@@ -57,6 +57,13 @@ UNICODE_ATTRIBUTES = {}
 # }
 DERIVED_CORE_PROPERTIES = {}
 
+# Dictionary holding the entire contents of the EastAsianWidths.txt file
+#
+# Contents of this dictionary look like this:
+#
+# {0: 'N', … , 45430: 'W', …}
+EAST_ASIAN_WIDTHS = {}
+
 def fill_attribute(code_point, fields):
     '''Stores in UNICODE_ATTRIBUTES[code_point] the values from the fields.
 
@@ -165,6 +172,35 @@ def fill_derived_core_properties(filename):
                     DERIVED_CORE_PROPERTIES[code_point].append(prop)
                 else:
                     DERIVED_CORE_PROPERTIES[code_point] = [prop]
+
+def fill_east_asian_widths(filename):
+    '''Stores the entire contents of the EastAsianWidths.txt file
+    in the EAST_ASIAN_WIDTHS dictionary.
+
+    Lines in EastAsianWidths.txt are either a code point range like
+    this:
+
+    9FCD..9FFF;W     # Cn    [51] <reserved-9FCD>..<reserved-9FFF>
+
+    or a single code point like this:
+
+    A015;W           # Lm         YI SYLLABLE WU
+    '''
+    with open(filename, mode='r') as east_asian_widths_file:
+        for line in east_asian_widths_file:
+            match = re.match(
+                r'^(?P<codepoint1>[0-9A-F]{4,6})'
+                +r'(?:\.\.(?P<codepoint2>[0-9A-F]{4,6}))?'
+                +r'\s*;\s*(?P<property>[a-zA-Z]+)',
+                line)
+            if not match:
+                continue
+            start = match.group('codepoint1')
+            end = match.group('codepoint2')
+            if not end:
+                end = start
+            for code_point in range(int(start, 16), int(end, 16)+1):
+                EAST_ASIAN_WIDTHS[code_point] = match.group('property')
 
 def to_upper(code_point):
     '''Returns the code point of the uppercase version
