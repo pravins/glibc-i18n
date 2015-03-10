@@ -220,7 +220,7 @@ def check_charmap(original_file_name, new_file_name):
                 ucs_symbol(key),
                 ocharmap[key],
                 UNICODE_ATTRIBUTES[key]['name'] \
-                if key in UNICODE_ATTRIBUTES else None))
+                if key in UNICODE_ATTRIBUTES else 'None'))
     print('------------------------------------------------------------')
     changed_charmap = {}
     for key in set(ocharmap).intersection(set(ncharmap)):
@@ -235,7 +235,7 @@ def check_charmap(original_file_name, new_file_name):
                 changed_charmap[key][0],
                 changed_charmap[key][1],
                 UNICODE_ATTRIBUTES[key]['name'] \
-                if key in UNICODE_ATTRIBUTES else None))
+                if key in UNICODE_ATTRIBUTES else 'None'))
     print('------------------------------------------------------------')
     print('Total added characters in newly generated CHARMAP: %d'
           %len(set(ncharmap)-set(ocharmap)))
@@ -245,7 +245,7 @@ def check_charmap(original_file_name, new_file_name):
                 ucs_symbol(key),
                 ncharmap[key],
                 UNICODE_ATTRIBUTES[key]['name'] \
-                if key in UNICODE_ATTRIBUTES else None))
+                if key in UNICODE_ATTRIBUTES else 'None'))
 
 def create_width_dictionary(file_name):
     '''Create a dictionary for all code points found in the WIDTH
@@ -294,16 +294,16 @@ def check_width(original_file_name, new_file_name):
                   + '{:d} : '.format(owidth[key])
                   + 'eaw={:s} '.format(
                       EAST_ASIAN_WIDTHS[key]
-                      if key in EAST_ASIAN_WIDTHS else None)
+                      if key in EAST_ASIAN_WIDTHS else 'None')
                   + 'category={:2s} '.format(
                       UNICODE_ATTRIBUTES[key]['category']
-                      if key in UNICODE_ATTRIBUTES else None)
+                      if key in UNICODE_ATTRIBUTES else 'None')
                   + 'bidi={:3s} '.format(
                       UNICODE_ATTRIBUTES[key]['bidi']
-                      if key in UNICODE_ATTRIBUTES else None)
+                      if key in UNICODE_ATTRIBUTES else 'None')
                   + 'name={:s}'.format(
                       UNICODE_ATTRIBUTES[key]['name']
-                      if key in UNICODE_ATTRIBUTES else None))
+                      if key in UNICODE_ATTRIBUTES else 'None'))
     print('------------------------------------------------------------')
     changed_width = {}
     for key in set(owidth).intersection(set(nwidth)):
@@ -318,16 +318,16 @@ def check_width(original_file_name, new_file_name):
                                           changed_width[key][1])
                   + 'eaw={:s} '.format(
                       EAST_ASIAN_WIDTHS[key]
-                      if key in EAST_ASIAN_WIDTHS else None)
+                      if key in EAST_ASIAN_WIDTHS else 'None')
                   + 'category={:2s} '.format(
                       UNICODE_ATTRIBUTES[key]['category']
-                      if key in UNICODE_ATTRIBUTES else None)
+                      if key in UNICODE_ATTRIBUTES else 'None')
                   + 'bidi={:3s} '.format(
                       UNICODE_ATTRIBUTES[key]['bidi']
-                      if key in UNICODE_ATTRIBUTES else None)
+                      if key in UNICODE_ATTRIBUTES else 'None')
                   + 'name={:s}'.format(
                       UNICODE_ATTRIBUTES[key]['name']
-                      if key in UNICODE_ATTRIBUTES else None))
+                      if key in UNICODE_ATTRIBUTES else 'None'))
     print('------------------------------------------------------------')
     print('Total added characters in newly generated WIDTH: %d'
           %len(set(nwidth)-set(owidth)))
@@ -339,16 +339,16 @@ def check_width(original_file_name, new_file_name):
                   + '{:d} : '.format(nwidth[key])
                   + 'eaw={:s} '.format(
                       EAST_ASIAN_WIDTHS[key]
-                      if key in EAST_ASIAN_WIDTHS else None)
+                      if key in EAST_ASIAN_WIDTHS else 'None')
                   + 'category={:2s} '.format(
                       UNICODE_ATTRIBUTES[key]['category']
-                      if key in UNICODE_ATTRIBUTES else None)
+                      if key in UNICODE_ATTRIBUTES else 'None')
                   + 'bidi={:3s} '.format(
                       UNICODE_ATTRIBUTES[key]['bidi']
-                      if key in UNICODE_ATTRIBUTES else None)
+                      if key in UNICODE_ATTRIBUTES else 'None')
                   + 'name={:s}'.format(
                       UNICODE_ATTRIBUTES[key]['name']
-                      if key in UNICODE_ATTRIBUTES else None))
+                      if key in UNICODE_ATTRIBUTES else 'None'))
 
 if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(

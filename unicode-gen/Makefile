@@ -82,8 +82,9 @@ UTF-8: utf8_gen.py
 
 UTF-8-report: UTF-8 ../charmaps/UTF-8
 UTF-8-report: utf8_compatibility.py
-	$(PYTHON3) ./utf8_compatibility.py -o ../charmaps/UTF-8 \
-	  -n UTF-8 -a -m > $@
+	$(PYTHON3) ./utf8_compatibility.py -u UnicodeData.txt \
+	-e EastAsianWidth.txt -o ../charmaps/UTF-8 \
+	-n UTF-8 -a -m -c > $@
 
 check-UTF-8: UTF-8-report
 	@if grep '^Total.*: [^0]' UTF-8-report; \
