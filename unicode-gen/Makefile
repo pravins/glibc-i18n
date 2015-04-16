@@ -41,7 +41,7 @@ PYTHON3 = python3
 WGET = wget
 
 DOWNLOADS = UnicodeData.txt DerivedCoreProperties.txt EastAsianWidth.txt
-GENERATED = i18n UTF-8 translit_combining translit_circle translit_cjk_compat translit_font
+GENERATED = i18n UTF-8 translit_combining translit_circle translit_cjk_compat translit_font translit_fraction
 REPORTS = i18n-report UTF-8-report
 
 all: $(GENERATED)
@@ -55,6 +55,7 @@ install:
 	cp -p translit_circle ../locales/translit_circle
 	cp -p translit_cjk_compat ../locales/translit_cjk_compat
 	cp -p translit_font ../locales/translit_font
+	cp -p translit_fraction ../locales/translit_fraction
 
 clean: mostlyclean
 	-rm -rf __pycache__
@@ -112,6 +113,11 @@ translit_cjk_compat: gen_translit_cjk_compat.py
 translit_font: UnicodeData.txt
 translit_font: gen_translit_font.py
 	$(PYTHON3) ./gen_translit_font.py -u UnicodeData.txt \
+	-o $@ --unicode_version $(UNICODE_VERSION)
+
+translit_fraction: UnicodeData.txt
+translit_fraction: gen_translit_fraction.py
+	$(PYTHON3) ./gen_translit_fraction.py -u UnicodeData.txt \
 	-o $@ --unicode_version $(UNICODE_VERSION)
 
 .PHONY: downloads clean-downloads
