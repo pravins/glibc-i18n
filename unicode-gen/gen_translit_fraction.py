@@ -29,7 +29,6 @@ To see how this script is used, call it with the “-h” option:
 
 import argparse
 import time
-import sys
 import unicode_utils
 
 def read_input_file(filename):

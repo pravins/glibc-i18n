@@ -63,7 +63,8 @@ def output_head(translit_file, unicode_version, head=''):
         translit_file.write('escape_char /\n')
         translit_file.write('comment_char %\n')
         translit_file.write('\n')
-        translit_file.write('% Transliterations of CJK compatibility characters.\n')
+        translit_file.write('% Transliterations of CJK compatibility ')
+        translit_file.write('characters.\n')
         translit_file.write('% Generated automatically from UnicodeData.txt '
                         + 'by gen_translit_cjk_compat.py '
                         + 'on {:s} '.format(time.strftime('%Y-%m-%d'))
@@ -98,7 +99,8 @@ def special_decompose(code_point_list):
         (0x00B3,): [0x005E,  0x0033], # ³ → ^3
         (0x00B5,): [0x0075], # µ → u
         (0x03BC, 0x2113): [0x03BC, 0x006C], # μℓ → μl
-        (0x0072, 0x0061, 0x0064, 0x2215, 0x0073, 0x00B2): [0x0072, 0x0061, 0x0064, 0x002F, 0x0073, 0x00B2],
+        (0x0072, 0x0061, 0x0064, 0x2215, 0x0073, 0x00B2): [
+            0x0072, 0x0061, 0x0064, 0x002F, 0x0073, 0x00B2],
         (0x006D, 0x2215, 0x0073, 0x00B2): [0x006D, 0x002F, 0x0073, 0x00B2],
     }
     if tuple(code_point_list) in special_decompose_dict:

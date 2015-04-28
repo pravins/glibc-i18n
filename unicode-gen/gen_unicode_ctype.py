@@ -30,7 +30,6 @@ To see how this script is used, call it with the “-h” option:
 '''
 
 import argparse
-import sys
 import time
 import re
 import unicode_utils
