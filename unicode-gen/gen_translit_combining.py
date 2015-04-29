@@ -222,13 +222,15 @@ def canonical_decompose(code_point):
 def special_decompose(code_point_list):
     '''
     Decompositions which are not canonical or which are not in
-    UnicodeData.txt at all but which were used in the original
-    translit_combining file in glibc and which seem to make sense.
+    UnicodeData.txt at all but some of these were used in the original
+    translit_combining file in glibc and they seemed to make sense.
     I want to keep the update of translit_combining close to the
-    spirit of the original file, therefore I added this special
+    spirit of the original file, therefore I added these special
     decomposition rules here.
     '''
     special_decompose_dict = {
+        (0x0110,): [0x0044], # Đ → D
+        (0x0111,): [0x0064], # đ → d
         (0x0141,): [0x004C], # Ł → L
         (0x0142,): [0x006C], # ł → l
         (0x00E6,): [0x0061, 0x0065], # æ → ae
