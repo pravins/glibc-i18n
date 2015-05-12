@@ -229,14 +229,12 @@ def special_decompose(code_point_list):
     decomposition rules here.
     '''
     special_decompose_dict = {
-        (0x0110,): [0x0044], # Đ → D
-        (0x0111,): [0x0064], # đ → d
-        (0x0141,): [0x004C], # Ł → L
-        (0x0142,): [0x006C], # ł → l
+        # Don’t add stuff like ø → o, đ → d, ... here,
+        # this should be manually added to translit_neutral instead
+        # Don’t add ligatures like æ → ae, ... here,
+        # they should be in translit_compat
         (0x00E6,): [0x0061, 0x0065], # æ → ae
         (0x00C6,): [0x0041, 0x0045], # Æ → AE
-        (0x00D8,): [0x004F], # Ø → O
-        (0x00F8,): [0x006F], # ø → o
         (0x05F2,): [0x05D9, 0x05D9], # ײ → יי
         # 0x2002 has a <compat> decomposition to 0x0020 in UnicodeData.txt
         (0x2002,): [0x0020], # EN SPACE → SPACE
