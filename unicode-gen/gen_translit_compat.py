@@ -109,6 +109,8 @@ def special_ligature_decompose(code_point):
 
     '''
     special_ligature_decompose_dict = {
+        0x00E6: [0x0061, 0x0065], # æ → ae
+        0x00C6: [0x0041, 0x0045], # Æ → AE
         # These following 5 special ligature decompositions were
         # in the original glibc/localedata/locales/translit_compat file
         0x0152: [0x004F, 0x0045], # Œ → OE
