@@ -105,7 +105,7 @@ def special_ligature_decompose(code_point):
     all but which were used in the original translit_compat file in
     glibc and which seem to make sense.  I want to keep the update of
     translit_compat close to the spirit of the original file,
-    therefore I added this special ligature decomposition rules here.
+    therefore I added these special ligature decomposition rules here.
 
     '''
     special_ligature_decompose_dict = {
