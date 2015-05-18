@@ -229,9 +229,18 @@ def special_decompose(code_point_list):
     decomposition rules here.
     '''
     special_decompose_dict = {
-        # Don’t add stuff like ø → o, đ → d, ... here,
-        # this should be manually added to translit_neutral instead
-
+        # Ø U+00D8 is already handled in translit_neutral. But
+        # translit_combining is usually included after translit_neutral
+        # and Ǿ U+01FE LATIN CAPITAL LETTER O WITH STROKE AND ACUTE
+        # has a canonical decomposition to Ø U+00D8 and we want to
+        # further decompose this to U+004F.
+        (0x00D8,): [0x004F], # Ø → O
+        # ø U+00F8 is already handled in translit_neutral. But
+        # translit_combining is usually included after translit_neutral
+        # and ǿ U+01FF LATIN SMALL LETTER O WITH STROKE AND ACUTE
+        # has a canonical decomposition to ø U+00F8 and we want to
+        # further decompose this to U+006F.
+        (0x00F8,): [0x006F], # ø → o
         # æ U+00E6 is already in translit_compat because ligatures
         # are handled in translit_compat. But ǣ U+01E3 has a
         # canonical decomposition to U+00E6, U+0304 and we want to
