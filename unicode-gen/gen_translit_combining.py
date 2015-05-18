@@ -231,9 +231,16 @@ def special_decompose(code_point_list):
     special_decompose_dict = {
         # Don’t add stuff like ø → o, đ → d, ... here,
         # this should be manually added to translit_neutral instead
-        # Don’t add ligatures like æ → ae, ... here,
-        # they should be in translit_compat
+
+        # æ U+00E6 is already in translit_compat because ligatures
+        # are handled in translit_compat. But ǣ U+01E3 has a
+        # canonical decomposition to U+00E6, U+0304 and we want to
+        # further decompose this to “ae”.
         (0x00E6,): [0x0061, 0x0065], # æ → ae
+        # Æ U+00C6  is already in translit_compat because ligatures
+        # are handled in translit_compat. But Ǣ U+01E2 has a
+        # canonical decomposition to U+00C6, U+0304 and we want to
+        # further decompose this to “AE”
         (0x00C6,): [0x0041, 0x0045], # Æ → AE
         (0x05F2,): [0x05D9, 0x05D9], # ײ → יי
         # 0x2002 has a <compat> decomposition to 0x0020 in UnicodeData.txt
