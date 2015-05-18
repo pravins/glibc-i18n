@@ -82,6 +82,35 @@ def output_tail(translit_file, tail=''):
         translit_file.write('\n')
         translit_file.write('END LC_CTYPE\n')
 
+def compatibility_decompose(code_point):
+    '''http://www.unicode.org/reports/tr44/#Character_Decomposition_Mappings
+
+    “The compatibility decomposition is formed by recursively applying
+    the canonical and compatibility mappings, then applying the
+    Canonical Ordering Algorithm.”
+
+    '''
+    name = unicode_utils.UNICODE_ATTRIBUTES[code_point]['name']
+    decomposition = unicode_utils.UNICODE_ATTRIBUTES[
+        code_point]['decomposition']
+    compatibility_tags = (
+        '<compat>', '<small>', '<super>', '<sub>', '<vertical>')
+    for compatibility_tag in compatibility_tags:
+        if decomposition.startswith(compatibility_tag):
+            decomposition = decomposition[len(compatibility_tag)+1:]
+            decomposed_code_points = [int(x, 16)
+                                      for x in decomposition.split(' ')]
+            if (len(decomposed_code_points) > 1
+                and decomposed_code_points[0] == 0x0020
+                and decomposed_code_points[1] >= 0x0300
+                and decomposed_code_points[1] <= 0x03FF):
+                # Decomposes into a space followed by a combining character.
+                # This is not useful fo transliteration.
+                return []
+            else:
+                return decomposed_code_points
+    return []
+
 def special_decompose(code_point_list):
     '''
     Decompositions which are not in UnicodeData.txt at all but which
@@ -170,47 +199,43 @@ def output_transliteration(translit_file):
     translit_file.write('\n')
     for code_point in sorted(unicode_utils.UNICODE_ATTRIBUTES):
         name = unicode_utils.UNICODE_ATTRIBUTES[code_point]['name']
-        decomposition = unicode_utils.UNICODE_ATTRIBUTES[
-            code_point]['decomposition']
-        if decomposition.startswith('<compat>'):
-            decomposition = decomposition[9:]
-            decomposed_code_points = [[int(x, 16)
-                                       for x in decomposition.split(' ')]]
-            if (decomposed_code_points[0]
-                and not (len(decomposed_code_points[0]) > 1
-                         and decomposed_code_points[0][0] == 0x0020
-                         and decomposed_code_points[0][1] >= 0x0300
-                         and decomposed_code_points[0][1] <= 0x03FF)):
-                while True:
-                    special_decomposed_code_points = special_decompose(
-                        decomposed_code_points[-1])
-                    if (special_decomposed_code_points
-                        != decomposed_code_points[-1]):
-                        decomposed_code_points.append(
-                            special_decomposed_code_points)
-                        continue
-                    special_decomposed_code_points = []
-                    for decomposed_code_point in decomposed_code_points[-1]:
-                        special_decomposed_code_points += special_decompose(
-                            [decomposed_code_point])
-                    if (special_decomposed_code_points
-                        == decomposed_code_points[-1]):
-                        break
+        decomposed_code_points = [compatibility_decompose(code_point)]
+        if not decomposed_code_points[0]:
+            if special_decompose([code_point]) != [code_point]:
+                decomposed_code_points[0] = special_decompose([code_point])
+        else:
+            special_decomposed_code_points = []
+            while True:
+                special_decomposed_code_points = special_decompose(
+                    decomposed_code_points[-1])
+                if (special_decomposed_code_points
+                    != decomposed_code_points[-1]):
                     decomposed_code_points.append(
                         special_decomposed_code_points)
-                translit_file.write('% {:s}\n'.format(name))
-                translit_file.write('{:s} '.format(
-                    unicode_utils.ucs_symbol(code_point)))
-                for index in range(0, len(decomposed_code_points)):
-                    if index > 0:
-                        translit_file.write(';')
-                    translit_file.write('"')
-                    for decomposed_code_point in decomposed_code_points[index]:
-                        translit_file.write('{:s}'.format(
-                            unicode_utils.ucs_symbol(decomposed_code_point)))
-                    translit_file.write('"')
-                translit_file.write('\n')
-        if 'LIGATURE' in name and not decomposition:
+                    continue
+                special_decomposed_code_points = []
+                for decomposed_code_point in decomposed_code_points[-1]:
+                    special_decomposed_code_points += special_decompose(
+                        [decomposed_code_point])
+                if (special_decomposed_code_points
+                    == decomposed_code_points[-1]):
+                    break
+                decomposed_code_points.append(
+                    special_decomposed_code_points)
+        if decomposed_code_points[0]:
+            translit_file.write('% {:s}\n'.format(name))
+            translit_file.write('{:s} '.format(
+                unicode_utils.ucs_symbol(code_point)))
+            for index in range(0, len(decomposed_code_points)):
+                if index > 0:
+                    translit_file.write(';')
+                translit_file.write('"')
+                for decomposed_code_point in decomposed_code_points[index]:
+                    translit_file.write('{:s}'.format(
+                        unicode_utils.ucs_symbol(decomposed_code_point)))
+                translit_file.write('"')
+            translit_file.write('\n')
+        elif 'LIGATURE' in name and 'ARABIC' not in name:
             decomposed_code_points = special_ligature_decompose(code_point)
             if decomposed_code_points[0] != code_point:
                 translit_file.write('% {:s}\n'.format(name))
