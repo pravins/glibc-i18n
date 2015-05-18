@@ -240,7 +240,13 @@ def special_decompose(code_point_list):
         (0x2002,): [0x0020], # EN SPACE → SPACE
         # 0x2003 has a <compat> decomposition to 0x0020 in UnicodeData.txt
         (0x2003,): [0x0020], # EM SPACE → SPACE
+        # Special rule for 〈 U+3008 is added
+        # because 〉 U+2329 has the canonical decomposition U+3008
+        # and we want to further decompose this to > U+003C.
         (0x3008,): [0x003C], # 〈 → <
+        # Special rule for 〉 U+3009 is added
+        # because 〉 U+232A has the canonical decomposition U+3009
+        # and we want to further decompose this to < U+003E.
         (0x3009,): [0x003E], # 〉→ >
     }
     if tuple(code_point_list) in special_decompose_dict:
