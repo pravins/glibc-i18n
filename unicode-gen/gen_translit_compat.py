@@ -89,8 +89,26 @@ def compatibility_decompose(code_point):
     the canonical and compatibility mappings, then applying the
     Canonical Ordering Algorithm.”
 
+    We don’t do the canonical decomposition here because this is
+    done in gen_translit_combining.py to generate translit_combining.
+
+    And we ignore some of the possible compatibility formatting tags
+    here. Some of them are used in other translit_* files, not
+    translit_compat:
+
+    <font>:   translit_font
+    <circle>: translit_circle
+    <wide>:   translit_wide
+    <narrow>: translit_narrow
+    <square>: translit_cjk_compat
+    <fraction>: translit_fraction
+
+    And we ignore
+
+    <noBreak>, <initial>, <medial>, <final>, <isolated>
+
+    because they seem to be not useful for transliteration.
     '''
-    name = unicode_utils.UNICODE_ATTRIBUTES[code_point]['name']
     decomposition = unicode_utils.UNICODE_ATTRIBUTES[
         code_point]['decomposition']
     compatibility_tags = (
@@ -108,7 +126,15 @@ def compatibility_decompose(code_point):
                 # This is not useful fo transliteration.
                 return []
             else:
-                return decomposed_code_points
+                return_value = []
+                for index in range(0, len(decomposed_code_points)):
+                    cd_code_points = compatibility_decompose(
+                        decomposed_code_points[index])
+                    if cd_code_points:
+                        return_value += cd_code_points
+                    else:
+                        return_value += [decomposed_code_points[index]]
+                return return_value
     return []
 
 def special_decompose(code_point_list):
