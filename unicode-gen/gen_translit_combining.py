@@ -237,8 +237,12 @@ def special_decompose(code_point_list):
         (0x00C6,): [0x0041, 0x0045], # Æ → AE
         (0x05F2,): [0x05D9, 0x05D9], # ײ → יי
         # 0x2002 has a <compat> decomposition to 0x0020 in UnicodeData.txt
+        # But U+2000 EN QUAD has a canonical decomposition U+2002
+        # and we want to further decompose this to U+0020.
         (0x2002,): [0x0020], # EN SPACE → SPACE
         # 0x2003 has a <compat> decomposition to 0x0020 in UnicodeData.txt
+        # But U+2001 EM QUAD has a canonical decomposition to U+2003
+        # and we want to further decompose this to U+0020.
         (0x2003,): [0x0020], # EM SPACE → SPACE
         # Special rule for 〈 U+3008 is added
         # because 〉 U+2329 has the canonical decomposition U+3008
