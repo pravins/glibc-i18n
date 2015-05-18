@@ -242,6 +242,10 @@ def special_decompose(code_point_list):
         # canonical decomposition to U+00C6, U+0304 and we want to
         # further decompose this to “AE”
         (0x00C6,): [0x0041, 0x0045], # Æ → AE
+        # U+05F2 HEBREW LIGATURE YIDDISH DOUBLE YOD is already in
+        # translit_compat because ligatures are handled in translit_compat.
+        # But U+FB1F has a canonical decomposition to U+05F2 and
+        # we want to further decompose this to U+05D9, U+05D9.
         (0x05F2,): [0x05D9, 0x05D9], # ײ → יי
         # 0x2002 has a <compat> decomposition to 0x0020 in UnicodeData.txt
         # But U+2000 EN QUAD has a canonical decomposition U+2002
