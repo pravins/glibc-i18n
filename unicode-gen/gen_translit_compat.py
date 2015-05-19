@@ -112,7 +112,7 @@ def compatibility_decompose(code_point):
     decomposition = unicode_utils.UNICODE_ATTRIBUTES[
         code_point]['decomposition']
     compatibility_tags = (
-        '<compat>', '<small>', '<super>', '<sub>', '<vertical>')
+        '<compat>', '<super>', '<sub>', '<vertical>')
     for compatibility_tag in compatibility_tags:
         if decomposition.startswith(compatibility_tag):
             decomposition = decomposition[len(compatibility_tag)+1:]
