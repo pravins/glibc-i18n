@@ -168,7 +168,9 @@ def is_combining_remove(code_point):
                       'PAHAWH HMONG',
                       'MIAO',
                       'DUPLOYAN',
-                      'MENDE KIKAKUI'
+                      'MENDE KIKAKUI',
+                      'AHOM',
+                      'SIGNWRITING'
     ):
         if substring in name:
             return False
