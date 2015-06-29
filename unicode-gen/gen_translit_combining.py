@@ -266,6 +266,54 @@ def special_decompose(code_point_list):
         # But U+2001 EM QUAD has a canonical decomposition to U+2003
         # and we want to further decompose this to U+0020.
         (0x2003,): [0x0020], # EM SPACE → SPACE
+        # U+2260 ≠ has the canonical decomposition U+003D U+0338
+        # (= followed by ̸). After stripping the combining characters,
+        # the result is only = which reverses the meaning.
+        # Therefore, we add a special rules here for such mathematical
+        # negations:
+        (0x21AE,): [0x0021, 0x003C, 0x002D, 0x003E], # ↮ → !<->
+        (0x21CD,): [0x0021, 0x003C, 0x003D], # ⇍ → !<=
+        (0x21CE,): [0x0021, 0x003C, 0x003D, 0x003E], # ⇎ → !<=>
+        (0x21CF,): [0x0021, 0x003D, 0x003E], # ⇏ → !=>
+        (0x2204,): [0x0021, 0x2203], # ∄ → !∃
+        (0x2209,): [0x0021, 0x2208], # ∉ → !∈
+        (0x220C,): [0x0021, 0x220B], # ∌ → !∋
+        (0x2224,): [0x0021, 0x2223], # ∤ → !∣
+        (0x2226,): [0x0021, 0x2225], # ∦ → !∥
+        (0x2241,): [0x0021, 0x007E], # ≁ → !~
+        (0x2244,): [0x0021, 0x007E, 0x002D], # ≄ → !~-
+        (0x2247,): [0x0021, 0x007E, 0x003D ], # ≇ → !~=
+        (0x2249,): [0x0021, 0x007E, 0x007E], # ≉ → !~~
+        (0x2260,): [0x0021, 0x003D], # ≠ → !=
+        (0x2262,): [0x0021, 0x003D, 0x003D], # ≢ → !==
+        (0x226D,): [0x0021, 0x224D], # ≭ → !≍
+        (0x226E,): [0x0021, 0x003C], # ≮ → !<
+        (0x226F,): [0x0021, 0x003E], # ≯ → !>
+        (0x2270,): [0x0021, 0x003C, 0x003D], # ≰ → !<=
+        (0x2271,): [0x0021, 0x003E, 0x003D], # ≱ → !>=
+        (0x2274,): [0x0021, 0x003C, 0x007E], # ≴ → !<~
+        (0x2275,): [0x0021, 0x003E, 0x007E], # ≵ → !>~
+        (0x2278,): [0x0021, 0x003C, 0x003E], # ≸ → !<>
+        (0x2279,): [0x0021, 0x003E, 0x003C], # ≹ → !><
+        (0x2280,): [0x0021, 0x227A], # ⊀ → !≺
+        (0x2281,): [0x0021, 0x227B], # ⊁ → !≻
+        (0x2284,): [0x0021, 0x2282], # ⊄ → !⊂
+        (0x2285,): [0x0021, 0x2283], # ⊅ → !⊃
+        (0x2288,): [0x0021, 0x2282, 0x003D], # ⊈ → !⊂=
+        (0x2289,): [0x0021, 0x2283, 0x003D], # ⊉ → !⊃=
+        (0x22AC,): [0x0021, 0x22A2], # ⊬ → !⊢
+        (0x22AD,): [0x0021, 0x22A8], # ⊭ → !⊨
+        (0x22AE,): [0x0021, 0x22A9], # ⊮ → !⊩
+        (0x22AF,): [0x0021, 0x22AB], # ⊯ → !⊫
+        (0x22E0,): [0x0021, 0x227C], # ⋠ → !≼
+        (0x22E1,): [0x0021, 0x227D], # ⋡ → !≽
+        (0x22E2,): [0x0021, 0x2291], # ⋢ → !⊑
+        (0x22E3,): [0x0021, 0x2292], # ⋣ → !⊒
+        (0x22EA,): [0x0021, 0x22B2], # ⋪ → !⊲
+        (0x22EB,): [0x0021, 0x22B3], # ⋫ → !⊳
+        (0x22EC,): [0x0021, 0x22B4], # ⋬ → !⊴
+        (0x22ED,): [0x0021, 0x22B5], # ⋭ → !⊵
+        (0x2ADC,): [0x0021, 0x2ADD], # ⫝̸ → !⫝
         # Special rule for 〈 U+3008 is added
         # because 〉 U+2329 has the canonical decomposition U+3008
         # and we want to further decompose this to > U+003C.
@@ -299,21 +347,32 @@ def output_decompositions(translit_file):
     the decompositions.
     '''
     for code_point in sorted(unicode_utils.UNICODE_ATTRIBUTES):
-        decomposed_code_points = [canonical_decompose(code_point)]
-        decomposed_code_points[0] = [x for x in decomposed_code_points[0]
-                             if not is_combining_remove(x)]
-        if not decomposed_code_points[0]:
-            if special_decompose([code_point]) != [code_point]:
-                decomposed_code_points[0] = special_decompose([code_point])
+        if special_decompose([code_point]) != [code_point]:
+            decomposed_code_points = [special_decompose([code_point])]
         else:
-            special_decomposed_code_points = []
-            for decomposed_code_point in decomposed_code_points[0]:
-                special_decomposed_code_points += special_decompose(
-                    [decomposed_code_point])
-            if (special_decomposed_code_points
-                != decomposed_code_points[0]):
+            decomposed_code_points = [canonical_decompose(code_point)]
+        if decomposed_code_points[0]:
+            while True:
+                special_decomposed_code_points = special_decompose(
+                    decomposed_code_points[-1])
+                if (special_decomposed_code_points
+                    != decomposed_code_points[-1]):
+                    decomposed_code_points.append(
+                        special_decomposed_code_points)
+                    continue
+                special_decomposed_code_points = []
+                for decomposed_code_point in decomposed_code_points[-1]:
+                    special_decomposed_code_points += special_decompose(
+                        [decomposed_code_point])
+                if (special_decomposed_code_points
+                    == decomposed_code_points[-1]):
+                    break
                 decomposed_code_points.append(
                     special_decomposed_code_points)
+            for index in range(0, len(decomposed_code_points)):
+                decomposed_code_points[index] = [
+                    x for x in decomposed_code_points[index]
+                    if not is_combining_remove(x)]
         if decomposed_code_points[0]:
             translit_file.write('% {:s}\n'.format(
                 unicode_utils.UNICODE_ATTRIBUTES[code_point]['name']))
