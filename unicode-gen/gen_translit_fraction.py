@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # Generate a translit_fraction file from a UnicodeData file.
 # Copyright (C) 2015 Free Software Foundation, Inc.
@@ -64,9 +65,9 @@ def output_head(translit_file, unicode_version, head=''):
         translit_file.write('\n')
         translit_file.write('% Transliterations of fractions.\n')
         translit_file.write('% Generated automatically from UnicodeData.txt '
-                        + 'by gen_translit_fraction.py '
-                        + 'on {:s} '.format(time.strftime('%Y-%m-%d'))
-                        + 'for Unicode {:s}.\n'.format(unicode_version))
+                            + 'by gen_translit_fraction.py '
+                            + 'on {:s} '.format(time.strftime('%Y-%m-%d'))
+                            + 'for Unicode {:s}.\n'.format(unicode_version))
         translit_file.write('% The replacements have been surrounded ')
         translit_file.write('with spaces, because fractions are\n')
         translit_file.write('% often preceded by a decimal number and ')
@@ -120,7 +121,7 @@ def output_transliteration(translit_file):
                     special_decomposed_code_points = special_decompose(
                         decomposed_code_points[-1])
                     if (special_decomposed_code_points
-                        != decomposed_code_points[-1]):
+                            != decomposed_code_points[-1]):
                         decomposed_code_points.append(
                             special_decomposed_code_points)
                         continue
@@ -129,7 +130,7 @@ def output_transliteration(translit_file):
                         special_decomposed_code_points += special_decompose(
                             [decomposed_code_point])
                     if (special_decomposed_code_points
-                        == decomposed_code_points[-1]):
+                            == decomposed_code_points[-1]):
                         break
                     decomposed_code_points.append(
                         special_decomposed_code_points)

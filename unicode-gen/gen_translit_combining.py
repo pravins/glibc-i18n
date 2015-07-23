@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # Generate a translit_combining file from a UnicodeData file.
 # Copyright (C) 2015 Free Software Foundation, Inc.
@@ -66,9 +67,9 @@ def output_head(translit_file, unicode_version, head=''):
         translit_file.write('combining characters (accents,\n')
         translit_file.write('% pronounciation marks, etc.).\n')
         translit_file.write('% Generated automatically from UnicodeData.txt '
-                        + 'by gen_translit_combining.py '
-                        + 'on {:s} '.format(time.strftime('%Y-%m-%d'))
-                        + 'for Unicode {:s}.\n'.format(unicode_version))
+                            + 'by gen_translit_combining.py '
+                            + 'on {:s} '.format(time.strftime('%Y-%m-%d'))
+                            + 'for Unicode {:s}.\n'.format(unicode_version))
         translit_file.write('\n')
         translit_file.write('LC_CTYPE\n')
         translit_file.write('\n')
@@ -171,7 +172,7 @@ def is_combining_remove(code_point):
                       'MENDE KIKAKUI',
                       'AHOM',
                       'SIGNWRITING'
-    ):
+                     ):
         if substring in name:
             return False
     return True
@@ -282,7 +283,7 @@ def special_decompose(code_point_list):
         (0x2226,): [0x0021, 0x2225], # ∦ → !∥
         (0x2241,): [0x0021, 0x007E], # ≁ → !~
         (0x2244,): [0x0021, 0x007E, 0x002D], # ≄ → !~-
-        (0x2247,): [0x0021, 0x007E, 0x003D ], # ≇ → !~=
+        (0x2247,): [0x0021, 0x007E, 0x003D], # ≇ → !~=
         (0x2249,): [0x0021, 0x007E, 0x007E], # ≉ → !~~
         (0x2260,): [0x0021, 0x003D], # ≠ → !=
         (0x2262,): [0x0021, 0x003D, 0x003D], # ≢ → !==
@@ -356,7 +357,7 @@ def output_decompositions(translit_file):
                 special_decomposed_code_points = special_decompose(
                     decomposed_code_points[-1])
                 if (special_decomposed_code_points
-                    != decomposed_code_points[-1]):
+                        != decomposed_code_points[-1]):
                     decomposed_code_points.append(
                         special_decomposed_code_points)
                     continue
@@ -365,7 +366,7 @@ def output_decompositions(translit_file):
                     special_decomposed_code_points += special_decompose(
                         [decomposed_code_point])
                 if (special_decomposed_code_points
-                    == decomposed_code_points[-1]):
+                        == decomposed_code_points[-1]):
                     break
                 decomposed_code_points.append(
                     special_decomposed_code_points)

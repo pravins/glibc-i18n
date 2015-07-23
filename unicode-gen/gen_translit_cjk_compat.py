@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # Generate a translit_cjk_compat file from a UnicodeData file.
 # Copyright (C) 2015 Free Software Foundation, Inc.
@@ -66,9 +67,9 @@ def output_head(translit_file, unicode_version, head=''):
         translit_file.write('% Transliterations of CJK compatibility ')
         translit_file.write('characters.\n')
         translit_file.write('% Generated automatically from UnicodeData.txt '
-                        + 'by gen_translit_cjk_compat.py '
-                        + 'on {:s} '.format(time.strftime('%Y-%m-%d'))
-                        + 'for Unicode {:s}.\n'.format(unicode_version))
+                            + 'by gen_translit_cjk_compat.py '
+                            + 'on {:s} '.format(time.strftime('%Y-%m-%d'))
+                            + 'for Unicode {:s}.\n'.format(unicode_version))
         translit_file.write('\n')
         translit_file.write('LC_CTYPE\n')
         translit_file.write('\n')
@@ -96,7 +97,7 @@ def special_decompose(code_point_list):
         (0x00B2,): [0x005E, 0x0032], # ² → ^2
         (0x03BC,): [0x00B5], # μ → µ (GREEK SMALL LETTER MU → MICRO SIGN)
         (0x2113,): [0x006C], # ℓ → l
-        (0x00B3,): [0x005E,  0x0033], # ³ → ^3
+        (0x00B3,): [0x005E, 0x0033], # ³ → ^3
         (0x00B5,): [0x0075], # µ → u
         (0x03BC, 0x2113): [0x03BC, 0x006C], # μℓ → μl
         (0x0072, 0x0061, 0x0064, 0x2215, 0x0073, 0x00B2): [
@@ -124,7 +125,7 @@ def output_transliteration(translit_file):
                     special_decomposed_code_points = special_decompose(
                         decomposed_code_points[-1])
                     if (special_decomposed_code_points
-                        != decomposed_code_points[-1]):
+                            != decomposed_code_points[-1]):
                         decomposed_code_points.append(
                             special_decomposed_code_points)
                         continue
@@ -133,7 +134,7 @@ def output_transliteration(translit_file):
                         special_decomposed_code_points += special_decompose(
                             [decomposed_code_point])
                     if (special_decomposed_code_points
-                        == decomposed_code_points[-1]):
+                            == decomposed_code_points[-1]):
                         break
                     decomposed_code_points.append(
                         special_decomposed_code_points)

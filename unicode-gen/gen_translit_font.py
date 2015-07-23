@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 #
 # Generate a translit_font file from a UnicodeData file.
 # Copyright (C) 2015 Free Software Foundation, Inc.
@@ -64,9 +65,9 @@ def output_head(translit_file, unicode_version, head=''):
         translit_file.write('\n')
         translit_file.write('% Transliterations of font equivalents.\n')
         translit_file.write('% Generated automatically from UnicodeData.txt '
-                        + 'by gen_translit_font.py '
-                        + 'on {:s} '.format(time.strftime('%Y-%m-%d'))
-                        + 'for Unicode {:s}.\n'.format(unicode_version))
+                            + 'by gen_translit_font.py '
+                            + 'on {:s} '.format(time.strftime('%Y-%m-%d'))
+                            + 'for Unicode {:s}.\n'.format(unicode_version))
         translit_file.write('\n')
         translit_file.write('LC_CTYPE\n')
         translit_file.write('\n')
