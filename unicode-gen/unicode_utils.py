@@ -1,6 +1,6 @@
 # Utilities to generate Unicode data for glibc from upstream Unicode data.
 #
-# Copyright (C) 2014, 2015 Free Software Foundation, Inc.
+# Copyright (C) 2014-2016 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 #
 # The GNU C Library is free software; you can redistribute it and/or
@@ -219,6 +219,20 @@ def to_lower(code_point):
         return UNICODE_ATTRIBUTES[code_point]['lower']
     else:
         return code_point
+
+def to_upper_turkish(code_point):
+    '''Returns the code point of the Turkish uppercase version
+    of the given code point'''
+    if code_point == 0x0069:
+        return 0x0130
+    return to_upper(code_point)
+
+def to_lower_turkish(code_point):
+    '''Returns the code point of the Turkish lowercase version
+    of the given code point'''
+    if code_point == 0x0049:
+        return 0x0131
+    return to_lower(code_point)
 
 def to_title(code_point):
     '''Returns the code point of the titlecase version
